@@ -1,0 +1,376 @@
+basePath: /
+definitions:
+  store-manager_internal_application_DTOs.CreateProductDTO:
+    properties:
+      name:
+        type: string
+      quantity:
+        type: integer
+      value:
+        $ref: '#/definitions/store-manager_internal_application_DTOs.MoneyDTO'
+    type: object
+  store-manager_internal_application_DTOs.CreateRawMaterialDTO:
+    properties:
+      cost:
+        $ref: '#/definitions/store-manager_internal_application_DTOs.MoneyDTO'
+      name:
+        type: string
+      quantity:
+        type: integer
+      unit:
+        $ref: '#/definitions/store-manager_internal_domain_entity.Unit'
+    type: object
+  store-manager_internal_application_DTOs.ErrorResponse:
+    properties:
+      code:
+        type: integer
+      message:
+        type: string
+    type: object
+  store-manager_internal_application_DTOs.FindRawMaterialDTO:
+    properties:
+      id:
+        type: string
+    type: object
+  store-manager_internal_application_DTOs.MoneyDTO:
+    properties:
+      currency_code:
+        type: string
+      total_cents:
+        type: integer
+    type: object
+  store-manager_internal_application_DTOs.ProductDTO:
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+      production_cost:
+        $ref: '#/definitions/store-manager_internal_application_DTOs.MoneyDTO'
+      quantity:
+        type: integer
+      raw_materials:
+        items:
+          $ref: '#/definitions/store-manager_internal_application_DTOs.RawMaterialDTO'
+        type: array
+      value:
+        $ref: '#/definitions/store-manager_internal_application_DTOs.MoneyDTO'
+    type: object
+  store-manager_internal_application_DTOs.RawMaterialDTO:
+    properties:
+      cost:
+        $ref: '#/definitions/store-manager_internal_application_DTOs.MoneyDTO'
+      id:
+        type: string
+      name:
+        type: string
+      quantity:
+        type: integer
+      unit:
+        $ref: '#/definitions/store-manager_internal_domain_entity.Unit'
+    type: object
+  store-manager_internal_application_DTOs.UpdateProductDTO:
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+      quantity:
+        type: integer
+      value:
+        $ref: '#/definitions/store-manager_internal_application_DTOs.MoneyDTO'
+    type: object
+  store-manager_internal_domain_entity.Unit:
+    enum:
+    - kilo
+    - litro
+    - unidade
+    - caixa
+    - gramas
+    type: string
+    x-enum-varnames:
+    - Kilograms
+    - Liters
+    - Each
+    - Boxes
+    - Grams
+host: localhost:8080
+info:
+  contact: {}
+  description: API para gerenciar lojas.
+  title: Store Manager API
+  version: "1.0"
+paths:
+  /products/delete-by-ids:
+    delete:
+      consumes:
+      - application/json
+      description: Remove vários produtos do sistema utilizando seus IDs.
+      parameters:
+      - description: Lista de IDs dos produtos a serem deletados
+        in: body
+        name: ids
+        required: true
+        schema:
+          items:
+            type: string
+          type: array
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/store-manager_internal_application_DTOs.ErrorResponse'
+      summary: Deletar produtos por IDs
+      tags:
+      - produtos
+  /products/get-all:
+    get:
+      consumes:
+      - application/json
+      description: Retorna todos os produtos cadastrados no sistema.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/store-manager_internal_application_DTOs.ProductDTO'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/store-manager_internal_application_DTOs.ErrorResponse'
+      summary: Listar todos os produtos
+      tags:
+      - produtos
+  /products/get-by-ids:
+    get:
+      consumes:
+      - application/json
+      description: Recupera produtos utilizando uma lista de IDs.
+      parameters:
+      - default: 8effac39-9d4d-4b20-851c-68cf0d8aae60
+        description: IDs dos produtos (separados por vírgula)
+        in: query
+        name: ids
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/store-manager_internal_application_DTOs.ProductDTO'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/store-manager_internal_application_DTOs.ErrorResponse'
+      summary: Buscar produtos por IDs
+      tags:
+      - produtos
+  /products/insert:
+    post:
+      consumes:
+      - application/json
+      description: Insere um novo produto no sistema.
+      parameters:
+      - description: Produto a ser inserido
+        in: body
+        name: product
+        required: true
+        schema:
+          $ref: '#/definitions/store-manager_internal_application_DTOs.CreateProductDTO'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/store-manager_internal_application_DTOs.ProductDTO'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/store-manager_internal_application_DTOs.ErrorResponse'
+      summary: Inserir um novo produto
+      tags:
+      - produtos
+  /products/update:
+    put:
+      consumes:
+      - application/json
+      description: Atualiza os dados de múltiplos produtos.
+      parameters:
+      - description: Array de produtos a serem atualizados
+        in: body
+        name: products
+        required: true
+        schema:
+          items:
+            $ref: '#/definitions/store-manager_internal_application_DTOs.UpdateProductDTO'
+          type: array
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/store-manager_internal_application_DTOs.ProductDTO'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/store-manager_internal_application_DTOs.ErrorResponse'
+      summary: Atualizar produtos
+      tags:
+      - produtos
+  /raw-material/delete-by-ids:
+    delete:
+      consumes:
+      - application/json
+      description: Remove várias matérias-primas do sistema utilizando seus IDs.
+      parameters:
+      - description: Lista de IDs das matérias-primas a serem deletadas
+        in: body
+        name: input
+        required: true
+        schema:
+          items:
+            $ref: '#/definitions/store-manager_internal_application_DTOs.FindRawMaterialDTO'
+          type: array
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/store-manager_internal_application_DTOs.ErrorResponse'
+      summary: Deletar matérias-primas por IDs
+      tags:
+      - matéria-prima
+  /raw-material/get-all:
+    get:
+      consumes:
+      - application/json
+      description: Retorna todas as matérias-primas cadastradas no sistema.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/store-manager_internal_application_DTOs.RawMaterialDTO'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/store-manager_internal_application_DTOs.ErrorResponse'
+      summary: Listar todas as matérias-primas
+      tags:
+      - matéria-prima
+  /raw-material/get-by-ids:
+    get:
+      consumes:
+      - application/json
+      description: Recupera matérias-primas utilizando uma lista de IDs.
+      parameters:
+      - default: 8effac39-9d4d-4b20-851c-68cf0d8aae60
+        description: IDs das matérias-primas (separados por vírgula)
+        in: query
+        name: ids
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/store-manager_internal_application_DTOs.RawMaterialDTO'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/store-manager_internal_application_DTOs.ErrorResponse'
+      summary: Buscar matérias-primas por IDs
+      tags:
+      - matéria-prima
+  /raw-material/insert:
+    post:
+      consumes:
+      - application/json
+      description: Insere uma ou mais matérias-primas no sistema.
+      parameters:
+      - description: Array de matérias-primas a serem inseridas
+        in: body
+        name: rawMaterials
+        required: true
+        schema:
+          items:
+            $ref: '#/definitions/store-manager_internal_application_DTOs.CreateRawMaterialDTO'
+          type: array
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            items:
+              $ref: '#/definitions/store-manager_internal_application_DTOs.RawMaterialDTO'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/store-manager_internal_application_DTOs.ErrorResponse'
+      summary: Inserir novas matérias-primas
+      tags:
+      - matéria-prima
+  /raw-material/update:
+    put:
+      consumes:
+      - application/json
+      description: Atualiza os dados de múltiplas matérias-primas.
+      parameters:
+      - description: Array de matérias-primas a serem atualizadas
+        in: body
+        name: rawMaterials
+        required: true
+        schema:
+          items:
+            $ref: '#/definitions/store-manager_internal_application_DTOs.RawMaterialDTO'
+          type: array
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/store-manager_internal_application_DTOs.RawMaterialDTO'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/store-manager_internal_application_DTOs.ErrorResponse'
+      summary: Atualizar matérias-primas
+      tags:
+      - matéria-prima
+swagger: "2.0"

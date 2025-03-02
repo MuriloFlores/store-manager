@@ -1,0 +1,570 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "API para gerenciar lojas.",
+        "title": "Store Manager API",
+        "contact": {},
+        "version": "1.0"
+    },
+    "host": "localhost:8080",
+    "basePath": "/",
+    "paths": {
+        "/products/delete-by-ids": {
+            "delete": {
+                "description": "Remove vários produtos do sistema utilizando seus IDs.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "produtos"
+                ],
+                "summary": "Deletar produtos por IDs",
+                "parameters": [
+                    {
+                        "description": "Lista de IDs dos produtos a serem deletados",
+                        "name": "ids",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/store-manager_internal_application_DTOs.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/products/get-all": {
+            "get": {
+                "description": "Retorna todos os produtos cadastrados no sistema.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "produtos"
+                ],
+                "summary": "Listar todos os produtos",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/store-manager_internal_application_DTOs.ProductDTO"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/store-manager_internal_application_DTOs.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/products/get-by-ids": {
+            "get": {
+                "description": "Recupera produtos utilizando uma lista de IDs.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "produtos"
+                ],
+                "summary": "Buscar produtos por IDs",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "default": "8effac39-9d4d-4b20-851c-68cf0d8aae60",
+                        "description": "IDs dos produtos (separados por vírgula)",
+                        "name": "ids",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/store-manager_internal_application_DTOs.ProductDTO"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/store-manager_internal_application_DTOs.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/products/insert": {
+            "post": {
+                "description": "Insere um novo produto no sistema.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "produtos"
+                ],
+                "summary": "Inserir um novo produto",
+                "parameters": [
+                    {
+                        "description": "Produto a ser inserido",
+                        "name": "product",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/store-manager_internal_application_DTOs.CreateProductDTO"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/store-manager_internal_application_DTOs.ProductDTO"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/store-manager_internal_application_DTOs.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/products/update": {
+            "put": {
+                "description": "Atualiza os dados de múltiplos produtos.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "produtos"
+                ],
+                "summary": "Atualizar produtos",
+                "parameters": [
+                    {
+                        "description": "Array de produtos a serem atualizados",
+                        "name": "products",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/store-manager_internal_application_DTOs.UpdateProductDTO"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/store-manager_internal_application_DTOs.ProductDTO"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/store-manager_internal_application_DTOs.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/raw-material/delete-by-ids": {
+            "delete": {
+                "description": "Remove várias matérias-primas do sistema utilizando seus IDs.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "matéria-prima"
+                ],
+                "summary": "Deletar matérias-primas por IDs",
+                "parameters": [
+                    {
+                        "description": "Lista de IDs das matérias-primas a serem deletadas",
+                        "name": "input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/store-manager_internal_application_DTOs.FindRawMaterialDTO"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/store-manager_internal_application_DTOs.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/raw-material/get-all": {
+            "get": {
+                "description": "Retorna todas as matérias-primas cadastradas no sistema.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "matéria-prima"
+                ],
+                "summary": "Listar todas as matérias-primas",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/store-manager_internal_application_DTOs.RawMaterialDTO"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/store-manager_internal_application_DTOs.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/raw-material/get-by-ids": {
+            "get": {
+                "description": "Recupera matérias-primas utilizando uma lista de IDs.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "matéria-prima"
+                ],
+                "summary": "Buscar matérias-primas por IDs",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "default": "8effac39-9d4d-4b20-851c-68cf0d8aae60",
+                        "description": "IDs das matérias-primas (separados por vírgula)",
+                        "name": "ids",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/store-manager_internal_application_DTOs.RawMaterialDTO"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/store-manager_internal_application_DTOs.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/raw-material/insert": {
+            "post": {
+                "description": "Insere uma ou mais matérias-primas no sistema.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "matéria-prima"
+                ],
+                "summary": "Inserir novas matérias-primas",
+                "parameters": [
+                    {
+                        "description": "Array de matérias-primas a serem inseridas",
+                        "name": "rawMaterials",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/store-manager_internal_application_DTOs.CreateRawMaterialDTO"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/store-manager_internal_application_DTOs.RawMaterialDTO"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/store-manager_internal_application_DTOs.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/raw-material/update": {
+            "put": {
+                "description": "Atualiza os dados de múltiplas matérias-primas.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "matéria-prima"
+                ],
+                "summary": "Atualizar matérias-primas",
+                "parameters": [
+                    {
+                        "description": "Array de matérias-primas a serem atualizadas",
+                        "name": "rawMaterials",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/store-manager_internal_application_DTOs.RawMaterialDTO"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/store-manager_internal_application_DTOs.RawMaterialDTO"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/store-manager_internal_application_DTOs.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "store-manager_internal_application_DTOs.CreateProductDTO": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "quantity": {
+                    "type": "integer"
+                },
+                "value": {
+                    "$ref": "#/definitions/store-manager_internal_application_DTOs.MoneyDTO"
+                }
+            }
+        },
+        "store-manager_internal_application_DTOs.CreateRawMaterialDTO": {
+            "type": "object",
+            "properties": {
+                "cost": {
+                    "$ref": "#/definitions/store-manager_internal_application_DTOs.MoneyDTO"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "quantity": {
+                    "type": "integer"
+                },
+                "unit": {
+                    "$ref": "#/definitions/store-manager_internal_domain_entity.Unit"
+                }
+            }
+        },
+        "store-manager_internal_application_DTOs.ErrorResponse": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer"
+                },
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
+        "store-manager_internal_application_DTOs.FindRawMaterialDTO": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                }
+            }
+        },
+        "store-manager_internal_application_DTOs.MoneyDTO": {
+            "type": "object",
+            "properties": {
+                "currency_code": {
+                    "type": "string"
+                },
+                "total_cents": {
+                    "type": "integer"
+                }
+            }
+        },
+        "store-manager_internal_application_DTOs.ProductDTO": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "production_cost": {
+                    "$ref": "#/definitions/store-manager_internal_application_DTOs.MoneyDTO"
+                },
+                "quantity": {
+                    "type": "integer"
+                },
+                "raw_materials": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/store-manager_internal_application_DTOs.RawMaterialDTO"
+                    }
+                },
+                "value": {
+                    "$ref": "#/definitions/store-manager_internal_application_DTOs.MoneyDTO"
+                }
+            }
+        },
+        "store-manager_internal_application_DTOs.RawMaterialDTO": {
+            "type": "object",
+            "properties": {
+                "cost": {
+                    "$ref": "#/definitions/store-manager_internal_application_DTOs.MoneyDTO"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "quantity": {
+                    "type": "integer"
+                },
+                "unit": {
+                    "$ref": "#/definitions/store-manager_internal_domain_entity.Unit"
+                }
+            }
+        },
+        "store-manager_internal_application_DTOs.UpdateProductDTO": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "quantity": {
+                    "type": "integer"
+                },
+                "value": {
+                    "$ref": "#/definitions/store-manager_internal_application_DTOs.MoneyDTO"
+                }
+            }
+        },
+        "store-manager_internal_domain_entity.Unit": {
+            "type": "string",
+            "enum": [
+                "kilo",
+                "litro",
+                "unidade",
+                "caixa",
+                "gramas"
+            ],
+            "x-enum-varnames": [
+                "Kilograms",
+                "Liters",
+                "Each",
+                "Boxes",
+                "Grams"
+            ]
+        }
+    }
+}
