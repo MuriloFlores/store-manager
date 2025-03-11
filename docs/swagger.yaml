@@ -17,6 +17,8 @@ definitions:
         type: string
       quantity:
         type: integer
+      risk_limit:
+        type: integer
       unit:
         $ref: '#/definitions/store-manager_internal_domain_entity.Unit'
     type: object
@@ -26,6 +28,23 @@ definitions:
         type: integer
       message:
         type: string
+    type: object
+  store-manager_internal_application_DTOs.FindAssocByCriteriaDTO:
+    properties:
+      criteria:
+        type: string
+      info: {}
+    type: object
+  store-manager_internal_application_DTOs.FindProductAssocRawMaterialDTO:
+    properties:
+      material_ids:
+        items:
+          type: string
+        type: array
+      product_ids:
+        items:
+          type: string
+        type: array
     type: object
   store-manager_internal_application_DTOs.FindRawMaterialDTO:
     properties:
@@ -37,6 +56,17 @@ definitions:
       currency_code:
         type: string
       total_cents:
+        type: integer
+    type: object
+  store-manager_internal_application_DTOs.ProductAssocRawMaterialDTO:
+    properties:
+      activated:
+        type: boolean
+      material_id:
+        type: string
+      product_id:
+        type: string
+      quantity_used:
         type: integer
     type: object
   store-manager_internal_application_DTOs.ProductDTO:
@@ -65,6 +95,8 @@ definitions:
       name:
         type: string
       quantity:
+        type: integer
+      risk_limit:
         type: integer
       unit:
         $ref: '#/definitions/store-manager_internal_domain_entity.Unit'
@@ -101,13 +133,199 @@ info:
   title: Store Manager API
   version: "1.0"
 paths:
+  /assoc-product-material/delete-by-ids:
+    delete:
+      consumes:
+      - application/json
+      description: Deleta associações com base nos IDs de produtos e matérias-primas.
+      parameters:
+      - description: Critérios para deletar associações
+        in: body
+        name: criteria
+        required: true
+        schema:
+          $ref: '#/definitions/store-manager_internal_application_DTOs.FindProductAssocRawMaterialDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/store-manager_internal_application_DTOs.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/store-manager_internal_application_DTOs.ErrorResponse'
+      summary: Deletar Associações
+      tags:
+      - Associações
+  /assoc-product-material/get-all:
+    get:
+      description: Recupera todas as associações entre produtos e matérias-primas
+        e retorna os produtos enriquecidos.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/store-manager_internal_application_DTOs.ProductDTO'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/store-manager_internal_application_DTOs.ErrorResponse'
+      summary: Obter Todas as Associações
+      tags:
+      - Associações
+  /assoc-product-material/get-by-criteria:
+    get:
+      consumes:
+      - application/json
+      description: Recupera associações com base nos critérios e informações fornecidos.
+      parameters:
+      - description: Critérios para buscar associações
+        in: body
+        name: criteria
+        required: true
+        schema:
+          $ref: '#/definitions/store-manager_internal_application_DTOs.FindAssocByCriteriaDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/store-manager_internal_application_DTOs.ProductDTO'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/store-manager_internal_application_DTOs.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/store-manager_internal_application_DTOs.ErrorResponse'
+      summary: Buscar Associações por Critério
+      tags:
+      - Associações
+  /assoc-product-material/get-by-ids:
+    get:
+      consumes:
+      - application/json
+      description: Recupera associações com base no DTO fornecido.
+      parameters:
+      - description: DTO de associação para buscar associações
+        in: body
+        name: association
+        required: true
+        schema:
+          items:
+            $ref: '#/definitions/store-manager_internal_application_DTOs.ProductAssocRawMaterialDTO'
+          type: array
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/store-manager_internal_application_DTOs.ProductDTO'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/store-manager_internal_application_DTOs.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/store-manager_internal_application_DTOs.ErrorResponse'
+      summary: Buscar Associação por ID
+      tags:
+      - Associações
+  /assoc-product-material/insert:
+    post:
+      consumes:
+      - application/json
+      description: Cria associações entre produtos e matérias-primas.
+      parameters:
+      - description: Array de associações a serem criadas
+        in: body
+        name: associations
+        required: true
+        schema:
+          items:
+            $ref: '#/definitions/store-manager_internal_application_DTOs.ProductAssocRawMaterialDTO'
+          type: array
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/store-manager_internal_application_DTOs.ProductDTO'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/store-manager_internal_application_DTOs.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/store-manager_internal_application_DTOs.ErrorResponse'
+      summary: Criar Associações
+      tags:
+      - Associações
+  /assoc-product-material/update:
+    put:
+      consumes:
+      - application/json
+      description: Atualiza as associações e retorna os produtos atualizados com as
+        matérias-primas associadas.
+      parameters:
+      - description: Array de associações para atualizar
+        in: body
+        name: associations
+        required: true
+        schema:
+          items:
+            $ref: '#/definitions/store-manager_internal_application_DTOs.ProductAssocRawMaterialDTO'
+          type: array
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/store-manager_internal_application_DTOs.ProductDTO'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/store-manager_internal_application_DTOs.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/store-manager_internal_application_DTOs.ErrorResponse'
+      summary: Atualizar Associações
+      tags:
+      - Associações
   /products/delete-by-ids:
     delete:
       consumes:
       - application/json
-      description: Remove vários produtos do sistema utilizando seus IDs.
+      description: Remove vários Produtos do sistema utilizando seus IDs.
       parameters:
-      - description: Lista de IDs dos produtos a serem deletados
+      - description: Lista de IDs dos Produtos a serem deletados
         in: body
         name: ids
         required: true
@@ -127,14 +345,14 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/store-manager_internal_application_DTOs.ErrorResponse'
-      summary: Deletar produtos por IDs
+      summary: Deletar Produtos por IDs
       tags:
-      - produtos
+      - Produtos
   /products/get-all:
     get:
       consumes:
       - application/json
-      description: Retorna todos os produtos cadastrados no sistema.
+      description: Retorna todos os Produtos cadastrados no sistema.
       produces:
       - application/json
       responses:
@@ -148,17 +366,17 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/store-manager_internal_application_DTOs.ErrorResponse'
-      summary: Listar todos os produtos
+      summary: Listar todos os Produtos
       tags:
-      - produtos
+      - Produtos
   /products/get-by-ids:
     get:
       consumes:
       - application/json
-      description: Recupera produtos utilizando uma lista de IDs.
+      description: Recupera Produtos utilizando uma lista de IDs.
       parameters:
       - default: 8effac39-9d4d-4b20-851c-68cf0d8aae60
-        description: IDs dos produtos (separados por vírgula)
+        description: IDs dos Produtos (separados por vírgula)
         in: query
         name: ids
         required: true
@@ -176,9 +394,9 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/store-manager_internal_application_DTOs.ErrorResponse'
-      summary: Buscar produtos por IDs
+      summary: Buscar Produtos por IDs
       tags:
-      - produtos
+      - Produtos
   /products/insert:
     post:
       consumes:
@@ -204,14 +422,14 @@ paths:
             $ref: '#/definitions/store-manager_internal_application_DTOs.ErrorResponse'
       summary: Inserir um novo produto
       tags:
-      - produtos
+      - Produtos
   /products/update:
     put:
       consumes:
       - application/json
-      description: Atualiza os dados de múltiplos produtos.
+      description: Atualiza os dados de múltiplos Produtos.
       parameters:
-      - description: Array de produtos a serem atualizados
+      - description: Array de Produtos a serem atualizados
         in: body
         name: products
         required: true
@@ -232,9 +450,9 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/store-manager_internal_application_DTOs.ErrorResponse'
-      summary: Atualizar produtos
+      summary: Atualizar Produtos
       tags:
-      - produtos
+      - Produtos
   /raw-material/delete-by-ids:
     delete:
       consumes:
@@ -263,12 +481,13 @@ paths:
             $ref: '#/definitions/store-manager_internal_application_DTOs.ErrorResponse'
       summary: Deletar matérias-primas por IDs
       tags:
-      - matéria-prima
+      - Matéria-Prima
   /raw-material/get-all:
     get:
       consumes:
       - application/json
-      description: Retorna todas as matérias-primas cadastradas no sistema.
+      description: Retorna todas as matérias-primas cadastradas no sistema em ordem
+        decrescente baseado no limite de risco.
       produces:
       - application/json
       responses:
@@ -282,9 +501,9 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/store-manager_internal_application_DTOs.ErrorResponse'
-      summary: Listar todas as matérias-primas
+      summary: Listar todas as matérias-primas ordenadas pelo limite de risco
       tags:
-      - matéria-prima
+      - Matéria-Prima
   /raw-material/get-by-ids:
     get:
       consumes:
@@ -312,7 +531,7 @@ paths:
             $ref: '#/definitions/store-manager_internal_application_DTOs.ErrorResponse'
       summary: Buscar matérias-primas por IDs
       tags:
-      - matéria-prima
+      - Matéria-Prima
   /raw-material/insert:
     post:
       consumes:
@@ -342,7 +561,7 @@ paths:
             $ref: '#/definitions/store-manager_internal_application_DTOs.ErrorResponse'
       summary: Inserir novas matérias-primas
       tags:
-      - matéria-prima
+      - Matéria-Prima1
   /raw-material/update:
     put:
       consumes:
@@ -372,5 +591,5 @@ paths:
             $ref: '#/definitions/store-manager_internal_application_DTOs.ErrorResponse'
       summary: Atualizar matérias-primas
       tags:
-      - matéria-prima
+      - Matéria-Prima
 swagger: "2.0"

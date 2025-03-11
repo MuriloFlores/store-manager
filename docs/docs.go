@@ -15,9 +15,9 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/products/delete-by-ids": {
+        "/assoc-product-material/delete-by-ids": {
             "delete": {
-                "description": "Remove vários produtos do sistema utilizando seus IDs.",
+                "description": "Deleta associações com base nos IDs de produtos e matérias-primas.",
                 "consumes": [
                     "application/json"
                 ],
@@ -25,12 +25,293 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "produtos"
+                    "Associações"
                 ],
-                "summary": "Deletar produtos por IDs",
+                "summary": "Deletar Associações",
                 "parameters": [
                     {
-                        "description": "Lista de IDs dos produtos a serem deletados",
+                        "description": "Critérios para deletar associações",
+                        "name": "criteria",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/store-manager_internal_application_DTOs.FindProductAssocRawMaterialDTO"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/store-manager_internal_application_DTOs.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/store-manager_internal_application_DTOs.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/assoc-product-material/get-all": {
+            "get": {
+                "description": "Recupera todas as associações entre produtos e matérias-primas e retorna os produtos enriquecidos.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Associações"
+                ],
+                "summary": "Obter Todas as Associações",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/store-manager_internal_application_DTOs.ProductDTO"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/store-manager_internal_application_DTOs.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/assoc-product-material/get-by-criteria": {
+            "get": {
+                "description": "Recupera associações com base nos critérios e informações fornecidos.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Associações"
+                ],
+                "summary": "Buscar Associações por Critério",
+                "parameters": [
+                    {
+                        "description": "Critérios para buscar associações",
+                        "name": "criteria",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/store-manager_internal_application_DTOs.FindAssocByCriteriaDTO"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/store-manager_internal_application_DTOs.ProductDTO"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/store-manager_internal_application_DTOs.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/store-manager_internal_application_DTOs.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/assoc-product-material/get-by-ids": {
+            "get": {
+                "description": "Recupera associações com base no DTO fornecido.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Associações"
+                ],
+                "summary": "Buscar Associação por ID",
+                "parameters": [
+                    {
+                        "description": "DTO de associação para buscar associações",
+                        "name": "association",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/store-manager_internal_application_DTOs.ProductAssocRawMaterialDTO"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/store-manager_internal_application_DTOs.ProductDTO"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/store-manager_internal_application_DTOs.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/store-manager_internal_application_DTOs.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/assoc-product-material/insert": {
+            "post": {
+                "description": "Cria associações entre produtos e matérias-primas.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Associações"
+                ],
+                "summary": "Criar Associações",
+                "parameters": [
+                    {
+                        "description": "Array de associações a serem criadas",
+                        "name": "associations",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/store-manager_internal_application_DTOs.ProductAssocRawMaterialDTO"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/store-manager_internal_application_DTOs.ProductDTO"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/store-manager_internal_application_DTOs.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/store-manager_internal_application_DTOs.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/assoc-product-material/update": {
+            "put": {
+                "description": "Atualiza as associações e retorna os produtos atualizados com as matérias-primas associadas.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Associações"
+                ],
+                "summary": "Atualizar Associações",
+                "parameters": [
+                    {
+                        "description": "Array de associações para atualizar",
+                        "name": "associations",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/store-manager_internal_application_DTOs.ProductAssocRawMaterialDTO"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/store-manager_internal_application_DTOs.ProductDTO"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/store-manager_internal_application_DTOs.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/store-manager_internal_application_DTOs.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/products/delete-by-ids": {
+            "delete": {
+                "description": "Remove vários Produtos do sistema utilizando seus IDs.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Produtos"
+                ],
+                "summary": "Deletar Produtos por IDs",
+                "parameters": [
+                    {
+                        "description": "Lista de IDs dos Produtos a serem deletados",
                         "name": "ids",
                         "in": "body",
                         "required": true,
@@ -61,7 +342,7 @@ const docTemplate = `{
         },
         "/products/get-all": {
             "get": {
-                "description": "Retorna todos os produtos cadastrados no sistema.",
+                "description": "Retorna todos os Produtos cadastrados no sistema.",
                 "consumes": [
                     "application/json"
                 ],
@@ -69,9 +350,9 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "produtos"
+                    "Produtos"
                 ],
-                "summary": "Listar todos os produtos",
+                "summary": "Listar todos os Produtos",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -93,7 +374,7 @@ const docTemplate = `{
         },
         "/products/get-by-ids": {
             "get": {
-                "description": "Recupera produtos utilizando uma lista de IDs.",
+                "description": "Recupera Produtos utilizando uma lista de IDs.",
                 "consumes": [
                     "application/json"
                 ],
@@ -101,14 +382,14 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "produtos"
+                    "Produtos"
                 ],
-                "summary": "Buscar produtos por IDs",
+                "summary": "Buscar Produtos por IDs",
                 "parameters": [
                     {
                         "type": "string",
                         "default": "8effac39-9d4d-4b20-851c-68cf0d8aae60",
-                        "description": "IDs dos produtos (separados por vírgula)",
+                        "description": "IDs dos Produtos (separados por vírgula)",
                         "name": "ids",
                         "in": "query",
                         "required": true
@@ -143,7 +424,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "produtos"
+                    "Produtos"
                 ],
                 "summary": "Inserir um novo produto",
                 "parameters": [
@@ -175,7 +456,7 @@ const docTemplate = `{
         },
         "/products/update": {
             "put": {
-                "description": "Atualiza os dados de múltiplos produtos.",
+                "description": "Atualiza os dados de múltiplos Produtos.",
                 "consumes": [
                     "application/json"
                 ],
@@ -183,12 +464,12 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "produtos"
+                    "Produtos"
                 ],
-                "summary": "Atualizar produtos",
+                "summary": "Atualizar Produtos",
                 "parameters": [
                     {
-                        "description": "Array de produtos a serem atualizados",
+                        "description": "Array de Produtos a serem atualizados",
                         "name": "products",
                         "in": "body",
                         "required": true,
@@ -229,7 +510,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "matéria-prima"
+                    "Matéria-Prima"
                 ],
                 "summary": "Deletar matérias-primas por IDs",
                 "parameters": [
@@ -265,7 +546,7 @@ const docTemplate = `{
         },
         "/raw-material/get-all": {
             "get": {
-                "description": "Retorna todas as matérias-primas cadastradas no sistema.",
+                "description": "Retorna todas as matérias-primas cadastradas no sistema em ordem decrescente baseado no limite de risco.",
                 "consumes": [
                     "application/json"
                 ],
@@ -273,9 +554,9 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "matéria-prima"
+                    "Matéria-Prima"
                 ],
-                "summary": "Listar todas as matérias-primas",
+                "summary": "Listar todas as matérias-primas ordenadas pelo limite de risco",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -305,7 +586,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "matéria-prima"
+                    "Matéria-Prima"
                 ],
                 "summary": "Buscar matérias-primas por IDs",
                 "parameters": [
@@ -347,7 +628,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "matéria-prima"
+                    "Matéria-Prima1"
                 ],
                 "summary": "Inserir novas matérias-primas",
                 "parameters": [
@@ -393,7 +674,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "matéria-prima"
+                    "Matéria-Prima"
                 ],
                 "summary": "Atualizar matérias-primas",
                 "parameters": [
@@ -457,6 +738,9 @@ const docTemplate = `{
                 "quantity": {
                     "type": "integer"
                 },
+                "risk_limit": {
+                    "type": "integer"
+                },
                 "unit": {
                     "$ref": "#/definitions/store-manager_internal_domain_entity.Unit"
                 }
@@ -470,6 +754,32 @@ const docTemplate = `{
                 },
                 "message": {
                     "type": "string"
+                }
+            }
+        },
+        "store-manager_internal_application_DTOs.FindAssocByCriteriaDTO": {
+            "type": "object",
+            "properties": {
+                "criteria": {
+                    "type": "string"
+                },
+                "info": {}
+            }
+        },
+        "store-manager_internal_application_DTOs.FindProductAssocRawMaterialDTO": {
+            "type": "object",
+            "properties": {
+                "material_ids": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "product_ids": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 }
             }
         },
@@ -488,6 +798,23 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "total_cents": {
+                    "type": "integer"
+                }
+            }
+        },
+        "store-manager_internal_application_DTOs.ProductAssocRawMaterialDTO": {
+            "type": "object",
+            "properties": {
+                "activated": {
+                    "type": "boolean"
+                },
+                "material_id": {
+                    "type": "string"
+                },
+                "product_id": {
+                    "type": "string"
+                },
+                "quantity_used": {
                     "type": "integer"
                 }
             }
@@ -531,6 +858,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "quantity": {
+                    "type": "integer"
+                },
+                "risk_limit": {
                     "type": "integer"
                 },
                 "unit": {
