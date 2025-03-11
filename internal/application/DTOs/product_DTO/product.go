@@ -1,35 +1,20 @@
-package DTOs
+package product_DTO
 
 import (
 	"github.com/google/uuid"
+	"store-manager/internal/application/DTOs/money_DTO"
+	"store-manager/internal/application/DTOs/raw_material_DTO"
 	"store-manager/internal/domain/entity"
 	"store-manager/internal/domain/value_objects"
 )
 
-type UpdateProductDTO struct {
-	Id       uuid.UUID `json:"id"`
-	Name     string    `json:"name"`
-	Quantity int       `json:"quantity"`
-	Value    MoneyDTO  `json:"value"`
-}
-
-type CreateProductDTO struct {
-	Name     string   `json:"name"`
-	Quantity int      `json:"quantity"`
-	Value    MoneyDTO `json:"value"`
-}
-
-type FindProductDTO struct {
-	Id uuid.UUID `json:"id"`
-}
-
 type ProductDTO struct {
-	Id             uuid.UUID        `json:"id"`
-	Name           string           `json:"name"`
-	RawMaterials   []RawMaterialDTO `json:"raw_materials"`
-	Quantity       int              `json:"quantity"`
-	Value          MoneyDTO         `json:"value"`
-	ProductionCost MoneyDTO         `json:"production_cost"`
+	Id             uuid.UUID                         `json:"id"`
+	Name           string                            `json:"name"`
+	RawMaterials   []raw_material_DTO.RawMaterialDTO `json:"raw_materials"`
+	Quantity       int                               `json:"quantity"`
+	Value          money_DTO.MoneyDTO                `json:"value"`
+	ProductionCost money_DTO.MoneyDTO                `json:"production_cost"`
 }
 
 func (p *ProductDTO) MapProductDTOToEntity() entity.ProductInterface {
@@ -53,13 +38,13 @@ func (p *ProductDTO) MapProductDTOToEntity() entity.ProductInterface {
 func MapProductEntityToDTO(product entity.ProductInterface) ProductDTO {
 	id := uuid.MustParse(product.ID().String())
 
-	rawMaterials := make([]RawMaterialDTO, len(product.RawMaterials()))
+	rawMaterials := make([]raw_material_DTO.RawMaterialDTO, len(product.RawMaterials()))
 	for i, rawMaterial := range product.RawMaterials() {
-		rawMaterials[i] = MapRawMaterialEntityToDTO(rawMaterial)
+		rawMaterials[i] = raw_material_DTO.MapRawMaterialEntityToDTO(rawMaterial)
 	}
 
-	getMoneyDTO := func(m value_objects.Money) MoneyDTO {
-		return MapMoneyObjectToDTO(
+	getMoneyDTO := func(m value_objects.Money) money_DTO.MoneyDTO {
+		return money_DTO.MapMoneyObjectToDTO(
 			m,
 		)
 	}

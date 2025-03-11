@@ -1,4 +1,4 @@
-package DTOs
+package money_DTO
 
 import (
 	"store-manager/internal/domain/value_objects"

@@ -1,4 +1,4 @@
-package DTOs
+package product_assoc_raw_material_DTO
 
 import "github.com/google/uuid"
 
