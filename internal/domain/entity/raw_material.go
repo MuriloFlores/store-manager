@@ -3,11 +3,12 @@ package entity
 import "store-manager/internal/domain/value_objects"
 
 type rawMaterial struct {
-	id       EntityID
-	name     string
-	unit     Unit
-	quantity int
-	cost     value_objects.Money
+	id        EntityID
+	name      string
+	unit      Unit
+	quantity  int
+	riskLimit int
+	cost      value_objects.Money
 }
 
 type RawMaterialInterface interface {
@@ -16,14 +17,16 @@ type RawMaterialInterface interface {
 	Unit() Unit
 	Quantity() int
 	Cost() value_objects.Money
+	RiskLimit() int
 
 	SetName(string)
 	SetUnit(Unit) error
 	SetQuantity(int)
 	SetCost(value_objects.Money)
+	SetRiskLimit(int)
 }
 
-func NewRawMaterial(id *EntityID, name string, unit Unit, quantity int, cost value_objects.Money) RawMaterialInterface {
+func NewRawMaterial(id *EntityID, name string, unit Unit, quantity int, cost value_objects.Money, riskLimit *int) RawMaterialInterface {
 	var productId EntityID
 	if id == nil {
 		productId = NewEntityID()
@@ -31,12 +34,20 @@ func NewRawMaterial(id *EntityID, name string, unit Unit, quantity int, cost val
 		productId = *id
 	}
 
+	var computedRiskLimit int
+	if riskLimit == nil {
+		computedRiskLimit = quantity / 2
+	} else {
+		computedRiskLimit = *riskLimit
+	}
+
 	return &rawMaterial{
-		id:       productId,
-		name:     name,
-		unit:     unit,
-		quantity: quantity,
-		cost:     cost,
+		id:        productId,
+		name:      name,
+		unit:      unit,
+		quantity:  quantity,
+		cost:      cost,
+		riskLimit: computedRiskLimit,
 	}
 }
 
@@ -60,6 +71,10 @@ func (m *rawMaterial) Cost() value_objects.Money {
 	return m.cost
 }
 
+func (m *rawMaterial) RiskLimit() int {
+	return m.riskLimit
+}
+
 func (m *rawMaterial) SetName(name string) {
 	m.name = name
 }
@@ -80,4 +95,8 @@ func (m *rawMaterial) SetQuantity(quantity int) {
 
 func (m *rawMaterial) SetCost(cost value_objects.Money) {
 	m.cost = cost
+}
+
+func (m *rawMaterial) SetRiskLimit(riskLimit int) {
+	m.riskLimit = riskLimit
 }
