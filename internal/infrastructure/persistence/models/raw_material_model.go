@@ -6,11 +6,12 @@ import (
 )
 
 type RawMaterialModel struct {
-	Id       uuid.UUID  `gorm:"type:uuid;primaryKey"`
-	Name     string     `gorm:"type:varchar(255);not null"`
-	Unit     string     `gorm:"type:varchar(20);not null"`
-	Quantity int        `gorm:"default:0"`
-	Cost     MoneyModel `gorm:"embedded;embeddedPrefix:cost_"`
+	Id        uuid.UUID  `gorm:"type:uuid;primaryKey"`
+	Name      string     `gorm:"type:varchar(255);not null"`
+	Unit      string     `gorm:"type:varchar(20);not null"`
+	Quantity  int        `gorm:"default:0"`
+	Cost      MoneyModel `gorm:"embedded;embeddedPrefix:cost_"`
+	RiskLimit int        `gorm:"default:0"`
 }
 
 func (r *RawMaterialModel) MapRawMaterialModelToEntity() entity.RawMaterialInterface {
@@ -22,6 +23,7 @@ func (r *RawMaterialModel) MapRawMaterialModelToEntity() entity.RawMaterialInter
 		entity.Unit(r.Unit),
 		r.Quantity,
 		r.Cost.MapMoneyModelToEntity(),
+		&r.RiskLimit,
 	)
 }
 
