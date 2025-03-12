@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
+	"store-manager/internal/application/DTOs/raw_material_DTO"
 
-	"store-manager/internal/application/DTOs"
 	"store-manager/internal/application/services"
 	"store-manager/internal/infrastructure/error_handler"
 	"store-manager/internal/infrastructure/logging"
@@ -41,7 +41,7 @@ func NewRawMaterialHandler(rawMaterialService services.RawMaterialServiceInterfa
 // CreateRawMaterial godoc
 // @Summary Inserir novas matérias-primas
 // @Description Insere uma ou mais matérias-primas no sistema.
-// @Tags matéria-prima
+// @Tags Matéria-Prima1
 // @Accept json
 // @Produce json
 // @Param rawMaterials body []DTOs.CreateRawMaterialDTO true "Array de matérias-primas a serem inseridas"
@@ -50,7 +50,7 @@ func NewRawMaterialHandler(rawMaterialService services.RawMaterialServiceInterfa
 // @Router /raw-material/insert [post]
 func (handler *rawMaterialHandler) CreateRawMaterial(w http.ResponseWriter, r *http.Request) {
 	logging.Info("CreateRawMaterial Journey", zap.String("Init", "CreateRawMaterialHandler"))
-	var input []DTOs.CreateRawMaterialDTO
+	var input []raw_material_DTO.CreateRawMaterialDTO
 
 	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
 		logging.Error("CreateRawMaterial Journey", zap.Error(err))
@@ -79,7 +79,7 @@ func (handler *rawMaterialHandler) CreateRawMaterial(w http.ResponseWriter, r *h
 // FindRawMaterial godoc
 // @Summary Buscar matérias-primas por IDs
 // @Description Recupera matérias-primas utilizando uma lista de IDs.
-// @Tags matéria-prima
+// @Tags Matéria-Prima
 // @Accept json
 // @Produce json
 // @Param ids query string true "IDs das matérias-primas (separados por vírgula)" default(8effac39-9d4d-4b20-851c-68cf0d8aae60)
@@ -88,7 +88,7 @@ func (handler *rawMaterialHandler) CreateRawMaterial(w http.ResponseWriter, r *h
 // @Router /raw-material/get-by-ids [get]
 func (handler *rawMaterialHandler) FindRawMaterial(w http.ResponseWriter, r *http.Request) {
 	logging.Info("FindRawMaterial Journey", zap.String("Init", "FindRawMaterialHandler"))
-	var input []DTOs.FindRawMaterialDTO
+	var input []raw_material_DTO.FindRawMaterialDTO
 
 	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
 		logging.Error("FindRawMaterial Journey", zap.Error(err))
@@ -117,7 +117,7 @@ func (handler *rawMaterialHandler) FindRawMaterial(w http.ResponseWriter, r *htt
 // GetAllRawMaterials godoc
 // @Summary Listar todas as matérias-primas
 // @Description Retorna todas as matérias-primas cadastradas no sistema.
-// @Tags matéria-prima
+// @Tags Matéria-Prima
 // @Accept json
 // @Produce json
 // @Success 200 {array} DTOs.RawMaterialDTO
@@ -144,10 +144,40 @@ func (handler *rawMaterialHandler) GetAllRawMaterials(w http.ResponseWriter, r *
 	logging.Info("GetAllRawMaterials Journey", zap.String("Finish", "GetAllRawMaterials"))
 }
 
+// GetAllRawMaterialsByLimit godoc
+// @Summary Listar todas as matérias-primas ordenadas pelo limite de risco
+// @Description Retorna todas as matérias-primas cadastradas no sistema em ordem decrescente baseado no limite de risco.
+// @Tags Matéria-Prima
+// @Accept json
+// @Produce json
+// @Success 200 {array} DTOs.RawMaterialDTO
+// @Failure 400 {object} DTOs.ErrorResponse
+// @Router /raw-material/get-all [get]
+func (handler *rawMaterialHandler) GetAllRawMaterialsByLimit(w http.ResponseWriter, r *http.Request) {
+	logging.Info("GetAllRawMaterialsByLimit Journey", zap.String("Init", "GetAllRawMaterialsByLimit"))
+
+	rawMaterials, err := handler.rawMaterialService.GetAllRawMaterialsByLimitRisk()
+	if err != nil {
+		logging.Error("GetAllRawMaterialsByLimit Journey", zap.Error(err))
+		error_handler.WriteJSONError(w, http.StatusBadRequest, ErrorFindRawMaterialsFailed.Error())
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	if err := json.NewEncoder(w).Encode(rawMaterials); err != nil {
+		logging.Error("GetAllRawMaterialsByLimit Journey", zap.Error(err))
+		error_handler.WriteJSONError(w, http.StatusInternalServerError, ErrorEncodeResponseJSON.Error())
+		return
+	}
+
+	logging.Info("GetAllRawMaterialsByLimit Journey", zap.String("Finish", "GetAllRawMaterialsByLimit"))
+}
+
 // DeleteRawMaterial godoc
 // @Summary Deletar matérias-primas por IDs
 // @Description Remove várias matérias-primas do sistema utilizando seus IDs.
-// @Tags matéria-prima
+// @Tags Matéria-Prima
 // @Accept json
 // @Produce json
 // @Param input body []DTOs.FindRawMaterialDTO true "Lista de IDs das matérias-primas a serem deletadas"
@@ -156,7 +186,7 @@ func (handler *rawMaterialHandler) GetAllRawMaterials(w http.ResponseWriter, r *
 // @Router /raw-material/delete-by-ids [delete]
 func (handler *rawMaterialHandler) DeleteRawMaterial(w http.ResponseWriter, r *http.Request) {
 	logging.Info("DeleteRawMaterial Journey", zap.String("Init", "DeleteRawMaterial"))
-	var input []DTOs.FindRawMaterialDTO
+	var input []raw_material_DTO.FindRawMaterialDTO
 
 	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
 		logging.Error("DeleteRawMaterial Journey", zap.Error(err))
@@ -190,7 +220,7 @@ func (handler *rawMaterialHandler) DeleteRawMaterial(w http.ResponseWriter, r *h
 // UpdateRawMaterial godoc
 // @Summary Atualizar matérias-primas
 // @Description Atualiza os dados de múltiplas matérias-primas.
-// @Tags matéria-prima
+// @Tags Matéria-Prima
 // @Accept json
 // @Produce json
 // @Param rawMaterials body []DTOs.RawMaterialDTO true "Array de matérias-primas a serem atualizadas"
@@ -199,7 +229,7 @@ func (handler *rawMaterialHandler) DeleteRawMaterial(w http.ResponseWriter, r *h
 // @Router /raw-material/update [put]
 func (handler *rawMaterialHandler) UpdateRawMaterial(w http.ResponseWriter, r *http.Request) {
 	logging.Info("UpdateRawMaterial Journey", zap.String("Init", "UpdateRawMaterial"))
-	var input []DTOs.RawMaterialDTO
+	var input []raw_material_DTO.RawMaterialDTO
 
 	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
 		logging.Error("UpdateRawMaterial Journey", zap.Error(err))
