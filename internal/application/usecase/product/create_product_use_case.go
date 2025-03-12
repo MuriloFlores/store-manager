@@ -4,7 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"go.uber.org/zap"
-	"store-manager/internal/application/DTOs"
+	"store-manager/internal/application/DTOs/product_DTO"
 	"store-manager/internal/domain/entity"
 	"store-manager/internal/domain/repositories"
 	"store-manager/internal/infrastructure/logging"
@@ -20,23 +20,23 @@ type createProductUseCase struct {
 }
 
 type CreateProductUseCaseInterface interface {
-	CreateProduct(input []DTOs.CreateProductDTO) ([]DTOs.ProductDTO, error)
+	CreateProduct(input []product_DTO.CreateProductDTO) ([]product_DTO.ProductDTO, error)
 }
 
 func NewCreateProductUseCase(productRepo repositories.ProductRepositoryInterface) CreateProductUseCaseInterface {
 	return &createProductUseCase{productRepo: productRepo}
 }
 
-func (uc *createProductUseCase) CreateProduct(input []DTOs.CreateProductDTO) ([]DTOs.ProductDTO, error) {
+func (uc *createProductUseCase) CreateProduct(input []product_DTO.CreateProductDTO) ([]product_DTO.ProductDTO, error) {
 	logging.Info("CreateProduct Journey", zap.String("Init", "CreateProductUseCase"))
 	productEntities := make([]entity.ProductInterface, len(input))
 	for i, product := range input {
 		if product.Name == "" {
-			return []DTOs.ProductDTO{}, ErrorNameIsRequired
+			return []product_DTO.ProductDTO{}, ErrorNameIsRequired
 		}
 
 		if product.Value.TotalCents <= 0 {
-			return []DTOs.ProductDTO{}, ErrorValueMustBePositive
+			return []product_DTO.ProductDTO{}, ErrorValueMustBePositive
 		}
 
 		productEntity := entity.NewProduct(
@@ -52,13 +52,13 @@ func (uc *createProductUseCase) CreateProduct(input []DTOs.CreateProductDTO) ([]
 
 	err := uc.productRepo.Save(productEntities)
 	if err != nil {
-		return []DTOs.ProductDTO{}, fmt.Errorf("error saving product: %w", err)
+		return []product_DTO.ProductDTO{}, fmt.Errorf("error saving product: %w", err)
 	}
 
-	productDTO := make([]DTOs.ProductDTO, len(productEntities))
+	productDTO := make([]product_DTO.ProductDTO, len(productEntities))
 
 	for i, product := range productEntities {
-		productDTO[i] = DTOs.MapProductEntityToDTO(product)
+		productDTO[i] = product_DTO.MapProductEntityToDTO(product)
 	}
 
 	logging.Info("CreateProduct Journey", zap.String("Finish", "CreateProductUseCase"))

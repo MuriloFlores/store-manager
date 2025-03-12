@@ -3,7 +3,7 @@ package product
 import (
 	"fmt"
 	"go.uber.org/zap"
-	"store-manager/internal/application/DTOs"
+	"store-manager/internal/application/DTOs/product_DTO"
 	"store-manager/internal/domain/repositories"
 	"store-manager/internal/infrastructure/logging"
 )
@@ -13,7 +13,7 @@ type getAllProductsUseCase struct {
 }
 
 type GetAllProductsUseCase interface {
-	GetAllProducts() ([]DTOs.ProductDTO, error)
+	GetAllProducts() ([]product_DTO.ProductDTO, error)
 }
 
 func NewGetAllProducts(productRepo repositories.ProductRepositoryInterface) GetAllProductsUseCase {
@@ -22,7 +22,7 @@ func NewGetAllProducts(productRepo repositories.ProductRepositoryInterface) GetA
 	}
 }
 
-func (uc *getAllProductsUseCase) GetAllProducts() ([]DTOs.ProductDTO, error) {
+func (uc *getAllProductsUseCase) GetAllProducts() ([]product_DTO.ProductDTO, error) {
 	logging.Info("GetAllProducts Journey", zap.String("Init", "GetAllProductsUseCase"))
 
 	productEntities, err := uc.productRepo.GetAllProducts()
@@ -31,9 +31,9 @@ func (uc *getAllProductsUseCase) GetAllProducts() ([]DTOs.ProductDTO, error) {
 		return nil, fmt.Errorf("error while getting all products: %w", err)
 	}
 
-	productDTOs := make([]DTOs.ProductDTO, len(productEntities))
+	productDTOs := make([]product_DTO.ProductDTO, len(productEntities))
 	for i, productEntity := range productEntities {
-		productDTOs[i] = DTOs.MapProductEntityToDTO(productEntity)
+		productDTOs[i] = product_DTO.MapProductEntityToDTO(productEntity)
 	}
 
 	logging.Info("GetAllProducts Journey", zap.String("Finish", "GetAllProductsUseCase"))

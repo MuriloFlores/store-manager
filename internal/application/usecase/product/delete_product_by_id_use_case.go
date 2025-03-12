@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/google/uuid"
 	"go.uber.org/zap"
-	"store-manager/internal/application/DTOs"
+	"store-manager/internal/application/DTOs/product_DTO"
 	"store-manager/internal/domain/repositories"
 	"store-manager/internal/infrastructure/logging"
 )
@@ -19,7 +19,7 @@ type deleteProductByIdUseCase struct {
 }
 
 type DeleteProductByIdUseCaseInterface interface {
-	DeleteProductById(dto []DTOs.FindProductDTO) error
+	DeleteProductById(dto []product_DTO.FindProductDTO) error
 }
 
 func NewDeleteProductByIdUseCase(productRepo repositories.ProductRepositoryInterface) DeleteProductByIdUseCaseInterface {
@@ -28,7 +28,7 @@ func NewDeleteProductByIdUseCase(productRepo repositories.ProductRepositoryInter
 	}
 }
 
-func (uc *deleteProductByIdUseCase) DeleteProductById(dto []DTOs.FindProductDTO) error {
+func (uc *deleteProductByIdUseCase) DeleteProductById(dto []product_DTO.FindProductDTO) error {
 	logging.Info("DeleteProduct Journey", zap.String("Init", "DeleteProductByIdUseCase"))
 
 	if len(dto) == 0 {

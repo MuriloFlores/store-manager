@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/google/uuid"
 	"go.uber.org/zap"
-	"store-manager/internal/application/DTOs"
+	"store-manager/internal/application/DTOs/product_DTO"
 	"store-manager/internal/domain/repositories"
 	"store-manager/internal/infrastructure/logging"
 )
@@ -19,7 +19,7 @@ type findProductByIdUseCase struct {
 }
 
 type FindProductByIdUseCaseInterface interface {
-	FindProductById(dto []DTOs.FindProductDTO) ([]DTOs.ProductDTO, error)
+	FindProductById(dto []product_DTO.FindProductDTO) ([]product_DTO.ProductDTO, error)
 }
 
 func NewFindProductByIdUseCase(productRepo repositories.ProductRepositoryInterface) FindProductByIdUseCaseInterface {
@@ -28,7 +28,7 @@ func NewFindProductByIdUseCase(productRepo repositories.ProductRepositoryInterfa
 	}
 }
 
-func (uc *findProductByIdUseCase) FindProductById(input []DTOs.FindProductDTO) ([]DTOs.ProductDTO, error) {
+func (uc *findProductByIdUseCase) FindProductById(input []product_DTO.FindProductDTO) ([]product_DTO.ProductDTO, error) {
 	logging.Info("FindProduct Journey", zap.String("Init", "FindProductByIdUseCase"))
 
 	ids := make([]string, len(input))
@@ -47,9 +47,9 @@ func (uc *findProductByIdUseCase) FindProductById(input []DTOs.FindProductDTO) (
 		return nil, fmt.Errorf("error getting products: %w", err)
 	}
 
-	productDTOs := make([]DTOs.ProductDTO, len(productEntities))
+	productDTOs := make([]product_DTO.ProductDTO, len(productEntities))
 	for i, productEntity := range productEntities {
-		productDTOs[i] = DTOs.MapProductEntityToDTO(productEntity)
+		productDTOs[i] = product_DTO.MapProductEntityToDTO(productEntity)
 	}
 
 	logging.Info("FindProduct Journey", zap.String("Finish", "FindProductByIdUseCase"))
