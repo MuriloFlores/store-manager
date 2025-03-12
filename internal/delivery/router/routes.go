@@ -16,7 +16,11 @@ import (
 // @description API para gerenciar lojas.
 // @host localhost:8080
 // @BasePath /
-func ConfigureRoutes(productHandler delivery.ProductHandlerInterface, rawMaterialHandler delivery.RawMaterialHandlerInterface) http.Handler {
+func ConfigureRoutes(
+	productHandler delivery.ProductHandlerInterface,
+	rawMaterialHandler delivery.RawMaterialHandlerInterface,
+	assocHandler delivery.AssocHandlerInterface,
+) http.Handler {
 	router := mux.NewRouter()
 
 	// Rotas de Produtos
@@ -32,6 +36,14 @@ func ConfigureRoutes(productHandler delivery.ProductHandlerInterface, rawMateria
 	router.HandleFunc("/raw-material/get-all", rawMaterialHandler.GetAllRawMaterials).Methods("GET")
 	router.HandleFunc("/raw-material/delete-by-ids", rawMaterialHandler.DeleteRawMaterial).Methods("DELETE")
 	router.HandleFunc("/raw-material/update", rawMaterialHandler.UpdateRawMaterial).Methods("PUT")
+
+	//Rotas de associacao
+	router.HandleFunc("/assoc-product-material/insert", assocHandler.CreateAssoc).Methods("POST")
+	router.HandleFunc("/assoc-product-material/get-by-criteria", assocHandler.FindByCriteria).Methods("GET")
+	router.HandleFunc("/assoc-product-material/get-by-ids", assocHandler.FindAssocById).Methods("GET")
+	router.HandleFunc("/assoc-product-material/get-all", assocHandler.FindAllAssociations).Methods("GET")
+	router.HandleFunc("/assoc-product-material/delete-by-ids", assocHandler.DeleteAssoc).Methods("DELETE")
+	router.HandleFunc("/assoc-product-material/update", assocHandler.UpdateAssoc).Methods("PUT")
 
 	// Swagger
 	router.PathPrefix("/swagger/").Handler(httpSwagger.WrapHandler)
