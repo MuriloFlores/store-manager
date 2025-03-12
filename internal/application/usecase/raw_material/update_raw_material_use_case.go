@@ -3,7 +3,7 @@ package raw_material
 import (
 	"fmt"
 	"go.uber.org/zap"
-	"store-manager/internal/application/DTOs"
+	"store-manager/internal/application/DTOs/raw_material_DTO"
 	"store-manager/internal/domain/entity"
 	"store-manager/internal/domain/repositories"
 	"store-manager/internal/infrastructure/logging"
@@ -14,7 +14,7 @@ type updateRawMaterialUseCase struct {
 }
 
 type UpdateRawMaterialUseCaseInterface interface {
-	UpdateRawMaterial(input []DTOs.RawMaterialDTO) ([]DTOs.RawMaterialDTO, error)
+	UpdateRawMaterial(input []raw_material_DTO.RawMaterialDTO) ([]raw_material_DTO.RawMaterialDTO, error)
 }
 
 func NewUpdateRawMaterialUseCase(rawMaterialRepo repositories.RawMaterialsRepositoryInterface) UpdateRawMaterialUseCaseInterface {
@@ -23,7 +23,7 @@ func NewUpdateRawMaterialUseCase(rawMaterialRepo repositories.RawMaterialsReposi
 	}
 }
 
-func (uc *updateRawMaterialUseCase) UpdateRawMaterial(input []DTOs.RawMaterialDTO) ([]DTOs.RawMaterialDTO, error) {
+func (uc *updateRawMaterialUseCase) UpdateRawMaterial(input []raw_material_DTO.RawMaterialDTO) ([]raw_material_DTO.RawMaterialDTO, error) {
 	logging.Info("UpdateRawMaterial Journey", zap.String("Init", "UpdateRawMaterialUseCase"))
 	rawMaterialEntities := make([]entity.RawMaterialInterface, len(input))
 
@@ -39,6 +39,7 @@ func (uc *updateRawMaterialUseCase) UpdateRawMaterial(input []DTOs.RawMaterialDT
 			rawMaterial.Unit,
 			rawMaterial.Quantity,
 			rawMaterial.Cost.MapMoneyDTOToObject(),
+			&rawMaterial.RiskLimit,
 		)
 
 		rawMaterialEntities[i] = rawMaterialEntity
@@ -50,9 +51,9 @@ func (uc *updateRawMaterialUseCase) UpdateRawMaterial(input []DTOs.RawMaterialDT
 		return nil, fmt.Errorf("error while updating raw material: %w", err)
 	}
 
-	rawMaterialDTOs := make([]DTOs.RawMaterialDTO, len(rawMaterialEntities))
+	rawMaterialDTOs := make([]raw_material_DTO.RawMaterialDTO, len(rawMaterialEntities))
 	for i, rawMaterialDTO := range rawMaterialEntities {
-		rawMaterialDTOs[i] = DTOs.MapRawMaterialEntityToDTO(rawMaterialDTO)
+		rawMaterialDTOs[i] = raw_material_DTO.MapRawMaterialEntityToDTO(rawMaterialDTO)
 	}
 
 	logging.Info("UpdateRawMaterial Journey", zap.String("Finish", "UpdateRawMaterialUseCase"))

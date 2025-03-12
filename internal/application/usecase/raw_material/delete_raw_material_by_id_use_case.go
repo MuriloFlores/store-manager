@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/google/uuid"
 	"go.uber.org/zap"
-	"store-manager/internal/application/DTOs"
+	"store-manager/internal/application/DTOs/raw_material_DTO"
 	"store-manager/internal/domain/repositories"
 	"store-manager/internal/infrastructure/logging"
 )
@@ -19,7 +19,7 @@ var (
 )
 
 type DeleteRawMaterialUseCaseInterface interface {
-	DeleteRawMaterial(dtos []DTOs.FindRawMaterialDTO) error
+	DeleteRawMaterial(dtos []raw_material_DTO.FindRawMaterialDTO) error
 }
 
 func NewDeleteRawMaterialUseCase(rawMaterialRepo repositories.RawMaterialsRepositoryInterface) DeleteRawMaterialUseCaseInterface {
@@ -28,7 +28,7 @@ func NewDeleteRawMaterialUseCase(rawMaterialRepo repositories.RawMaterialsReposi
 	}
 }
 
-func (uc *deleteRawMaterialUseCase) DeleteRawMaterial(dtos []DTOs.FindRawMaterialDTO) error {
+func (uc *deleteRawMaterialUseCase) DeleteRawMaterial(dtos []raw_material_DTO.FindRawMaterialDTO) error {
 	logging.Info("DeleteRawMaterial Journey", zap.String("Init", "DeleteRawMaterialUseCase"))
 
 	ids := make([]string, len(dtos))

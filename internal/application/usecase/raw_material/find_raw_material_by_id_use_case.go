@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/google/uuid"
 	"go.uber.org/zap"
-	"store-manager/internal/application/DTOs"
+	"store-manager/internal/application/DTOs/raw_material_DTO"
 	"store-manager/internal/domain/repositories"
 	"store-manager/internal/infrastructure/logging"
 )
@@ -14,7 +14,7 @@ type findRawMaterialByIdUseCase struct {
 }
 
 type FindRawMaterialByIdUseCaseInterface interface {
-	FindRawMaterialById(input []DTOs.FindRawMaterialDTO) ([]DTOs.RawMaterialDTO, error)
+	FindRawMaterialById(input []raw_material_DTO.FindRawMaterialDTO) ([]raw_material_DTO.RawMaterialDTO, error)
 }
 
 func NewFindRawMaterialByIdUseCase(productRepo repositories.RawMaterialsRepositoryInterface) FindRawMaterialByIdUseCaseInterface {
@@ -23,7 +23,7 @@ func NewFindRawMaterialByIdUseCase(productRepo repositories.RawMaterialsReposito
 	}
 }
 
-func (uc *findRawMaterialByIdUseCase) FindRawMaterialById(input []DTOs.FindRawMaterialDTO) ([]DTOs.RawMaterialDTO, error) {
+func (uc *findRawMaterialByIdUseCase) FindRawMaterialById(input []raw_material_DTO.FindRawMaterialDTO) ([]raw_material_DTO.RawMaterialDTO, error) {
 	logging.Info("FindRawMaterialById Journey", zap.String("Init", "FindRawMaterialByIdUseCase"))
 
 	ids := make([]string, len(input))
@@ -39,12 +39,12 @@ func (uc *findRawMaterialByIdUseCase) FindRawMaterialById(input []DTOs.FindRawMa
 	rawMaterialEntities, err := uc.productRepo.FindByIds(ids)
 	if err != nil {
 		logging.Error("FindRawMaterialById Journey", zap.String("Error", err.Error()))
-		return nil, fmt.Errorf("error getting raw material: %w", err)
+		return []raw_material_DTO.RawMaterialDTO{}, fmt.Errorf("error getting raw material: %w", err)
 	}
 
-	rawMaterialDTOs := make([]DTOs.RawMaterialDTO, len(rawMaterialEntities))
+	rawMaterialDTOs := make([]raw_material_DTO.RawMaterialDTO, len(rawMaterialEntities))
 	for i, rawMaterial := range rawMaterialEntities {
-		rawMaterialDTOs[i] = DTOs.MapRawMaterialEntityToDTO(rawMaterial)
+		rawMaterialDTOs[i] = raw_material_DTO.MapRawMaterialEntityToDTO(rawMaterial)
 	}
 
 	logging.Info("FindRawMaterialById Journey", zap.String("Finish", "FindRawMaterialByIdUseCase"))
