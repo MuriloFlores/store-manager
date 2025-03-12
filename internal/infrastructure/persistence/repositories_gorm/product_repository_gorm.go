@@ -46,11 +46,7 @@ func (r *ProductRepositoryGorm) GetAllProducts() ([]entity.ProductInterface, err
 
 	err := r.db.Find(&productModels).Error
 	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, ErrorRecordNotFound
-		}
-
-		return nil, err
+		return []entity.ProductInterface{}, err
 	}
 
 	productEntities := make([]entity.ProductInterface, len(productModels))
@@ -66,7 +62,7 @@ func (r *ProductRepositoryGorm) FindByIds(ids []string) ([]entity.ProductInterfa
 
 	err := r.db.Find(&productModels, "id IN ?", ids).Error
 	if err != nil {
-		return nil, err
+		return []entity.ProductInterface{}, err
 	}
 
 	if len(productModels) == 0 {
@@ -97,9 +93,6 @@ func (r *ProductRepositoryGorm) Update(products []entity.ProductInterface) error
 func (r *ProductRepositoryGorm) DeleteByIds(ids []string) error {
 	err := r.db.Delete(&models.ProductModel{}, "id IN ?", ids).Error
 	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return ErrorRecordNotFound
-		}
 		return err
 	}
 

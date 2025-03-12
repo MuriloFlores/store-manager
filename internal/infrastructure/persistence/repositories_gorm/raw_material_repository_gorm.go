@@ -42,11 +42,11 @@ func (r *rawMaterialsRepositoryGorm) FindByIds(ids []string) ([]entity.RawMateri
 
 	err := r.db.Where("id IN (?)", ids).Find(&rawMaterialModels).Error
 	if err != nil {
-		return nil, err
+		return []entity.RawMaterialInterface{}, err
 	}
 
 	if len(rawMaterialModels) == 0 {
-		return []entity.RawMaterialInterface{}, ErrorRecordNotFound
+		return []entity.RawMaterialInterface{}, nil
 	}
 
 	rawMaterialEntities := make([]entity.RawMaterialInterface, len(rawMaterialModels))
@@ -88,11 +88,11 @@ func (r *rawMaterialsRepositoryGorm) GetAllRawMaterials() ([]entity.RawMaterialI
 		Find(&rawMaterialModels).Error
 
 	if err != nil {
-		return nil, err
+		return []entity.RawMaterialInterface{}, err
 	}
 
 	if len(rawMaterialModels) == 0 {
-		return nil, ErrorRecordNotFound
+		return []entity.RawMaterialInterface{}, ErrorRecordNotFound
 	}
 
 	rawMaterialsEntities := make([]entity.RawMaterialInterface, len(rawMaterialModels))
@@ -111,11 +111,11 @@ func (r *rawMaterialsRepositoryGorm) GetAllRawMaterialsByLimitRisk() ([]entity.R
 		Find(&rawMaterialModels).Error
 
 	if err != nil {
-		return nil, err
+		return []entity.RawMaterialInterface{}, err
 	}
 
 	if len(rawMaterialModels) == 0 {
-		return nil, ErrorRecordNotFound
+		return []entity.RawMaterialInterface{}, ErrorRecordNotFound
 	}
 
 	rawMaterialsEntities := make([]entity.RawMaterialInterface, len(rawMaterialModels))
