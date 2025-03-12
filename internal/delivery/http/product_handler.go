@@ -4,10 +4,10 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
+	"store-manager/internal/application/DTOs/product_DTO"
 	"store-manager/internal/infrastructure/error_handler"
 
 	"go.uber.org/zap"
-	"store-manager/internal/application/DTOs"
 	"store-manager/internal/application/services"
 	"store-manager/internal/infrastructure/logging"
 )
@@ -40,7 +40,7 @@ func NewProductHandler(productService services.ProductServiceInterface) ProductH
 // CreateProduct godoc
 // @Summary Inserir um novo produto
 // @Description Insere um novo produto no sistema.
-// @Tags produtos
+// @Tags Produtos
 // @Accept json
 // @Produce json
 // @Param product body DTOs.CreateProductDTO true "Produto a ser inserido"
@@ -49,7 +49,7 @@ func NewProductHandler(productService services.ProductServiceInterface) ProductH
 // @Router /products/insert [post]
 func (handler *productHandler) CreateProduct(w http.ResponseWriter, r *http.Request) {
 	logging.Info("CreateProduct Journey", zap.String("Init", "CreateProductHandler"))
-	var input []DTOs.CreateProductDTO
+	var input []product_DTO.CreateProductDTO
 
 	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
 		logging.Error("CreateProduct Journey", zap.String("Error", err.Error()))
@@ -76,18 +76,18 @@ func (handler *productHandler) CreateProduct(w http.ResponseWriter, r *http.Requ
 }
 
 // FindProductById godoc
-// @Summary Buscar produtos por IDs
-// @Description Recupera produtos utilizando uma lista de IDs.
-// @Tags produtos
+// @Summary Buscar Produtos por IDs
+// @Description Recupera Produtos utilizando uma lista de IDs.
+// @Tags Produtos
 // @Accept json
 // @Produce json
-// @Param ids query string true "IDs dos produtos (separados por vírgula)" default(8effac39-9d4d-4b20-851c-68cf0d8aae60)
+// @Param ids query string true "IDs dos Produtos (separados por vírgula)" default(8effac39-9d4d-4b20-851c-68cf0d8aae60)
 // @Success 200 {array} DTOs.ProductDTO
 // @Failure 400 {object} DTOs.ErrorResponse
 // @Router /products/get-by-ids [get]
 func (handler *productHandler) FindProductById(w http.ResponseWriter, r *http.Request) {
 	logging.Info("FindProductById Journey", zap.String("Init", "FindProductByIdHandler"))
-	var input []DTOs.FindProductDTO
+	var input []product_DTO.FindProductDTO
 
 	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
 		logging.Error("FindProductById Journey", zap.String("Error", err.Error()))
@@ -114,9 +114,9 @@ func (handler *productHandler) FindProductById(w http.ResponseWriter, r *http.Re
 }
 
 // GetAllProducts godoc
-// @Summary Listar todos os produtos
-// @Description Retorna todos os produtos cadastrados no sistema.
-// @Tags produtos
+// @Summary Listar todos os Produtos
+// @Description Retorna todos os Produtos cadastrados no sistema.
+// @Tags Produtos
 // @Accept json
 // @Produce json
 // @Success 200 {array} DTOs.ProductDTO
@@ -144,18 +144,18 @@ func (handler *productHandler) GetAllProducts(w http.ResponseWriter, r *http.Req
 }
 
 // DeleteProductsByIds godoc
-// @Summary Deletar produtos por IDs
-// @Description Remove vários produtos do sistema utilizando seus IDs.
-// @Tags produtos
+// @Summary Deletar Produtos por IDs
+// @Description Remove vários Produtos do sistema utilizando seus IDs.
+// @Tags Produtos
 // @Accept json
 // @Produce json
-// @Param ids body []string true "Lista de IDs dos produtos a serem deletados"
+// @Param ids body []string true "Lista de IDs dos Produtos a serem deletados"
 // @Success 200 {object} map[string]interface{}
 // @Failure 400 {object} DTOs.ErrorResponse
 // @Router /products/delete-by-ids [delete]
 func (handler *productHandler) DeleteProductsByIds(w http.ResponseWriter, r *http.Request) {
 	logging.Info("DeleteProductById Journey", zap.String("Init", "DeleteProductByIdHandler"))
-	var input []DTOs.FindProductDTO
+	var input []product_DTO.FindProductDTO
 
 	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
 		logging.Error("DeleteProductById Journey", zap.String("Error", err.Error()))
@@ -187,18 +187,18 @@ func (handler *productHandler) DeleteProductsByIds(w http.ResponseWriter, r *htt
 }
 
 // UpdateProduct godoc
-// @Summary Atualizar produtos
-// @Description Atualiza os dados de múltiplos produtos.
-// @Tags produtos
+// @Summary Atualizar Produtos
+// @Description Atualiza os dados de múltiplos Produtos.
+// @Tags Produtos
 // @Accept json
 // @Produce json
-// @Param products body []DTOs.UpdateProductDTO true "Array de produtos a serem atualizados"
+// @Param products body []DTOs.UpdateProductDTO true "Array de Produtos a serem atualizados"
 // @Success 200 {array} DTOs.ProductDTO
 // @Failure 400 {object} DTOs.ErrorResponse
 // @Router /products/update [put]
 func (handler *productHandler) UpdateProduct(w http.ResponseWriter, r *http.Request) {
 	logging.Info("UpdateProducts Journey", zap.String("Init", "UpdateProductsHandler"))
-	var input []DTOs.UpdateProductDTO
+	var input []product_DTO.UpdateProductDTO
 
 	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
 		logging.Error("UpdateProducts Journey", zap.String("Error", err.Error()))
