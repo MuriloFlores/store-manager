@@ -2,6 +2,7 @@ package product_raw_material_assoc
 
 import (
 	"fmt"
+	"github.com/google/uuid"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
 	"store-manager/internal/application/DTOs/product_assoc_raw_material_DTO"
@@ -29,6 +30,20 @@ func (uc *createAssocUseCase) CreateAssoc(input []product_assoc_raw_material_DTO
 	if len(input) == 0 {
 		logging.Error("CreateAssoc Journey", zap.String("Error", "input can't be empty"))
 		return []entity.ProductInterface{}, fmt.Errorf("input is empty")
+	}
+
+	for i, assoc := range input {
+		if assoc.ProductId == uuid.Nil {
+			return []entity.ProductInterface{}, fmt.Errorf("association at index %d: productId is empty", i)
+		}
+
+		if assoc.MaterialId == uuid.Nil {
+			return []entity.ProductInterface{}, fmt.Errorf("association at index %d: materialId is empty", i)
+		}
+
+		if assoc.QuantityUsed <= 0 {
+			return []entity.ProductInterface{}, fmt.Errorf("association at index %d: quantity is empty", i)
+		}
 	}
 
 	if err := uc.assocRepo.CreateAssociation(input); err != nil {
