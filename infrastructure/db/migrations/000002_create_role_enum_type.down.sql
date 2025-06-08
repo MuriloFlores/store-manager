@@ -1,0 +1,1 @@
+drop type user_role_enum;
