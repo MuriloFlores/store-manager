@@ -1,34 +1,33 @@
 package domain
 
 import (
-	"fmt"
 	"github.com/muriloFlores/StoreManager/internal/core/value_objects"
 )
 
 type User struct {
-	id       *string
+	id       string
 	name     string
 	email    string
 	password string
 	role     value_objects.Role
 }
 
-func NewUser(id, name, email, password string, role value_objects.Role) (*User, error) {
+func NewUser(id string, name, email, password string, role value_objects.Role) (*User, error) {
 	if name == "" {
-		return nil, fmt.Errorf(`name is required`)
+		return nil, &ErrInvalidInput{FieldName: "name", Reason: "name is required"}
 	}
 	if email == "" {
-		return nil, fmt.Errorf(`email is required`)
+		return nil, &ErrInvalidInput{FieldName: "email", Reason: "email is required"}
 	}
 	if err := validatePassword(password); err != nil {
 		return nil, err
 	}
 	if !role.IsValid() {
-		return nil, fmt.Errorf(`invalid role`)
+		return nil, &ErrInvalidInput{FieldName: "role", Reason: "invalid role"}
 	}
 
 	return &User{
-		id:       &id,
+		id:       id,
 		name:     name,
 		email:    email,
 		password: password,
@@ -36,7 +35,7 @@ func NewUser(id, name, email, password string, role value_objects.Role) (*User, 
 	}, nil
 }
 
-func (u *User) ID() *string {
+func (u *User) ID() string {
 	return u.id
 }
 
@@ -58,7 +57,7 @@ func (u *User) Role() string {
 
 func (u *User) ChangeName(name string) error {
 	if name == "" {
-		return fmt.Errorf(`name is required`)
+		return &ErrInvalidInput{FieldName: "name", Reason: "name is required"}
 	}
 	u.name = name
 	return nil
@@ -66,7 +65,7 @@ func (u *User) ChangeName(name string) error {
 
 func (u *User) ChangeEmail(email string) error {
 	if email == "" {
-		return fmt.Errorf(`email is required`)
+		return &ErrInvalidInput{FieldName: "email", Reason: "email is required"}
 	}
 	u.email = email
 	return nil
@@ -82,7 +81,7 @@ func (u *User) SetPasswordHash(hashedPassword string) error {
 
 func (u *User) ChangeRole(newRole value_objects.Role) error {
 	if !newRole.IsValid() {
-		return fmt.Errorf(`invalid role`)
+		return &ErrInvalidInput{FieldName: "role", Reason: "invalid role"}
 	}
 	u.role = newRole
 	return nil
@@ -90,10 +89,10 @@ func (u *User) ChangeRole(newRole value_objects.Role) error {
 
 func validatePassword(password string) error {
 	if password == "" {
-		return fmt.Errorf(`password is required`)
+		return &ErrInvalidInput{FieldName: "password", Reason: "password is required"}
 	}
 	if len(password) < 8 {
-		return fmt.Errorf(`password must be at least 8 characters`)
+		return &ErrInvalidInput{FieldName: "password", Reason: "password must be at least 8 characters"}
 	}
 	return nil
 }
