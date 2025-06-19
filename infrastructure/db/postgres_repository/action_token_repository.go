@@ -22,7 +22,14 @@ func NewActionTokenRepository(db *pgxpool.Pool) ports.ActionTokenRepository {
 func (r *ActionTokenRepository) Create(ctx context.Context, token *domain.ActionToken) error {
 	query := `INSERT INTO action_tokens (token, user_id, type, payload,  expires_at) VALUES ($1, $2, $3, $4, $5)`
 
-	_, err := r.db.Exec(ctx, query, token.Token, token.UserID, token.Token, token.Payload, token.ExpiresAt)
+	_, err := r.db.Exec(ctx, query,
+		token.Token,
+		token.UserID,
+		token.Type,
+		token.Payload,
+		token.ExpiresAt,
+	)
+
 	if err != nil {
 		return fmt.Errorf("error while reset token: %w", err)
 	}
