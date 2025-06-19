@@ -37,7 +37,7 @@ func main() {
 
 	cfg, err := config.LoadConfig("./")
 	if err != nil {
-		log.Fatalf("FATAL: Erro ao carregar as configurações: %v", err)
+		log.Fatalf("FATAL: error in load config: %v", err)
 	}
 
 	ctx, cancel := context.WithCancel(context.Background())
@@ -45,7 +45,7 @@ func main() {
 
 	dbpool, err := db.NewDBPool(ctx, cfg)
 	if err != nil {
-		log.Fatalf("FATAL: Falha na inicialização do banco de dados: %v", err)
+		log.Fatalf("FATAL: dabase initialization failed: %v", err)
 	}
 	defer dbpool.Close()
 
@@ -68,7 +68,15 @@ func main() {
 	emailSender := notifications.NewSmtpSender(cfg.SmtpHost, cfg.SmtpPort, cfg.SmtpSenderEmail, cfg.SmtpAppPassword)
 	taskEnqueuer := queue.NewTaskEnqueuer(redisConnectionOpt)
 
-	userUseCases := user.NewUserUseCases(userRepo, passwordHasher, idGenerator)
+	userUseCases := user.NewUserUseCases(
+		userRepo,
+		passwordHasher,
+		idGenerator,
+		cryptToken,
+		taskEnqueuer,
+		actionTokenRepo,
+	)
+
 	authUseCases := auth.NewAuthUseCases(
 		userRepo,
 		passwordHasher,
