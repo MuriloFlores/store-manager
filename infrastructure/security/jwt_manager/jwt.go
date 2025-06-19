@@ -6,7 +6,6 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/muriloFlores/StoreManager/internal/core/domain"
 	"github.com/muriloFlores/StoreManager/internal/core/ports"
-	"github.com/muriloFlores/StoreManager/internal/core/value_objects"
 	"time"
 )
 
@@ -62,7 +61,7 @@ func (j *jwtGenerator) Validate(tokenString string) (*domain.Identity, error) {
 
 	identity := &domain.Identity{
 		UserID: claims.UserID,
-		Role:   value_objects.Role(claims.Role),
+		Role:   claims.Role,
 	}
 
 	return identity, nil
