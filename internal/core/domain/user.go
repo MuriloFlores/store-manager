@@ -38,6 +38,17 @@ func NewUser(id string, name, email, password string, role value_objects.Role) (
 	}, nil
 }
 
+func HydrateUser(id, name, email, passwordHash string, role value_objects.Role, verifiedAt *time.Time) *User {
+	return &User{
+		id:         id,
+		name:       name,
+		email:      email,
+		password:   passwordHash,
+		role:       role,
+		verifiedAt: verifiedAt,
+	}
+}
+
 func (u *User) ID() string {
 	return u.id
 }
@@ -60,6 +71,10 @@ func (u *User) Role() string {
 
 func (u *User) IsVerified() bool {
 	return u.verifiedAt != nil
+}
+
+func (u *User) VerifiedAt() *time.Time {
+	return u.verifiedAt
 }
 
 func (u *User) ChangeName(name string) error {
