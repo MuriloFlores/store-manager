@@ -5,12 +5,12 @@ import (
 	"github.com/muriloFlores/StoreManager/infrastructure/web/web_errors"
 	"github.com/muriloFlores/StoreManager/internal/core/ports"
 	"net/http"
+	"strings"
 )
 
 type contextKey string
 
-const UserIDKey contextKey = "userID"
-const UserRoleKey contextKey = "userRole"
+const UserIdentityKey contextKey = "userIdentity"
 
 func AuthMiddleware(tokenManager ports.TokenManager) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
@@ -23,16 +23,22 @@ func AuthMiddleware(tokenManager ports.TokenManager) func(http.Handler) http.Han
 				return
 			}
 
-			identity, err := tokenManager.Validate(authHeader)
+			headerParts := strings.Split(authHeader, " ")
+			if len(headerParts) != 2 || strings.ToLower(headerParts[0]) != "bearer" {
+				restErr := web_errors.NewUnauthorizedRequestError("invalid Authorization header format")
+				restErr.Send(w)
+				return
+			}
+			tokenString := headerParts[1]
+
+			identity, err := tokenManager.Validate(tokenString)
 			if err != nil {
-				restErr := web_errors.NewUnauthorizedRequestError("Invalid Authorization header")
+				restErr := web_errors.NewUnauthorizedRequestError("expired or invalid token")
 				restErr.Send(w)
 				return
 			}
 
-			ctx := context.WithValue(r.Context(), UserIDKey, identity.UserID)
-			ctx = context.WithValue(ctx, UserRoleKey, identity.Role)
-
+			ctx := context.WithValue(r.Context(), UserIdentityKey, identity)
 			next.ServeHTTP(w, r.WithContext(ctx))
 		})
 	}
