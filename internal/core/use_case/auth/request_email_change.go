@@ -84,8 +84,8 @@ func (uc *RequestEmailChangeUseCase) Execute(ctx context.Context, actor *domain.
 		ToEmail:          user.Email(),
 	}
 
-	if err = uc.taskEnqueuer.EnqueueEmailChangeConfirmation(ctx, &confirmationJob); err != nil {
-		// deveriamos remover o token se a fila falhar?
+	if err = uc.taskEnqueuer.EnqueueEmailChangeConfirmation(&confirmationJob); err != nil {
+		return fmt.Errorf("internal error starting email change process: %w", err)
 	}
 
 	alertJob := &domain.SecurityNotificationJobData{
@@ -95,10 +95,9 @@ func (uc *RequestEmailChangeUseCase) Execute(ctx context.Context, actor *domain.
 		'%s'. Se você não fez essa solicitação, por favor, ignore este email.`, newEmail),
 	}
 
-	if err = uc.taskEnqueuer.EnqueueSecurityNotification(ctx, alertJob); err != nil {
-		// Se a fila falhar, deveriamos remover o token?
+	if err = uc.taskEnqueuer.EnqueueSecurityNotification(alertJob); err != nil {
+		return fmt.Errorf("internal error when starting the confirmation email sending process: %w", err)
 	}
 
-	//pq nao usamos mais o enqueue?
 	return nil
 }
