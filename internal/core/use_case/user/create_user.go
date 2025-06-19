@@ -19,11 +19,21 @@ type CreateUserUseCase struct {
 	tokenRepo      ports.ActionTokenRepository
 }
 
-func NewCreateUserUseCase(userRepository ports.UserRepository, hasher ports.PasswordHasher, generator ports.IDGenerator) *CreateUserUseCase {
+func NewCreateUserUseCase(
+	userRepository ports.UserRepository,
+	hasher ports.PasswordHasher,
+	generator ports.IDGenerator,
+	tokenGenerator ports.SecureTokenGenerator,
+	taskEnqueuer ports.TaskEnqueuer,
+	tokenRepo ports.ActionTokenRepository,
+) *CreateUserUseCase {
 	return &CreateUserUseCase{
 		userRepository: userRepository,
 		hasher:         hasher,
 		generator:      generator,
+		tokenGenerator: tokenGenerator,
+		taskEnqueuer:   taskEnqueuer,
+		tokenRepo:      tokenRepo,
 	}
 }
 
