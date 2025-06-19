@@ -7,7 +7,7 @@ import (
 	"github.com/go-playground/locales/en"
 	ut "github.com/go-playground/universal-translator"
 	"github.com/go-playground/validator/v10"
-	en_translation "github.com/go-playground/validator/v10/translations/en"
+	entranslation "github.com/go-playground/validator/v10/translations/en"
 )
 
 var (
@@ -19,7 +19,7 @@ func init() {
 	en := en.New()
 	unt := ut.New(en, en)
 	transl, _ = unt.GetTranslator("en")
-	en_translation.RegisterDefaultTranslations(Validate, transl)
+	entranslation.RegisterDefaultTranslations(Validate, transl)
 }
 
 func TranslateError(err error) *RestErr {

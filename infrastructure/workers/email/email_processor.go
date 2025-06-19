@@ -21,7 +21,7 @@ func NewEmailProcessor(sender ports.NotificationSender, templateManager ports.Te
 }
 
 func (p *EmailProcessor) HandlePasswordReset(ctx context.Context, taskPayload []byte) error {
-	var payload domain.PasswordChangeJobData
+	var payload domain.PasswordResetJobData
 	if err := json.Unmarshal(taskPayload, &payload); err != nil {
 		return fmt.Errorf("unmarshal email password_reset payload: %w", err)
 	}

@@ -10,6 +10,7 @@ import (
 	"github.com/muriloFlores/StoreManager/internal/core/domain"
 	"github.com/muriloFlores/StoreManager/internal/core/ports"
 	"github.com/muriloFlores/StoreManager/internal/core/value_objects"
+	"time"
 )
 
 type PostgresUserRepository struct {
@@ -49,12 +50,13 @@ func (p *PostgresUserRepository) Save(ctx context.Context, user *domain.User) er
 }
 
 func (p *PostgresUserRepository) FindByEmail(ctx context.Context, email string) (*domain.User, error) {
-	var id, name, emailScan, password string
+	var id, name, emailScan, passwordHash string
 	var role value_objects.Role
+	var verifiedAt *time.Time
 
-	query := `SELECT id, name, email, password_hash, role FROM users WHERE email = $1 AND deleted_at IS NULL`
+	query := `SELECT id, name, email, password_hash, role, verified_at FROM users WHERE email = $1 AND deleted_at IS NULL`
 
-	err := p.db.QueryRow(ctx, query, email).Scan(&id, &name, &emailScan, &password, &role)
+	err := p.db.QueryRow(ctx, query, email).Scan(&id, &name, &emailScan, &passwordHash, &role, &verifiedAt)
 
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
@@ -64,16 +66,19 @@ func (p *PostgresUserRepository) FindByEmail(ctx context.Context, email string) 
 		return nil, fmt.Errorf("error finding user by email: %w", err)
 	}
 
-	return domain.NewUser(id, name, emailScan, password, role)
+	user := domain.HydrateUser(id, name, emailScan, passwordHash, role, verifiedAt)
+
+	return user, nil
 }
 
 func (p *PostgresUserRepository) FindByID(ctx context.Context, id string) (*domain.User, error) {
 	var idScan, name, email, passwordHash string
 	var role value_objects.Role
+	var verifiedAt *time.Time
 
-	query := `SELECT id, name, email, password_hash, role FROM users WHERE id = $1 AND deleted_at IS NULL`
+	query := `SELECT id, name, email, password_hash, role, verified_at FROM users WHERE id = $1 AND deleted_at IS NULL`
 
-	err := p.db.QueryRow(ctx, query, id).Scan(&idScan, &name, &email, &passwordHash, &role)
+	err := p.db.QueryRow(ctx, query, id).Scan(&idScan, &name, &email, &passwordHash, &role, &verifiedAt)
 
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
@@ -83,17 +88,20 @@ func (p *PostgresUserRepository) FindByID(ctx context.Context, id string) (*doma
 		return nil, fmt.Errorf("error finding user by id: %w", err)
 	}
 
-	return domain.NewUser(idScan, name, email, passwordHash, role)
+	user := domain.HydrateUser(idScan, name, email, passwordHash, role, verifiedAt)
+
+	return user, nil
 }
 
 func (p *PostgresUserRepository) Update(ctx context.Context, user *domain.User) error {
-	query := `UPDATE users SET name = $1, email = $2, password_hash = $3,  role = $4 WHERE id = $5`
+	query := `UPDATE users SET name = $1, email = $2, password_hash = $3,  role = $4, verified_at = $5 WHERE id = $5`
 
 	commandTag, err := p.db.Exec(ctx, query,
 		user.Name(),
 		user.Email(),
 		user.Password(),
 		user.Role(),
+		user.VerifiedAt(),
 		user.ID(),
 	)
 
