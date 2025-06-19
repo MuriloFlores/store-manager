@@ -10,7 +10,7 @@ type ErrInvalidInput struct {
 }
 
 func (e *ErrInvalidInput) Error() string {
-	return fmt.Sprintf("entrada inválida no campo '%s': %s", e.FieldName, e.Reason)
+	return fmt.Sprintf("invalid input on field '%s': %s", e.FieldName, e.Reason)
 }
 
 // ErrNotFound - Usado quando um recurso específico não é encontrado.
@@ -21,7 +21,7 @@ type ErrNotFound struct {
 }
 
 func (e *ErrNotFound) Error() string {
-	return fmt.Sprintf("%s com identificador '%s' não encontrado", e.ResourceName, e.ResourceID)
+	return fmt.Sprintf("%s with identifier '%s' not found", e.ResourceName, e.ResourceID)
 }
 
 // ErrConflict - Usado quando uma ação viola uma regra de unicidade.
@@ -32,7 +32,7 @@ type ErrConflict struct {
 }
 
 func (e *ErrConflict) Error() string {
-	return fmt.Sprintf("conflito ao criar %s: %s", e.Resource, e.Details)
+	return fmt.Sprintf("conflict on create %s: %s", e.Resource, e.Details)
 }
 
 // ErrInvalidCredentials - Usado especificamente para falhas de login.
@@ -41,5 +41,23 @@ func (e *ErrConflict) Error() string {
 type ErrInvalidCredentials struct{}
 
 func (e *ErrInvalidCredentials) Error() string {
-	return "credenciais inválidas"
+	return "invalid credentials"
+}
+
+type ErrForbidden struct {
+	Action string
+}
+
+func (e *ErrForbidden) Error() string {
+	return fmt.Sprintf("forbidden: %s", e.Action)
+}
+
+// ErrInvalidToken é usado quando um token (de reset, de confirmação, etc.) é inválido,
+// não encontrado ou expirado.
+type ErrInvalidToken struct {
+	Reason string
+}
+
+func (e *ErrInvalidToken) Error() string {
+	return fmt.Sprintf("token inválido: %s", e.Reason)
 }

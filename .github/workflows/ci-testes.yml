@@ -1,0 +1,22 @@
+name: Order Manger - Tests
+on:
+  push:
+    branches:
+      - develop
+jobs:
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Go configure
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.24'
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: go mod download
+
+      - name: Run tests
+        run: go test -v ./...
