@@ -1,8 +1,8 @@
-// config/config.go
 package config
 
 import (
 	"errors"
+	"fmt"
 	"github.com/spf13/viper"
 )
 
@@ -40,4 +40,14 @@ func LoadConfig(path string) (*Config, error) {
 
 	Cfg = &cfg
 	return Cfg, nil
+}
+
+func (c *Config) DatabaseURL() string {
+	return fmt.Sprintf("postgres://%s:%s@%s:%s/%s",
+		c.DBUser,
+		c.DBPassword,
+		c.DBHost,
+		c.DBPort,
+		c.DBName,
+	)
 }
