@@ -51,8 +51,8 @@ func (e *ErrInvalidToken) Error() string {
 	return fmt.Sprintf("invalid token: %s", e.Reason)
 }
 
-type EmailNotVerified struct{}
+type ErrEmailNotVerified struct{}
 
-func (e *EmailNotVerified) Error() string {
+func (e *ErrEmailNotVerified) Error() string {
 	return fmt.Sprintf("email not verified")
 }
