@@ -1,47 +1,49 @@
-package web_errors
+package validation
 
 import (
 	"encoding/json"
 	"errors"
+	"github.com/go-playground/validator/v10"
+	"github.com/muriloFlores/StoreManager/infrastructure/web/web_errors"
 
 	"github.com/go-playground/locales/en"
 	ut "github.com/go-playground/universal-translator"
-	"github.com/go-playground/validator/v10"
-	entranslation "github.com/go-playground/validator/v10/translations/en"
+	en_translation "github.com/go-playground/validator/v10/translations/en"
 )
 
 var (
+	// Validate é a instância singleton do nosso validador.
 	Validate = validator.New()
 	transl   ut.Translator
 )
 
+// init configura o validador e as traduções na inicialização do pacote.
 func init() {
 	en := en.New()
 	unt := ut.New(en, en)
 	transl, _ = unt.GetTranslator("en")
-	entranslation.RegisterDefaultTranslations(Validate, transl)
+	en_translation.RegisterDefaultTranslations(Validate, transl)
 }
 
-func TranslateError(err error) *RestErr {
+// TranslateError traduz erros da biblioteca 'validator' para o nosso RestErr.
+func TranslateError(err error) *web_errors.RestErr {
 	var jsonErr *json.UnmarshalTypeError
 	var validationErrs validator.ValidationErrors
 
 	if errors.As(err, &jsonErr) {
-		return NewBadRequestError("Invalid field type")
+		return web_errors.NewBadRequestError("Tipo de campo inválido, verifique os dados enviados.")
 	} else if errors.As(err, &validationErrs) {
-		var causes []Causes
+		causes := []web_errors.Causes{}
 
 		for _, e := range validationErrs {
-			cause := Causes{
+			cause := web_errors.Causes{
 				Message: e.Translate(transl),
 				Field:   e.Field(),
 			}
-
 			causes = append(causes, cause)
 		}
-
-		return NewBadRequestValidationError("Some fields are invalid", causes)
+		return web_errors.NewBadRequestValidationError("Alguns campos são inválidos", causes)
 	} else {
-		return NewBadRequestError("Error trying to convert fields")
+		return web_errors.NewBadRequestError("Erro ao tentar converter os campos da requisição.")
 	}
 }
