@@ -26,6 +26,9 @@ func NewRouter(
 	api.Use(middleware.AuthMiddleware(tokenManager))
 
 	api.HandleFunc("/auth/change-password", authHandler.ChangePassword).Methods(http.MethodPut)
+	api.HandleFunc("/user/{id}", userHandler.DeleteUser).Methods(http.MethodDelete)
+	api.HandleFunc("/user/{id}", userHandler.FindUserByID).Methods(http.MethodGet)
+	api.HandleFunc("/users", userHandler.FindUserByEmail).Methods(http.MethodGet).Queries("email", "{email}")
 
 	allowedOrigins := handlers.AllowedOrigins([]string{"*"})
 	allowedMethods := handlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE", "OPTIONS"})
