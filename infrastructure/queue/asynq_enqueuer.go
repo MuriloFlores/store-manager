@@ -1,7 +1,6 @@
 package queue
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"github.com/hibiken/asynq"
@@ -12,6 +11,7 @@ import (
 const (
 	TaskTypeEmailPasswordReset = "email:password_reset"
 	TaskTypeEmailChange        = "email:change_confirmation"
+	TaskTypeEmailSecurityAlert = "email:security_alert"
 )
 
 type taskEnqueuer struct {
@@ -24,7 +24,7 @@ func NewTaskEnqueuer(redisOpt asynq.RedisClientOpt) ports.TaskEnqueuer {
 	}
 }
 
-func (t *taskEnqueuer) EnqueuePasswordReset(data *domain.PasswordChangeJobData) error {
+func (t *taskEnqueuer) EnqueuePasswordReset(data *domain.PasswordResetJobData) error {
 	payload, err := json.Marshal(data)
 	if err != nil {
 		return fmt.Errorf("fail in marshal data: %w", err)
@@ -40,7 +40,7 @@ func (t *taskEnqueuer) EnqueuePasswordReset(data *domain.PasswordChangeJobData) 
 	return nil
 }
 
-func (t *taskEnqueuer) EnqueueEmailChangeConfirmation(ctx context.Context, data *domain.EmailChangeConfirmationJobData) error {
+func (t *taskEnqueuer) EnqueueEmailChangeConfirmation(data *domain.EmailChangeConfirmationJobData) error {
 	payload, err := json.Marshal(data)
 	if err != nil {
 		return fmt.Errorf("fail in marshal data: %w", err)
@@ -56,7 +56,18 @@ func (t *taskEnqueuer) EnqueueEmailChangeConfirmation(ctx context.Context, data 
 	return nil
 }
 
-func (t *taskEnqueuer) EnqueueSecurityNotification(ctx context.Context, data *domain.SecurityNotificationJobData) error {
-	//TODO implement me
-	panic("implement me")
+func (t *taskEnqueuer) EnqueueSecurityNotification(data *domain.SecurityNotificationJobData) error {
+	payload, err := json.Marshal(data)
+	if err != nil {
+		return fmt.Errorf("fail in marshal data: %w", err)
+	}
+
+	task := asynq.NewTask(TaskTypeEmailSecurityAlert, payload)
+
+	_, err = t.client.Enqueue(task)
+	if err != nil {
+		return fmt.Errorf("fail in enqueue security notification payload: %w", err)
+	}
+
+	return nil
 }

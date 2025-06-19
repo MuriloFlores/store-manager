@@ -2,6 +2,7 @@ package templates
 
 import (
 	"bytes"
+	"embed"
 	"fmt"
 	"github.com/muriloFlores/StoreManager/internal/core/ports"
 	"html/template"
@@ -11,8 +12,11 @@ type HTMLTemplateManager struct {
 	templates *template.Template
 }
 
-func NewHTMLTemplateManager(templatesDir string) (ports.TemplateManager, error) {
-	templates, err := template.ParseGlob(fmt.Sprintf("%s/*.html", templatesDir))
+//go:embed emails/*.html
+var templateFS embed.FS
+
+func NewHTMLTemplateManager() (ports.TemplateManager, error) {
+	templates, err := template.ParseFS(templateFS, "emails/*.html")
 	if err != nil {
 		return nil, fmt.Errorf("template parsing error: %s", err)
 	}

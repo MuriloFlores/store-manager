@@ -12,18 +12,8 @@ type RestErr struct {
 	Causes  []Causes `json:"causes"`
 }
 
-// Causes represents the error causes.
-// @Summary Error Causes
-// @Description Structure representing the causes of an error.
 type Causes struct {
-	// Field associated with the error cause.
-	// @json
-	// @jsonTag field
-	Field string `json:"field" example:"name"`
-
-	// Error message describing the cause.
-	// @json
-	// @jsonTag message
+	Field   string `json:"field" example:"name"`
 	Message string `json:"message" example:"name is required"`
 }
 
@@ -83,5 +73,13 @@ func NewForbiddenError(message string) *RestErr {
 		Message: message,
 		Err:     "forbidden",
 		Code:    http.StatusForbidden,
+	}
+}
+
+func NewConflictError(message string) *RestErr {
+	return &RestErr{
+		Message: message,
+		Err:     "conflict",
+		Code:    http.StatusConflict,
 	}
 }

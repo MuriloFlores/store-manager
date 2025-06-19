@@ -1,6 +1,6 @@
 package domain
 
-type PasswordChangeJobData struct {
+type PasswordResetJobData struct {
 	UserName  string
 	UserEmail string
 	ResetLink string

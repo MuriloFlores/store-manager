@@ -8,42 +8,66 @@ import (
 
 var Cfg *Config
 
+// A struct Config permanece a mesma
 type Config struct {
-	DBHost     string `mapstructure:"DB_HOST"`
-	DBPort     string `mapstructure:"DB_PORT"`
-	DBUser     string `mapstructure:"DB_USER"`
-	DBPassword string `mapstructure:"DB_PASSWORD"`
-	DBName     string `mapstructure:"DB_NAME"`
-	ServerPort string `mapstructure:"SERVER_PORT"`
-	JWTSecret  string `mapstructure:"JWT_SECRET"`
+	DBHost                   string `mapstructure:"DB_HOST"`
+	DBPort                   string `mapstructure:"DB_PORT"`
+	DBUser                   string `mapstructure:"DB_USER"`
+	DBPassword               string `mapstructure:"DB_PASSWORD"`
+	DBName                   string `mapstructure:"DB_NAME"`
+	ServerPort               string `mapstructure:"SERVER_PORT"`
+	JWTSecret                string `mapstructure:"JWT_SECRET"`
+	RedisAddress             string `mapstructure:"REDIS_ADDRESS"`
+	SmtpHost                 string `mapstructure:"SMTP_HOST"`
+	SmtpPort                 string `mapstructure:"SMTP_PORT"`
+	SmtpSenderEmail          string `mapstructure:"SMTP_SENDER_EMAIL"`
+	SmtpAppPassword          string `mapstructure:"SMTP_APP_PASSWORD"`
+	FrontendPasswordResetURL string `mapstructure:"FRONTEND_PASSWORD_RESET_URL"`
 }
 
 func LoadConfig(path string) (*Config, error) {
+	viper.AddConfigPath(path)
 	viper.SetConfigName(".env")
 	viper.SetConfigType("env")
-	viper.AddConfigPath(path)
 
-	viper.AutomaticEnv()
+	// Tentamos ler o arquivo .env, útil para desenvolvimento local sem Docker.
+	// No ambiente Docker, é normal que ele não seja encontrado.
+	viper.ReadInConfig()
 
-	// Tenta ler o arquivo de configuração.
-	if err := viper.ReadInConfig(); err != nil {
-		var configFileNotFoundError viper.ConfigFileNotFoundError
-		if !errors.As(err, &configFileNotFoundError) {
-			return nil, err
-		}
-	}
+	// --- BINDING EXPLÍCITO ---
+	// Esta é a parte que resolve o problema de forma definitiva.
+	// Dizemos ao Viper para ligar cada chave de configuração a uma variável de ambiente.
+	// viper.BindEnv("NOME_DA_CHAVE_NO_VIPER", "NOME_DA_VARIAVEL_DE_AMBIENTE")
+	// Se os nomes forem iguais, podemos passar apenas um argumento.
+	viper.BindEnv("DB_HOST")
+	viper.BindEnv("DB_PORT")
+	viper.BindEnv("DB_USER")
+	viper.BindEnv("DB_PASSWORD")
+	viper.BindEnv("DB_NAME")
+	viper.BindEnv("SERVER_PORT")
+	viper.BindEnv("JWT_SECRET")
+	viper.BindEnv("REDIS_ADDRESS")
+	viper.BindEnv("SMTP_HOST")
+	viper.BindEnv("SMTP_PORT")
+	viper.BindEnv("SMTP_SENDER_EMAIL")
+	viper.BindEnv("SMTP_APP_PASSWORD")
+	viper.BindEnv("FRONTEND_PASSWORD_RESET_URL")
 
 	var cfg Config
 	if err := viper.Unmarshal(&cfg); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("não foi possível fazer unmarshal da configuração: %w", err)
+	}
+
+	// Mantemos a verificação para ter certeza
+	if cfg.DBUser == "" || cfg.DBPassword == "" || cfg.DBName == "" {
+		return nil, errors.New("variáveis de banco de dados essenciais (DB_USER, DB_PASSWORD, DB_NAME) não foram carregadas")
 	}
 
 	Cfg = &cfg
 	return Cfg, nil
 }
-
 func (c *Config) DatabaseURL() string {
-	return fmt.Sprintf("postgres://%s:%s@%s:%s/%s",
+	return fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable",
 		c.DBUser,
 		c.DBPassword,
 		c.DBHost,

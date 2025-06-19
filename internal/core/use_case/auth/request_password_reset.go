@@ -58,10 +58,15 @@ func (uc *RequestPasswordResetUseCase) Execute(ctx context.Context, email string
 		return err
 	}
 
-	jobData := domain.PasswordChangeJobData{
+	jobData := domain.PasswordResetJobData{
 		UserName:  user.Name(),
 		UserEmail: user.Email(),
 		ResetLink: "http://localhost/reset-password?token=" + resetToken.Token,
 	}
 
+	if err = uc.taskEnqueuer.EnqueuePasswordReset(&jobData); err != nil {
+		return err
+	}
+
+	return nil
 }

@@ -27,6 +27,10 @@ func (uc *LoginUserUseCase) Execute(ctx context.Context, email, password string)
 		return "", &domain.ErrInvalidCredentials{}
 	}
 
+	if !user.IsVerified() {
+		return "", &domain.ErrEmailNotVerified{}
+	}
+
 	passwordMatch := uc.hasher.Compare(user.Password(), password)
 	if !passwordMatch {
 		return "", &domain.ErrInvalidCredentials{}

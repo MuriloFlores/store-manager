@@ -2,14 +2,16 @@ package domain
 
 import (
 	"github.com/muriloFlores/StoreManager/internal/core/value_objects"
+	"time"
 )
 
 type User struct {
-	id       string
-	name     string
-	email    string
-	password string
-	role     value_objects.Role
+	id         string
+	name       string
+	email      string
+	password   string
+	role       value_objects.Role
+	verifiedAt *time.Time
 }
 
 func NewUser(id string, name, email, password string, role value_objects.Role) (*User, error) {
@@ -27,12 +29,24 @@ func NewUser(id string, name, email, password string, role value_objects.Role) (
 	}
 
 	return &User{
-		id:       id,
-		name:     name,
-		email:    email,
-		password: password,
-		role:     role,
+		id:         id,
+		name:       name,
+		email:      email,
+		password:   password,
+		role:       role,
+		verifiedAt: nil,
 	}, nil
+}
+
+func HydrateUser(id, name, email, passwordHash string, role value_objects.Role, verifiedAt *time.Time) *User {
+	return &User{
+		id:         id,
+		name:       name,
+		email:      email,
+		password:   passwordHash,
+		role:       role,
+		verifiedAt: verifiedAt,
+	}
 }
 
 func (u *User) ID() string {
@@ -53,6 +67,14 @@ func (u *User) Password() string {
 
 func (u *User) Role() string {
 	return u.role.ToString()
+}
+
+func (u *User) IsVerified() bool {
+	return u.verifiedAt != nil
+}
+
+func (u *User) VerifiedAt() *time.Time {
+	return u.verifiedAt
 }
 
 func (u *User) ChangeName(name string) error {
@@ -85,6 +107,12 @@ func (u *User) ChangeRole(newRole value_objects.Role) error {
 	}
 	u.role = newRole
 	return nil
+}
+
+func (u *User) MarkAsVerified() {
+	now := time.Now().UTC()
+
+	u.verifiedAt = &now
 }
 
 func validatePassword(password string) error {
