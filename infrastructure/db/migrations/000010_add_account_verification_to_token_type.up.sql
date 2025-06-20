@@ -1,0 +1,1 @@
+ALTER TYPE token_action_type ADD VALUE 'ACCOUNT_VERIFICATION';

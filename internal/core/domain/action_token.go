@@ -5,8 +5,9 @@ import "time"
 type ActionType string
 
 const (
-	PasswordReset     ActionType = "PASSWORD_RESET"
-	EmailConfirmation ActionType = "EMAIL_CONFIRMATION"
+	PasswordReset       ActionType = "PASSWORD_RESET"
+	EmailConfirmation   ActionType = "EMAIL_CONFIRMATION"
+	AccountVerification ActionType = "ACCOUNT_VERIFICATION"
 )
 
 type ActionToken struct {

@@ -21,11 +21,16 @@ func NewRouter(
 	r.HandleFunc("/create-user", userHandler.CreateUser).Methods(http.MethodPost)
 	r.HandleFunc("/login", authHandler.Login).Methods(http.MethodPost)
 
+	r.HandleFunc("/verify-account", authHandler.ConfirmAccount).Methods(http.MethodGet)
+
 	// --- Rotas Protegidas ---
 	api := r.PathPrefix("/api").Subrouter()
 	api.Use(middleware.AuthMiddleware(tokenManager))
 
 	api.HandleFunc("/auth/change-password", authHandler.ChangePassword).Methods(http.MethodPut)
+	api.HandleFunc("/user/{id}", userHandler.DeleteUser).Methods(http.MethodDelete)
+	api.HandleFunc("/user/{id}", userHandler.FindUserByID).Methods(http.MethodGet)
+	api.HandleFunc("/users", userHandler.FindUserByEmail).Methods(http.MethodGet).Queries("email", "{email}")
 
 	allowedOrigins := handlers.AllowedOrigins([]string{"*"})
 	allowedMethods := handlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE", "OPTIONS"})

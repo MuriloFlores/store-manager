@@ -1,4 +1,4 @@
-package domain
+package jobs
 
 type PasswordResetJobData struct {
 	UserName  string

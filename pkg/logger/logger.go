@@ -1,51 +1,60 @@
 package logger
 
 import (
+	"github.com/muriloFlores/StoreManager/internal/core/ports"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
+	"gopkg.in/natefinch/lumberjack.v2"
+	"os"
 	"strings"
 )
-
-type LogInterface interface {
-	ErrorLevel(message string, err error, tags ...Field)
-	InfoLevel(message string, tags ...Field)
-}
-
-type Field map[string]interface{}
 
 type log struct {
 	Logger *zap.Logger
 }
 
-func NewLogger(LogOutput, LogLevel string) LogInterface {
-	logConfig := zap.Config{
-		OutputPaths: []string{getOutputLogs(LogOutput)},
-		Level:       zap.NewAtomicLevelAt(getLevelLogs(LogLevel)),
-		Encoding:    "json",
-		EncoderConfig: zapcore.EncoderConfig{
-			LevelKey:     "level",
-			TimeKey:      "time",
-			MessageKey:   "message",
-			EncodeTime:   zapcore.ISO8601TimeEncoder,
-			EncodeLevel:  zapcore.LowercaseLevelEncoder,
-			EncodeCaller: zapcore.ShortCallerEncoder,
-		},
+func NewLogger() ports.Logger {
+	encoderConfig := zapcore.EncoderConfig{
+		MessageKey:   "message",
+		LevelKey:     "level",
+		TimeKey:      "time",
+		EncodeLevel:  zapcore.LowercaseLevelEncoder,
+		EncodeTime:   zapcore.ISO8601TimeEncoder,
+		EncodeCaller: zapcore.ShortCallerEncoder,
 	}
 
-	Logger, _ := logConfig.Build()
+	lumberjackLogger := &lumberjack.Logger{
+		Filename:   "./logs/app.log",
+		MaxSize:    10,
+		MaxBackups: 5,
+		MaxAge:     30,
+		Compress:   true,
+	}
+
+	fileWriter := zapcore.AddSync(lumberjackLogger)
+	consoleWriter := zapcore.AddSync(os.Stdout)
+
+	logLevel := zap.DebugLevel
+
+	core := zapcore.NewTee(
+		zapcore.NewCore(zapcore.NewJSONEncoder(encoderConfig), fileWriter, logLevel),
+		zapcore.NewCore(zapcore.NewConsoleEncoder(encoderConfig), consoleWriter, logLevel),
+	)
+
+	logger := zap.New(core, zap.AddCaller())
 
 	return &log{
-		Logger: Logger,
+		Logger: logger,
 	}
 }
 
-func (l *log) InfoLevel(message string, tags ...Field) {
+func (l *log) InfoLevel(message string, tags ...ports.Field) {
 	zapFields := fieldsToZapFields(tags)
 
 	l.Logger.Info(message, zapFields...)
 	l.Logger.Sync()
 }
-func (l *log) ErrorLevel(message string, err error, tags ...Field) {
+func (l *log) ErrorLevel(message string, err error, tags ...ports.Field) {
 	zapFields := fieldsToZapFields(tags)
 	zapFields = append(zapFields, zap.NamedError("error", err))
 
@@ -75,7 +84,7 @@ func getLevelLogs(LevelLog string) zapcore.Level {
 	}
 }
 
-func fieldsToZapFields(fields []Field) []zap.Field {
+func fieldsToZapFields(fields []ports.Field) []zap.Field {
 	zapFields := make([]zap.Field, 0, len(fields))
 	for _, field := range fields {
 		for k, v := range field {

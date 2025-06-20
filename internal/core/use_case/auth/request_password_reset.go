@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"github.com/muriloFlores/StoreManager/internal/core/domain"
+	"github.com/muriloFlores/StoreManager/internal/core/domain/jobs"
 	"github.com/muriloFlores/StoreManager/internal/core/ports"
 	"time"
 )
@@ -58,7 +59,7 @@ func (uc *RequestPasswordResetUseCase) Execute(ctx context.Context, email string
 		return err
 	}
 
-	jobData := domain.PasswordResetJobData{
+	jobData := jobs.PasswordResetJobData{
 		UserName:  user.Name(),
 		UserEmail: user.Email(),
 		ResetLink: "http://localhost/reset-password?token=" + resetToken.Token,

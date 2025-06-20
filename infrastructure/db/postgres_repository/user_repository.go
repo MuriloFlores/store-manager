@@ -94,7 +94,7 @@ func (p *PostgresUserRepository) FindByID(ctx context.Context, id string) (*doma
 }
 
 func (p *PostgresUserRepository) Update(ctx context.Context, user *domain.User) error {
-	query := `UPDATE users SET name = $1, email = $2, password_hash = $3,  role = $4, verified_at = $5 WHERE id = $5`
+	query := `UPDATE users SET name = $1, email = $2, password_hash = $3,  role = $4, verified_at = $5 WHERE id = $6`
 
 	commandTag, err := p.db.Exec(ctx, query,
 		user.Name(),

@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/muriloFlores/StoreManager/internal/core/domain"
+	"github.com/muriloFlores/StoreManager/internal/core/domain/jobs"
 	"github.com/muriloFlores/StoreManager/internal/core/ports"
 	"time"
 )
@@ -78,7 +79,7 @@ func (uc *RequestEmailChangeUseCase) Execute(ctx context.Context, actor *domain.
 		return err
 	}
 
-	confirmationJob := domain.EmailChangeConfirmationJobData{
+	confirmationJob := jobs.EmailChangeConfirmationJobData{
 		UserName:         user.Name(),
 		ConfirmationLink: "http://localhost/change-email?token=" + changeToken.Token,
 		ToEmail:          user.Email(),
@@ -88,7 +89,7 @@ func (uc *RequestEmailChangeUseCase) Execute(ctx context.Context, actor *domain.
 		return fmt.Errorf("internal error starting email change process: %w", err)
 	}
 
-	alertJob := &domain.SecurityNotificationJobData{
+	alertJob := &jobs.SecurityNotificationJobData{
 		UserName: user.Name(),
 		ToEmail:  user.Email(),
 		Message: fmt.Sprintf(`Recebemos uma solicitação para alterar seu email para 

@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/muriloFlores/StoreManager/internal/core/domain"
+	"github.com/muriloFlores/StoreManager/internal/core/domain/jobs"
 	"github.com/muriloFlores/StoreManager/internal/core/ports"
 )
 
@@ -21,7 +22,7 @@ func NewEmailProcessor(sender ports.NotificationSender, templateManager ports.Te
 }
 
 func (p *EmailProcessor) HandlePasswordReset(ctx context.Context, taskPayload []byte) error {
-	var payload domain.PasswordResetJobData
+	var payload jobs.PasswordResetJobData
 	if err := json.Unmarshal(taskPayload, &payload); err != nil {
 		return fmt.Errorf("unmarshal email password_reset payload: %w", err)
 	}
@@ -46,7 +47,7 @@ func (p *EmailProcessor) HandlePasswordReset(ctx context.Context, taskPayload []
 }
 
 func (p *EmailProcessor) HandleEmailChangeTask(ctx context.Context, taskPayload []byte) error {
-	var payload domain.EmailChangeConfirmationJobData
+	var payload jobs.EmailChangeConfirmationJobData
 	if err := json.Unmarshal(taskPayload, &payload); err != nil {
 		return fmt.Errorf("unmarshal email verification payload: %w", err)
 	}
@@ -64,6 +65,32 @@ func (p *EmailProcessor) HandleEmailChangeTask(ctx context.Context, taskPayload 
 	emailData := domain.EmailData{
 		To:       payload.ToEmail,
 		Subject:  "Confirmação de Alteração de Email - Store Manager",
+		BodyHTML: htmlBody,
+	}
+
+	return p.sender.Send(ctx, emailData)
+}
+
+func (p *EmailProcessor) HandleAccountVerification(ctx context.Context, taskPayload []byte) error {
+	var payload jobs.AccountVerificationJobData
+
+	if err := json.Unmarshal(taskPayload, &payload); err != nil {
+		return fmt.Errorf("unmarshal account verification payload: %w", err)
+	}
+
+	templateData := map[string]interface{}{
+		"UserName":         payload.UserName,
+		"VerificationLink": payload.VerificationLink,
+	}
+
+	htmlBody, err := p.templateManager.Render("account_verification.html", templateData)
+	if err != nil {
+		return fmt.Errorf("error in rendering account verification template: %w", err)
+	}
+
+	emailData := domain.EmailData{
+		To:       payload.ToEmail,
+		Subject:  "Verificação de Conta - Store Manager",
 		BodyHTML: htmlBody,
 	}
 

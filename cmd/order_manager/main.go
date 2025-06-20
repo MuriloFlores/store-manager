@@ -6,6 +6,7 @@ import (
 	"github.com/muriloFlores/StoreManager/infrastructure/security"
 	"github.com/muriloFlores/StoreManager/infrastructure/security/uuid_generator"
 	"github.com/muriloFlores/StoreManager/infrastructure/workers/email"
+	"github.com/muriloFlores/StoreManager/pkg/logger"
 	"log"
 	"net/http"
 	"os"
@@ -14,9 +15,8 @@ import (
 	"time"
 
 	"github.com/hibiken/asynq"
-	"github.com/muriloFlores/StoreManager/pkg/config" // Usando sua nova estrutura de pacotes
+	"github.com/muriloFlores/StoreManager/pkg/config"
 
-	// Adaptadores de Infraestrutura
 	"github.com/muriloFlores/StoreManager/infrastructure/db"
 	"github.com/muriloFlores/StoreManager/infrastructure/db/postgres_repository"
 	"github.com/muriloFlores/StoreManager/infrastructure/notifications"
@@ -27,13 +27,14 @@ import (
 
 	"github.com/muriloFlores/StoreManager/infrastructure/web/router"
 
-	// Casos de Uso do Core
 	"github.com/muriloFlores/StoreManager/internal/core/use_case/auth"
 	"github.com/muriloFlores/StoreManager/internal/core/use_case/user"
 )
 
 func main() {
 	log.Println("Iniciando a aplicação Store Manager...")
+
+	appLogs := logger.NewLogger()
 
 	cfg, err := config.LoadConfig("./")
 	if err != nil {
@@ -50,8 +51,9 @@ func main() {
 	defer dbpool.Close()
 
 	redisConnectionOpt := asynq.RedisClientOpt{Addr: cfg.RedisAddress}
+
 	userRepo := postgres_repository.NewPostgresUserRepository(dbpool)
-	actionTokenRepo := postgres_repository.NewActionTokenRepository(dbpool)
+	actionTokenRepo := postgres_repository.NewActionTokenRepository(dbpool, appLogs)
 	passwordHasher := security.NewPasswordHasher()
 	idGenerator := uuid_generator.NewUUIDGenerator()
 	tokenManager := jwt_manager.NewJWTGenerator(cfg.JWTSecret)
@@ -66,7 +68,7 @@ func main() {
 		log.Fatalf("FATAL: Falha ao carregar templates de email: %v", err)
 	}
 	emailSender := notifications.NewSmtpSender(cfg.SmtpHost, cfg.SmtpPort, cfg.SmtpSenderEmail, cfg.SmtpAppPassword)
-	taskEnqueuer := queue.NewTaskEnqueuer(redisConnectionOpt)
+	taskEnqueuer := queue.NewTaskEnqueuer(redisConnectionOpt, appLogs)
 
 	userUseCases := user.NewUserUseCases(
 		userRepo,
@@ -75,6 +77,7 @@ func main() {
 		cryptToken,
 		taskEnqueuer,
 		actionTokenRepo,
+		appLogs,
 	)
 
 	authUseCases := auth.NewAuthUseCases(
@@ -84,13 +87,14 @@ func main() {
 		actionTokenRepo,
 		cryptToken,
 		taskEnqueuer,
+		appLogs,
 	)
 
 	emailProcessor := email.NewEmailProcessor(emailSender, templateManager)
-	go email.RunTaskServer(redisConnectionOpt, emailProcessor)
+	go email.RunTaskServer(redisConnectionOpt, emailProcessor, appLogs)
 
 	userHandler := web_http.NewUserHandler(userUseCases)
-	authHandler := web_http.NewAuthHandler(authUseCases)
+	authHandler := web_http.NewAuthHandler(authUseCases, appLogs)
 	mainRouter := router.NewRouter(userHandler, authHandler, tokenManager)
 
 	server := &http.Server{
