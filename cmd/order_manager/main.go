@@ -51,8 +51,9 @@ func main() {
 	defer dbpool.Close()
 
 	redisConnectionOpt := asynq.RedisClientOpt{Addr: cfg.RedisAddress}
+
 	userRepo := postgres_repository.NewPostgresUserRepository(dbpool)
-	actionTokenRepo := postgres_repository.NewActionTokenRepository(dbpool)
+	actionTokenRepo := postgres_repository.NewActionTokenRepository(dbpool, appLogs)
 	passwordHasher := security.NewPasswordHasher()
 	idGenerator := uuid_generator.NewUUIDGenerator()
 	tokenManager := jwt_manager.NewJWTGenerator(cfg.JWTSecret)
@@ -86,13 +87,14 @@ func main() {
 		actionTokenRepo,
 		cryptToken,
 		taskEnqueuer,
+		appLogs,
 	)
 
 	emailProcessor := email.NewEmailProcessor(emailSender, templateManager)
 	go email.RunTaskServer(redisConnectionOpt, emailProcessor, appLogs)
 
 	userHandler := web_http.NewUserHandler(userUseCases)
-	authHandler := web_http.NewAuthHandler(authUseCases)
+	authHandler := web_http.NewAuthHandler(authUseCases, appLogs)
 	mainRouter := router.NewRouter(userHandler, authHandler, tokenManager)
 
 	server := &http.Server{
