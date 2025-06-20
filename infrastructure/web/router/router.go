@@ -21,6 +21,8 @@ func NewRouter(
 	r.HandleFunc("/create-user", userHandler.CreateUser).Methods(http.MethodPost)
 	r.HandleFunc("/login", authHandler.Login).Methods(http.MethodPost)
 
+	r.HandleFunc("/verify-account", authHandler.ConfirmAccount).Methods(http.MethodGet)
+
 	// --- Rotas Protegidas ---
 	api := r.PathPrefix("/api").Subrouter()
 	api.Use(middleware.AuthMiddleware(tokenManager))
