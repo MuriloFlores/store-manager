@@ -16,17 +16,21 @@ const (
 
 type taskEnqueuer struct {
 	client *asynq.Client
+	logger ports.Logger
 }
 
-func NewTaskEnqueuer(redisOpt asynq.RedisClientOpt) ports.TaskEnqueuer {
+func NewTaskEnqueuer(redisOpt asynq.RedisClientOpt, logger ports.Logger) ports.TaskEnqueuer {
 	return &taskEnqueuer{
 		client: asynq.NewClient(redisOpt),
 	}
 }
 
 func (t *taskEnqueuer) EnqueuePasswordReset(data *domain.PasswordResetJobData) error {
+	t.logger.InfoLevel("Enqueuing password reset task", map[string]interface{}{"user_name": data.UserName, "email": data.UserEmail})
+
 	payload, err := json.Marshal(data)
 	if err != nil {
+		t.logger.ErrorLevel("Failed to marshal password reset data", err, map[string]interface{}{"user_name": data.UserName, "email": data.UserEmail})
 		return fmt.Errorf("fail in marshal data: %w", err)
 	}
 
@@ -34,15 +38,20 @@ func (t *taskEnqueuer) EnqueuePasswordReset(data *domain.PasswordResetJobData) e
 
 	_, err = t.client.Enqueue(task)
 	if err != nil {
+		t.logger.ErrorLevel("Failed to enqueue password reset task", err, map[string]interface{}{"user_name": data.UserName, "email": data.UserEmail})
 		return fmt.Errorf("fail in enqueue password rest payload: %w", err)
 	}
 
+	t.logger.InfoLevel("Password reset task enqueued successfully", map[string]interface{}{"user_name": data.UserName, "email": data.UserEmail})
 	return nil
 }
 
 func (t *taskEnqueuer) EnqueueEmailChangeConfirmation(data *domain.EmailChangeConfirmationJobData) error {
+	t.logger.InfoLevel("Enqueuing email change confirmation task", map[string]interface{}{"user_name": data.UserName, "user_email": data.ToEmail})
+
 	payload, err := json.Marshal(data)
 	if err != nil {
+		t.logger.ErrorLevel("Failed to marshal email change confirmation data", err, map[string]interface{}{"user_name": data.UserName, "user_email": data.ToEmail})
 		return fmt.Errorf("fail in marshal data: %w", err)
 	}
 
@@ -50,15 +59,20 @@ func (t *taskEnqueuer) EnqueueEmailChangeConfirmation(data *domain.EmailChangeCo
 
 	_, err = t.client.Enqueue(task)
 	if err != nil {
+		t.logger.ErrorLevel("Failed to enqueue email change confirmation task", err, map[string]interface{}{"user_name": data.UserName, "user_email": data.ToEmail})
 		return fmt.Errorf("fail in enqueue email rest payload: %w", err)
 	}
 
+	t.logger.InfoLevel("Email change confirmation task enqueued successfully", map[string]interface{}{"user_name": data.UserName, "user_email": data.ToEmail})
 	return nil
 }
 
 func (t *taskEnqueuer) EnqueueSecurityNotification(data *domain.SecurityNotificationJobData) error {
+	t.logger.InfoLevel("Enqueuing security alert task", map[string]interface{}{"user_name": data.UserName, "user_email": data.ToEmail})
+
 	payload, err := json.Marshal(data)
 	if err != nil {
+		t.logger.ErrorLevel("Failed to marshal security alert data", err, map[string]interface{}{"user_name": data.UserName, "user_email": data.ToEmail})
 		return fmt.Errorf("fail in marshal data: %w", err)
 	}
 
@@ -66,8 +80,10 @@ func (t *taskEnqueuer) EnqueueSecurityNotification(data *domain.SecurityNotifica
 
 	_, err = t.client.Enqueue(task)
 	if err != nil {
+		t.logger.ErrorLevel("Failed to enqueue security notification task", err, map[string]interface{}{"user_name": data.UserName, "user_email": data.ToEmail})
 		return fmt.Errorf("fail in enqueue security notification payload: %w", err)
 	}
 
+	t.logger.InfoLevel("Security notification task enqueued successfully", map[string]interface{}{"user_name": data.UserName, "user_email": data.ToEmail})
 	return nil
 }
