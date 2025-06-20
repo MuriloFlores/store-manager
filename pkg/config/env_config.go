@@ -8,7 +8,6 @@ import (
 
 var Cfg *Config
 
-// A struct Config permanece a mesma
 type Config struct {
 	DBHost                   string `mapstructure:"DB_HOST"`
 	DBPort                   string `mapstructure:"DB_PORT"`
@@ -26,19 +25,12 @@ type Config struct {
 }
 
 func LoadConfig(path string) (*Config, error) {
-	viper.AddConfigPath(path)
-	viper.SetConfigName(".env")
-	viper.SetConfigType("env")
+	//viper.AddConfigPath(path)
+	//viper.SetConfigName(".env")
+	//viper.SetConfigType("env")
 
-	// Tentamos ler o arquivo .env, útil para desenvolvimento local sem Docker.
-	// No ambiente Docker, é normal que ele não seja encontrado.
-	viper.ReadInConfig()
+	//viper.ReadInConfig()
 
-	// --- BINDING EXPLÍCITO ---
-	// Esta é a parte que resolve o problema de forma definitiva.
-	// Dizemos ao Viper para ligar cada chave de configuração a uma variável de ambiente.
-	// viper.BindEnv("NOME_DA_CHAVE_NO_VIPER", "NOME_DA_VARIAVEL_DE_AMBIENTE")
-	// Se os nomes forem iguais, podemos passar apenas um argumento.
 	viper.BindEnv("DB_HOST")
 	viper.BindEnv("DB_PORT")
 	viper.BindEnv("DB_USER")
@@ -58,7 +50,6 @@ func LoadConfig(path string) (*Config, error) {
 		return nil, fmt.Errorf("não foi possível fazer unmarshal da configuração: %w", err)
 	}
 
-	// Mantemos a verificação para ter certeza
 	if cfg.DBUser == "" || cfg.DBPassword == "" || cfg.DBName == "" {
 		return nil, errors.New("variáveis de banco de dados essenciais (DB_USER, DB_PASSWORD, DB_NAME) não foram carregadas")
 	}
