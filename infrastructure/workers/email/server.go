@@ -46,7 +46,7 @@ func RunTaskServer(
 	)
 
 	mux.HandleFunc(
-		queue.TaskTypeEmailChange, // Supondo que a constante seja TaskTypeEmailChangeConfirmation
+		queue.TaskTypeEmailChange,
 		func(ctx context.Context, t *asynq.Task) error {
 			logger.InfoLevel("Processing task", map[string]interface{}{"task_payload": t.Payload(), "task_type": t.Type()})
 
@@ -59,6 +59,23 @@ func RunTaskServer(
 
 			logger.InfoLevel("Task processed successfully", map[string]interface{}{"task_payload": t.Payload(), "task_type": t.Type()})
 
+			return nil
+		},
+	)
+
+	mux.HandleFunc(
+		queue.TaskTypeEmailAccountVerification,
+		func(ctx context.Context, t *asynq.Task) error {
+			logger.InfoLevel("Processing task", map[string]interface{}{"task_type": t.Type()})
+
+			err := workerOpt.HandleAccountVerification(ctx, t.Payload())
+
+			if err != nil {
+				logger.ErrorLevel("Error processing task", err, map[string]interface{}{"task_payload": t.Payload(), "task_type": t.Type()})
+				return err
+			}
+
+			logger.InfoLevel("Task processed successfully", map[string]interface{}{"task_payload": t.Payload(), "task_type": t.Type()})
 			return nil
 		},
 	)

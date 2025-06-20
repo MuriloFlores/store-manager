@@ -1,11 +1,12 @@
 package ports
 
 import (
-	"github.com/muriloFlores/StoreManager/internal/core/domain"
+	"github.com/muriloFlores/StoreManager/internal/core/domain/jobs"
 )
 
 type TaskEnqueuer interface {
-	EnqueuePasswordReset(data *domain.PasswordResetJobData) error
-	EnqueueEmailChangeConfirmation(data *domain.EmailChangeConfirmationJobData) error
-	EnqueueSecurityNotification(data *domain.SecurityNotificationJobData) error
+	EnqueuePasswordReset(data *jobs.PasswordResetJobData) error
+	EnqueueEmailChangeConfirmation(data *jobs.EmailChangeConfirmationJobData) error
+	EnqueueSecurityNotification(data *jobs.SecurityNotificationJobData) error
+	EnqueueAccountVerification(data *jobs.AccountVerificationJobData) error
 }

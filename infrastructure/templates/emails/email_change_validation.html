@@ -46,21 +46,21 @@
 <body>
 <div class="container">
     <div class="header">
-        <h2>Confirmação de Email</h2>
+        <h2>Confirmação de Alteração de Email</h2>
     </div>
     <div class="content">
         <h3>Olá, {{.UserName}}!</h3>
         <p>
-            Recebemos uma solicitação para associar o endereço de email à sua conta no **Store Manager**.
+            Recebemos uma solicitação para alterar o endereço de email associado à sua conta no **Store Manager**.
         </p>
         <p>
-            Para confirmar que este é o seu email e finalizar a verificação, por favor, clique no botão abaixo. Este link de confirmação é válido por 30 minutos.
+            Para confirmar que este é o seu novo email e finalizar a alteração, por favor, clique no botão abaixo. Este link de confirmação é válido por 30 minutos.
         </p>
         <p style="text-align: center;">
-            <a href="{{.VerificationLink}}" class="button">Confirmar Email</a>
+            <a href="{{.ConfirmationLink}}" class="button">Confirmar Novo Email</a>
         </p>
         <p>
-            Se você não solicitou esta ação, pode ignorar este email com segurança.
+            Se você não solicitou esta alteração, pode ignorar este email com segurança. Um alerta já foi enviado para o seu endereço de email antigo.
         </p>
     </div>
     <div class="footer">

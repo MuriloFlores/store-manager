@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/muriloFlores/StoreManager/internal/core/domain"
+	"github.com/muriloFlores/StoreManager/internal/core/domain/jobs"
 	"github.com/muriloFlores/StoreManager/internal/core/ports"
 	"github.com/muriloFlores/StoreManager/internal/core/value_objects"
 	"time"
@@ -83,7 +84,7 @@ func (uc *CreateUserUseCase) Execute(ctx context.Context, name, email, password 
 	actionToken := &domain.ActionToken{
 		Token:     verificationTokenString,
 		UserID:    user.ID(),
-		Type:      domain.EmailConfirmation,
+		Type:      domain.AccountVerification,
 		ExpiresAt: time.Now().Add(time.Minute * 30),
 	}
 
@@ -92,13 +93,13 @@ func (uc *CreateUserUseCase) Execute(ctx context.Context, name, email, password 
 		return nil, err
 	}
 
-	jobData := &domain.EmailChangeConfirmationJobData{
+	jobData := &jobs.AccountVerificationJobData{
 		UserName:         user.Name(),
 		ToEmail:          user.Email(),
-		ConfirmationLink: "http://localhost/verify-account?token=" + actionToken.Token,
+		VerificationLink: "http://localhost:8080/verify-account?token=" + actionToken.Token,
 	}
 
-	if err = uc.taskEnqueuer.EnqueueEmailChangeConfirmation(jobData); err != nil {
+	if err = uc.taskEnqueuer.EnqueueAccountVerification(jobData); err != nil {
 		uc.logger.ErrorLevel("Error enqueuing email change confirmation task", err, map[string]interface{}{"user_id": id, "token": verificationTokenString})
 		return nil, err
 	}
