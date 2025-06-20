@@ -28,6 +28,8 @@ func NewRouter(
 	api.Use(middleware.AuthMiddleware(tokenManager))
 
 	api.HandleFunc("/auth/change-password", authHandler.ChangePassword).Methods(http.MethodPut)
+	api.HandleFunc("/auth/confirm-email", authHandler.ConfirmEmail).Methods(http.MethodPost)
+
 	api.HandleFunc("/user/{id}", userHandler.DeleteUser).Methods(http.MethodDelete)
 	api.HandleFunc("/user/{id}", userHandler.FindUserByID).Methods(http.MethodGet)
 	api.HandleFunc("/users", userHandler.FindUserByEmail).Methods(http.MethodGet).Queries("email", "{email}")
