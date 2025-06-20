@@ -76,6 +76,7 @@ func main() {
 		cryptToken,
 		taskEnqueuer,
 		actionTokenRepo,
+		appLogs,
 	)
 
 	authUseCases := auth.NewAuthUseCases(
