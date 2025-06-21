@@ -35,16 +35,23 @@ jobs:
       - name: Deploy to server
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} << 'EOF'
-          
             cd ${{ secrets.EC2_APP_DIR }}
           
-            docker pull muriloflores/order_manager:latest
-
-            docker run --rm --network host -v $(pwd)/infrastructure/db/migrations:/migrations \
+            echo "Waiting 15 seconds for Docker image to replicate..."
+            sleep 15
+          
+            echo "Downloading new image..."
+            docker pull ${{ secrets.DOCKERHUB_USERNAME }}/order_manager:latest
+          
+            echo "Performing database migrations...
+         
+            docker run --rm --env-file .env --network host -v $(pwd)/infrastructure/db/migrations:/migrations \
             migrate/migrate -path /migrations \
             -database "postgres://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}?sslmode=disable" up
-
+          
+            echo "Starting the application with Docker Compose..."
             docker compose -f docker-compose.prod.yml up -d --remove-orphans
           
+            echo "Cleaning up old images..."
             docker image prune -af
           EOF
