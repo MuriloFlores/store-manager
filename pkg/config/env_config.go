@@ -58,7 +58,7 @@ func LoadConfig(path string) (*Config, error) {
 	return Cfg, nil
 }
 func (c *Config) DatabaseURL() string {
-	return fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable",
+	return fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=require",
 		c.DBUser,
 		c.DBPassword,
 		c.DBHost,
