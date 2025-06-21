@@ -23,7 +23,7 @@ func NewAuthUseCases(
 	logger ports.Logger,
 ) *AuthUseCases {
 	return &AuthUseCases{
-		Login:                     NewLoginUserUseCase(userRepo, hasher, manager),
+		Login:                     NewLoginUserUseCase(userRepo, hasher, manager, logger),
 		ChangePassword:            NewChangePasswordUseCase(userRepo, hasher),
 		RequestPasswordReset:      NewRequestPasswordResetUseCase(userRepo, tokenRepo, tokenGen, taskEnqueuer),
 		ConfirmPasswordReset:      NewConfirmPasswordResetUseCase(userRepo, tokenRepo, hasher),

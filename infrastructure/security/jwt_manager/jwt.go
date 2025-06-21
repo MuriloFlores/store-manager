@@ -27,7 +27,7 @@ func (j *jwtGenerator) Generate(identity *domain.Identity) (string, error) {
 		Role:   string(identity.Role),
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(expirationTime),
-			Issuer:    "order_manager",
+			Issuer:    "muriloflores.xyz",
 		},
 	}
 
