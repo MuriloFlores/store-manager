@@ -20,7 +20,7 @@ func NewRouter(
 	// --- Rotas Públicas ---
 	r.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte("Bem-vindo à Store Manager API!"))
+		w.Write([]byte("01101000 01101001 01101100 01101100 00100000 01100100 01100101 01100001 01101110 00100000 11101001 00100000 01110110 01101001 01100001 01100100 01101111 "))
 	})
 
 	r.HandleFunc("/create-user", userHandler.CreateUser).Methods(http.MethodPost)
