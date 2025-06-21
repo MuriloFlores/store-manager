@@ -62,7 +62,7 @@ func (uc *RequestAccountValidationUseCase) Execute(ctx context.Context, userID s
 	jobData := &jobs.AccountVerificationJobData{
 		UserName:         user.Name(),
 		ToEmail:          user.Email(),
-		VerificationLink: "https://muriloflores.xyz/auth/verify-account?token=" + verificationTokenString,
+		VerificationLink: "https://muriloflores.xyz/verify-account?token=" + actionToken.Token,
 	}
 
 	if err = uc.taskEnqueuer.EnqueueAccountVerification(jobData); err != nil {
