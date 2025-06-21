@@ -62,7 +62,7 @@ func (uc *RequestPasswordResetUseCase) Execute(ctx context.Context, email string
 	jobData := jobs.PasswordResetJobData{
 		UserName:  user.Name(),
 		UserEmail: user.Email(),
-		ResetLink: "https://muriloflores.xyz/auth/reset-password?token=" + resetToken.Token,
+		ResetLink: "https://muriloflores.xyz/reset-password?token=" + resetToken.Token,
 	}
 
 	if err = uc.taskEnqueuer.EnqueuePasswordReset(&jobData); err != nil {

@@ -43,7 +43,7 @@ func (uc *UpdateUserUseCase) Execute(ctx context.Context, actor *domain.Identity
 	if params.Role != nil {
 		newRole := value_objects.Role(*params.Role)
 
-		if err = uc.canChangeRole(actor, targetUser, newRole); err != nil {
+		if err = uc.canChangeRole(actor, targetUser, newRole, ctx); err != nil {
 			return nil, err
 		}
 
@@ -59,14 +59,14 @@ func (uc *UpdateUserUseCase) Execute(ctx context.Context, actor *domain.Identity
 	return targetUser, nil
 }
 
-func (uc *UpdateUserUseCase) canChangeRole(actor *domain.Identity, targetUser *domain.User, newRole value_objects.Role) error {
+func (uc *UpdateUserUseCase) canChangeRole(actor *domain.Identity, targetUser *domain.User, newRole value_objects.Role, ctx context.Context) error {
 	actorRole := actor.Role
 	targetRole := targetUser.Role()
 
 	switch actorRole {
 	case value_objects.Admin:
-		if actor.UserID == targetUser.ID() && newRole == value_objects.Admin {
-			count, err := uc.userRepository.CountAdmins(context.Background())
+		if actor.UserID == targetUser.ID() && newRole != value_objects.Admin {
+			count, err := uc.userRepository.CountAdmins(ctx)
 			if err != nil {
 				return err
 			}
@@ -81,15 +81,15 @@ func (uc *UpdateUserUseCase) canChangeRole(actor *domain.Identity, targetUser *d
 
 	case value_objects.Manager:
 		if targetRole == value_objects.Manager || targetRole == value_objects.Admin {
-			return &domain.ErrForbidden{Action: "alterar o cargo de um manager ou admin"}
+			return &domain.ErrForbidden{Action: "attempt to change an manager or admin"}
 		}
 
 		if targetRole == value_objects.Client {
-			return &domain.ErrForbidden{Action: "alterar o cargo de um cliente"}
+			return &domain.ErrForbidden{Action: "attempt to change an client"}
 		}
 
 		if newRole == value_objects.Admin || newRole == value_objects.Manager {
-			return &domain.ErrForbidden{Action: "promover um usuário para manager ou admin"}
+			return &domain.ErrForbidden{Action: "attempt to change a user to admin or manager role"}
 		}
 
 		return nil

@@ -122,3 +122,47 @@ func (h *UserHandler) FindUserByEmail(w http.ResponseWriter, r *http.Request) {
 
 	respondWithJSON(w, http.StatusOK, response)
 }
+
+func (h *UserHandler) UpdateUser(w http.ResponseWriter, r *http.Request) {
+	actorIdentity, ok := r.Context().Value(middleware.UserIdentityKey).(*domain.Identity)
+	if !ok {
+		web_errors.NewInternalServerError("user service not found in context").Send(w)
+		return
+	}
+
+	vars := mux.Vars(r)
+	targetID, ok := vars["id"]
+
+	var req dto.UpdateUserRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		web_errors.NewBadRequestError("invalid json body").Send(w)
+		return
+	}
+
+	if err := validation.Validate.Struct(&req); err != nil {
+		restErr := validation.TranslateError(err)
+		restErr.Send(w)
+		return
+	}
+
+	params := user.UpdateUserParams{
+		Name: req.Name,
+		Role: req.Role,
+	}
+
+	responseUser, err := h.useCases.Update.Execute(r.Context(), actorIdentity, targetID, params)
+
+	if err != nil {
+		web.HandleError(w, err)
+		return
+	}
+
+	response := dto.UserResponse{
+		ID:    responseUser.ID(),
+		Name:  responseUser.Name(),
+		Email: responseUser.Email(),
+		Role:  responseUser.Role(),
+	}
+
+	respondWithJSON(w, http.StatusOK, response)
+}
