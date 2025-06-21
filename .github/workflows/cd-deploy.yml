@@ -35,22 +35,27 @@ jobs:
       - name: Deploy to server
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} << 'EOF'
+            # Navigate to the correct application directory
             cd ${{ secrets.EC2_APP_DIR }}
           
-            echo "Waiting 20 seconds for Docker image to replicate..."
+            echo "Waiting 20 seconds for the Docker image to replicate..."
             sleep 20
           
-            echo "Downloading new image..."
-            docker pull ${{ secrets.DOCKERHUB_USERNAME }}/order_manager:latest
+            echo "Downloading the new image from Docker Hub..."
+            docker pull ${{ secrets.DOCKERHUB_USERNAME }}/order-manager:latest
           
+            # Load variables from the .env file into the shell environment
             echo "Loading production environment variables..."
             export $(grep -v '^#' .env | xargs)
+
+            # Build the database URL in a separate variable for robustness
+            echo "Building the database URL for migration..."
+            DATABASE_URL="postgres://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}?sslmode=disable"
           
-            echo "Performing database migrations...
-         
-            docker run --rm --env-file .env --network host -v $(pwd)/infrastructure/db/migrations:/migrations \
-            migrate/migrate -path /migrations \
-            -database "postgres://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}?sslmode=disable" up
+            # Run the migration using the variable, properly quoted
+            echo "Running database migrations..."
+            docker run --rm --network host -v $(pwd)/infrastructure/db/migrations:/migrations \
+            migrate/migrate -path /migrations -database "${DATABASE_URL}" up
           
             echo "Starting the application with Docker Compose..."
             docker compose -f docker-compose.prod.yml up -d --remove-orphans
