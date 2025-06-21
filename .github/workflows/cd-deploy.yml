@@ -20,6 +20,26 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
+      - name: Debug
+        run: |
+          echo "DockerHub Username: ${{ secrets.DOCKERHUB_USERNAME }}"
+          echo "EC2 Host: ${{ secrets.EC2_HOST }}"
+          echo "EC2 Username: ${{ secrets.EC2_USERNAME }}"
+          echo "EC2 App Directory: ${{ secrets.EC2_APP_DIR }}"
+          echo "DB User: ${{ secrets.DB_USER }}"
+          echo "DB Password: ${{ secrets.DB_PASSWORD }}"
+          echo "DB Host: ${{ secrets.DB_HOST }}"
+          echo "DB Port: ${{ secrets.DB_PORT }}"
+          echo "DB Name: ${{ secrets.DB_NAME }}"
+          
+          echo "=================================================="
+          echo "== list workspace files =="
+          ls -laR
+          echo "=================================================="
+          echo "== show content =="
+          cat ./.github/workflows/cd-deploy.yml
+          echo "=================================================="
+
       - name: build and push Docker image
         uses: docker/build-push-action@v5
         with:
