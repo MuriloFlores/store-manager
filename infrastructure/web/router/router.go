@@ -18,6 +18,11 @@ func NewRouter(
 	r := mux.NewRouter()
 
 	// --- Rotas Públicas ---
+	r.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("Bem-vindo à Store Manager API!"))
+	})
+
 	r.HandleFunc("/create-user", userHandler.CreateUser).Methods(http.MethodPost)
 	r.HandleFunc("/login", authHandler.Login).Methods(http.MethodPost)
 
