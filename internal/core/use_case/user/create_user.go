@@ -5,20 +5,20 @@ import (
 	"errors"
 	"fmt"
 	"github.com/muriloFlores/StoreManager/internal/core/domain"
-	"github.com/muriloFlores/StoreManager/internal/core/domain/jobs"
 	"github.com/muriloFlores/StoreManager/internal/core/ports"
+	"github.com/muriloFlores/StoreManager/internal/core/use_case/auth"
 	"github.com/muriloFlores/StoreManager/internal/core/value_objects"
-	"time"
 )
 
 type CreateUserUseCase struct {
-	userRepository ports.UserRepository
-	hasher         ports.PasswordHasher
-	generator      ports.IDGenerator
-	tokenGenerator ports.SecureTokenGenerator
-	taskEnqueuer   ports.TaskEnqueuer
-	tokenRepo      ports.ActionTokenRepository
-	logger         ports.Logger
+	userRepository    ports.UserRepository
+	hasher            ports.PasswordHasher
+	generator         ports.IDGenerator
+	tokenGenerator    ports.SecureTokenGenerator
+	taskEnqueuer      ports.TaskEnqueuer
+	tokenRepo         ports.ActionTokenRepository
+	logger            ports.Logger
+	accountValidation auth.RequestAccountValidationUseCase //não tenho certeza se isso foi importado corretamente, no sentido de uma arquitetura limpa, talvez seja melhor criar uma nova port para isso
 }
 
 func NewCreateUserUseCase(
@@ -29,15 +29,17 @@ func NewCreateUserUseCase(
 	taskEnqueuer ports.TaskEnqueuer,
 	tokenRepo ports.ActionTokenRepository,
 	logger ports.Logger,
+	accountValidation auth.RequestAccountValidationUseCase,
 ) *CreateUserUseCase {
 	return &CreateUserUseCase{
-		userRepository: userRepository,
-		hasher:         hasher,
-		generator:      generator,
-		tokenGenerator: tokenGenerator,
-		taskEnqueuer:   taskEnqueuer,
-		tokenRepo:      tokenRepo,
-		logger:         logger,
+		userRepository:    userRepository,
+		hasher:            hasher,
+		generator:         generator,
+		tokenGenerator:    tokenGenerator,
+		taskEnqueuer:      taskEnqueuer,
+		tokenRepo:         tokenRepo,
+		logger:            logger,
+		accountValidation: accountValidation,
 	}
 }
 
@@ -75,32 +77,8 @@ func (uc *CreateUserUseCase) Execute(ctx context.Context, name, email, password 
 		return nil, err
 	}
 
-	verificationTokenString, err := uc.tokenGenerator.Generate()
-	if err != nil {
-		uc.logger.ErrorLevel("Error generating verification token", err, map[string]interface{}{"user_id": id})
-		return nil, err
-	}
-
-	actionToken := &domain.ActionToken{
-		Token:     verificationTokenString,
-		UserID:    user.ID(),
-		Type:      domain.AccountVerification,
-		ExpiresAt: time.Now().Add(time.Minute * 30),
-	}
-
-	if err = uc.tokenRepo.Create(ctx, actionToken); err != nil {
-		uc.logger.ErrorLevel("Error saving action token to repository", err, map[string]interface{}{"user_id": id, "token": verificationTokenString})
-		return nil, err
-	}
-
-	jobData := &jobs.AccountVerificationJobData{
-		UserName:         user.Name(),
-		ToEmail:          user.Email(),
-		VerificationLink: "http://localhost:8080/verify-account?token=" + actionToken.Token,
-	}
-
-	if err = uc.taskEnqueuer.EnqueueAccountVerification(jobData); err != nil {
-		uc.logger.ErrorLevel("Error enqueuing email change confirmation task", err, map[string]interface{}{"user_id": id, "token": verificationTokenString})
+	if err = uc.accountValidation.Execute(ctx, user.ID()); err != nil {
+		uc.logger.ErrorLevel("Error requesting account validation", err, map[string]interface{}{"user_id": id})
 		return nil, err
 	}
 

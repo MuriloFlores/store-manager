@@ -19,6 +19,7 @@ func NewUserUseCases(
 	taskEnqueuer ports.TaskEnqueuer,
 	tokenRepo ports.ActionTokenRepository,
 	logger ports.Logger,
+
 ) *UserUseCases {
 	return &UserUseCases{
 		Create: NewCreateUserUseCase(userRepo, hasher, generator, tokenGenerator, taskEnqueuer, tokenRepo, logger),
