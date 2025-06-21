@@ -70,16 +70,6 @@ func main() {
 	emailSender := notifications.NewSmtpSender(cfg.SmtpHost, cfg.SmtpPort, cfg.SmtpSenderEmail, cfg.SmtpAppPassword)
 	taskEnqueuer := queue.NewTaskEnqueuer(redisConnectionOpt, appLogs)
 
-	userUseCases := user.NewUserUseCases(
-		userRepo,
-		passwordHasher,
-		idGenerator,
-		cryptToken,
-		taskEnqueuer,
-		actionTokenRepo,
-		appLogs,
-	)
-
 	authUseCases := auth.NewAuthUseCases(
 		userRepo,
 		passwordHasher,
@@ -88,6 +78,17 @@ func main() {
 		cryptToken,
 		taskEnqueuer,
 		appLogs,
+	)
+
+	userUseCases := user.NewUserUseCases(
+		userRepo,
+		passwordHasher,
+		idGenerator,
+		cryptToken,
+		taskEnqueuer,
+		actionTokenRepo,
+		appLogs,
+		*authUseCases.RequestAccountValidationUseCase, // realmente acho que isso esta pessimo, mas não sei como resolver
 	)
 
 	emailProcessor := email.NewEmailProcessor(emailSender, templateManager)
