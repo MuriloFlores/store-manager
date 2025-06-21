@@ -37,11 +37,14 @@ jobs:
           ssh -o StrictHostKeyChecking=no ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} << 'EOF'
             cd ${{ secrets.EC2_APP_DIR }}
           
-            echo "Waiting 15 seconds for Docker image to replicate..."
-            sleep 15
+            echo "Waiting 20 seconds for Docker image to replicate..."
+            sleep 20
           
             echo "Downloading new image..."
             docker pull ${{ secrets.DOCKERHUB_USERNAME }}/order_manager:latest
+          
+            echo "Loading production environment variables..."
+            export $(grep -v '^#' .env | xargs)
           
             echo "Performing database migrations...
          
