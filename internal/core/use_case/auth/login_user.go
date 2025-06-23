@@ -5,16 +5,17 @@ import (
 	"fmt"
 	"github.com/muriloFlores/StoreManager/internal/core/domain"
 	"github.com/muriloFlores/StoreManager/internal/core/ports"
+	"github.com/muriloFlores/StoreManager/internal/core/ports/repositories"
 )
 
 type LoginUserUseCase struct {
-	userRepository ports.UserRepository
+	userRepository repositories.UserRepository
 	hasher         ports.PasswordHasher
 	tokenManager   ports.TokenManager
 	logger         ports.Logger
 }
 
-func NewLoginUserUseCase(userRepository ports.UserRepository, hasher ports.PasswordHasher, tokenManager ports.TokenManager, logger ports.Logger) *LoginUserUseCase {
+func NewLoginUserUseCase(userRepository repositories.UserRepository, hasher ports.PasswordHasher, tokenManager ports.TokenManager, logger ports.Logger) *LoginUserUseCase {
 	return &LoginUserUseCase{
 		userRepository: userRepository,
 		hasher:         hasher,

@@ -3,14 +3,14 @@ package user
 import (
 	"context"
 	"github.com/muriloFlores/StoreManager/internal/core/domain"
-	"github.com/muriloFlores/StoreManager/internal/core/ports"
+	"github.com/muriloFlores/StoreManager/internal/core/ports/repositories"
 )
 
 type FindUserUseCase struct {
-	userRepository ports.UserRepository
+	userRepository repositories.UserRepository
 }
 
-func NewFindUserUseCase(userRepository ports.UserRepository) *FindUserUseCase {
+func NewFindUserUseCase(userRepository repositories.UserRepository) *FindUserUseCase {
 	return &FindUserUseCase{userRepository: userRepository}
 }
 

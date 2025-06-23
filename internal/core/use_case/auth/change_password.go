@@ -5,15 +5,16 @@ import (
 	"fmt"
 	"github.com/muriloFlores/StoreManager/internal/core/domain"
 	"github.com/muriloFlores/StoreManager/internal/core/ports"
+	"github.com/muriloFlores/StoreManager/internal/core/ports/repositories"
 )
 
 type ChangePasswordUseCase struct {
-	userRepo     ports.UserRepository
+	userRepo     repositories.UserRepository
 	hasher       ports.PasswordHasher
 	taskEnqueuer ports.TaskEnqueuer
 }
 
-func NewChangePasswordUseCase(userRepo ports.UserRepository, hasher ports.PasswordHasher) *ChangePasswordUseCase {
+func NewChangePasswordUseCase(userRepo repositories.UserRepository, hasher ports.PasswordHasher) *ChangePasswordUseCase {
 	return &ChangePasswordUseCase{
 		userRepo: userRepo,
 		hasher:   hasher,

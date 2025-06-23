@@ -4,15 +4,16 @@ import (
 	"context"
 	"github.com/muriloFlores/StoreManager/internal/core/domain"
 	"github.com/muriloFlores/StoreManager/internal/core/ports"
+	"github.com/muriloFlores/StoreManager/internal/core/ports/repositories"
 )
 
 type ConfirmUserEmailUseCase struct {
-	userRepo  ports.UserRepository
-	tokenRepo ports.ActionTokenRepository
+	userRepo  repositories.UserRepository
+	tokenRepo repositories.ActionTokenRepository
 	logger    ports.Logger
 }
 
-func NewConfirmUserEmailUseCase(userRepo ports.UserRepository, tokenRepo ports.ActionTokenRepository, logger ports.Logger) *ConfirmUserEmailUseCase {
+func NewConfirmUserEmailUseCase(userRepo repositories.UserRepository, tokenRepo repositories.ActionTokenRepository, logger ports.Logger) *ConfirmUserEmailUseCase {
 	return &ConfirmUserEmailUseCase{
 		userRepo:  userRepo,
 		tokenRepo: tokenRepo,

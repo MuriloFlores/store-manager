@@ -5,20 +5,21 @@ import (
 	"github.com/muriloFlores/StoreManager/internal/core/domain"
 	"github.com/muriloFlores/StoreManager/internal/core/domain/jobs"
 	"github.com/muriloFlores/StoreManager/internal/core/ports"
+	"github.com/muriloFlores/StoreManager/internal/core/ports/repositories"
 	"time"
 )
 
 type RequestAccountValidationUseCase struct {
-	userRepo       ports.UserRepository
-	tokenRepo      ports.ActionTokenRepository
+	userRepo       repositories.UserRepository
+	tokenRepo      repositories.ActionTokenRepository
 	tokenGenerator ports.SecureTokenGenerator
 	taskEnqueuer   ports.TaskEnqueuer
 	logger         ports.Logger
 }
 
 func NewRequestAccountValidationUseCase(
-	userRepo ports.UserRepository,
-	tokenRepo ports.ActionTokenRepository,
+	userRepo repositories.UserRepository,
+	tokenRepo repositories.ActionTokenRepository,
 	tokenGenerator ports.SecureTokenGenerator,
 	taskEnqueuer ports.TaskEnqueuer,
 	logger ports.Logger,

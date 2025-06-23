@@ -5,17 +5,18 @@ import (
 	"fmt"
 	"github.com/muriloFlores/StoreManager/internal/core/domain"
 	"github.com/muriloFlores/StoreManager/internal/core/ports"
+	"github.com/muriloFlores/StoreManager/internal/core/ports/repositories"
 )
 
 type ConfirmPasswordResetUseCase struct {
-	userRepo  ports.UserRepository
-	tokenRepo ports.ActionTokenRepository
+	userRepo  repositories.UserRepository
+	tokenRepo repositories.ActionTokenRepository
 	hasher    ports.PasswordHasher
 }
 
 func NewConfirmPasswordResetUseCase(
-	userRepo ports.UserRepository,
-	tokenRepo ports.ActionTokenRepository,
+	userRepo repositories.UserRepository,
+	tokenRepo repositories.ActionTokenRepository,
 	hasher ports.PasswordHasher,
 ) *ConfirmPasswordResetUseCase {
 	return &ConfirmPasswordResetUseCase{

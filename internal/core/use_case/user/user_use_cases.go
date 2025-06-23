@@ -2,6 +2,7 @@ package user
 
 import (
 	"github.com/muriloFlores/StoreManager/internal/core/ports"
+	"github.com/muriloFlores/StoreManager/internal/core/ports/repositories"
 	"github.com/muriloFlores/StoreManager/internal/core/use_case/auth"
 )
 
@@ -13,12 +14,12 @@ type UserUseCases struct {
 }
 
 func NewUserUseCases(
-	userRepo ports.UserRepository,
+	userRepo repositories.UserRepository,
 	hasher ports.PasswordHasher,
 	generator ports.IDGenerator,
 	tokenGenerator ports.SecureTokenGenerator,
 	taskEnqueuer ports.TaskEnqueuer,
-	tokenRepo ports.ActionTokenRepository,
+	tokenRepo repositories.ActionTokenRepository,
 	logger ports.Logger,
 	accountValidation auth.RequestAccountValidationUseCase,
 

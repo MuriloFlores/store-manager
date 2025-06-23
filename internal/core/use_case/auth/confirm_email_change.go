@@ -3,17 +3,17 @@ package auth
 import (
 	"context"
 	"github.com/muriloFlores/StoreManager/internal/core/domain"
-	"github.com/muriloFlores/StoreManager/internal/core/ports"
+	"github.com/muriloFlores/StoreManager/internal/core/ports/repositories"
 )
 
 type ConfirmEmailChangeUseCase struct {
-	userRepo  ports.UserRepository
-	tokenRepo ports.ActionTokenRepository
+	userRepo  repositories.UserRepository
+	tokenRepo repositories.ActionTokenRepository
 }
 
 func NewConfirmEmailChangeUseCase(
-	userRepo ports.UserRepository,
-	tokenRepo ports.ActionTokenRepository,
+	userRepo repositories.UserRepository,
+	tokenRepo repositories.ActionTokenRepository,
 ) *ConfirmEmailChangeUseCase {
 	return &ConfirmEmailChangeUseCase{
 		userRepo:  userRepo,

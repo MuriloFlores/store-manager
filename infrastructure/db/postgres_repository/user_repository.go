@@ -8,7 +8,7 @@ import (
 	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/muriloFlores/StoreManager/internal/core/domain"
-	"github.com/muriloFlores/StoreManager/internal/core/ports"
+	"github.com/muriloFlores/StoreManager/internal/core/ports/repositories"
 	"github.com/muriloFlores/StoreManager/internal/core/value_objects"
 	"time"
 )
@@ -17,7 +17,7 @@ type PostgresUserRepository struct {
 	db *pgxpool.Pool
 }
 
-func NewPostgresUserRepository(db *pgxpool.Pool) ports.UserRepository {
+func NewPostgresUserRepository(db *pgxpool.Pool) repositories.UserRepository {
 	return &PostgresUserRepository{db: db}
 }
 
@@ -66,7 +66,7 @@ func (p *PostgresUserRepository) FindByEmail(ctx context.Context, email string) 
 		return nil, fmt.Errorf("error finding user by email: %w", err)
 	}
 
-	user := domain.HydrateUser(id, name, emailScan, passwordHash, role, verifiedAt)
+	user := domain.HydrateUser(id, name, emailScan, passwordHash, role, verifiedAt, nil)
 
 	return user, nil
 }
@@ -88,7 +88,7 @@ func (p *PostgresUserRepository) FindByID(ctx context.Context, id string) (*doma
 		return nil, fmt.Errorf("error finding user by id: %w", err)
 	}
 
-	user := domain.HydrateUser(idScan, name, email, passwordHash, role, verifiedAt)
+	user := domain.HydrateUser(idScan, name, email, passwordHash, role, verifiedAt, nil)
 
 	return user, nil
 }
@@ -150,4 +150,27 @@ func (p *PostgresUserRepository) CountAdmins(ctx context.Context) (int, error) {
 	}
 
 	return count, nil
+}
+
+func (p *PostgresUserRepository) FindByEmailIncludingDeleted(ctx context.Context, email string) (*domain.User, error) {
+	var id, name, passwordHash string
+	var role value_objects.Role
+	var verifiedAt, deletedAt *time.Time
+
+	query := `SELECT id, name, email, password_hash, role, verified_at, deleted_at FROM users WHERE email = $1`
+
+	err := p.db.QueryRow(ctx, query, email).Scan(
+		&id, &name, &email, &passwordHash, &role, &verifiedAt, &deletedAt,
+	)
+
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, &domain.ErrNotFound{ResourceName: "user", ResourceID: email}
+		}
+		return nil, fmt.Errorf("error finding user by email including deleted: %w", err)
+	}
+
+	user := domain.HydrateUser(id, name, email, passwordHash, role, verifiedAt, deletedAt)
+
+	return user, nil
 }
