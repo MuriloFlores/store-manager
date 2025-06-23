@@ -20,7 +20,7 @@ func NewRouter(
 	// --- Rotas Públicas ---
 	r.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte("Bem-vindo à StoreManager API!"))
+		w.Write([]byte("Guthinery?"))
 	})
 
 	// --- Rotas de Autenticação e Criação de Usuários ---

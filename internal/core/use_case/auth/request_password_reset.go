@@ -6,19 +6,20 @@ import (
 	"github.com/muriloFlores/StoreManager/internal/core/domain"
 	"github.com/muriloFlores/StoreManager/internal/core/domain/jobs"
 	"github.com/muriloFlores/StoreManager/internal/core/ports"
+	"github.com/muriloFlores/StoreManager/internal/core/ports/repositories"
 	"time"
 )
 
 type RequestPasswordResetUseCase struct {
-	userRepo       ports.UserRepository
-	tokenRepo      ports.ActionTokenRepository
+	userRepo       repositories.UserRepository
+	tokenRepo      repositories.ActionTokenRepository
 	tokenGenerator ports.SecureTokenGenerator
 	taskEnqueuer   ports.TaskEnqueuer
 }
 
 func NewRequestPasswordResetUseCase(
-	userRepo ports.UserRepository,
-	tokenRepo ports.ActionTokenRepository,
+	userRepo repositories.UserRepository,
+	tokenRepo repositories.ActionTokenRepository,
 	tokenGenerator ports.SecureTokenGenerator,
 	taskEnqueuer ports.TaskEnqueuer,
 ) *RequestPasswordResetUseCase {

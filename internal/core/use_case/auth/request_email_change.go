@@ -7,20 +7,21 @@ import (
 	"github.com/muriloFlores/StoreManager/internal/core/domain"
 	"github.com/muriloFlores/StoreManager/internal/core/domain/jobs"
 	"github.com/muriloFlores/StoreManager/internal/core/ports"
+	"github.com/muriloFlores/StoreManager/internal/core/ports/repositories"
 	"time"
 )
 
 type RequestEmailChangeUseCase struct {
-	userRepo       ports.UserRepository
-	tokenRepo      ports.ActionTokenRepository
+	userRepo       repositories.UserRepository
+	tokenRepo      repositories.ActionTokenRepository
 	tokenGenerator ports.SecureTokenGenerator
 	hasher         ports.PasswordHasher
 	taskEnqueuer   ports.TaskEnqueuer
 }
 
 func NewRequestEmailChangeUseCase(
-	userRepo ports.UserRepository,
-	tokenRepo ports.ActionTokenRepository,
+	userRepo repositories.UserRepository,
+	tokenRepo repositories.ActionTokenRepository,
 	tokenGenerator ports.SecureTokenGenerator,
 	taskEnqueuer ports.TaskEnqueuer,
 	hasher ports.PasswordHasher,

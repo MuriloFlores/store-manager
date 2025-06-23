@@ -4,11 +4,12 @@ import (
 	"context"
 	"github.com/muriloFlores/StoreManager/internal/core/domain"
 	"github.com/muriloFlores/StoreManager/internal/core/ports"
+	"github.com/muriloFlores/StoreManager/internal/core/ports/repositories"
 	"github.com/muriloFlores/StoreManager/internal/core/value_objects"
 )
 
 type UpdateUserUseCase struct {
-	userRepository ports.UserRepository
+	userRepository repositories.UserRepository
 	hasher         ports.PasswordHasher
 }
 
@@ -17,7 +18,7 @@ type UpdateUserParams struct {
 	Role *string
 }
 
-func NewUpdateUserUseCase(userRepository ports.UserRepository, hasher ports.PasswordHasher) *UpdateUserUseCase {
+func NewUpdateUserUseCase(userRepository repositories.UserRepository, hasher ports.PasswordHasher) *UpdateUserUseCase {
 	return &UpdateUserUseCase{
 		userRepository: userRepository,
 		hasher:         hasher,

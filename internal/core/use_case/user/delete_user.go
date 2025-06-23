@@ -3,15 +3,15 @@ package user
 import (
 	"context"
 	"github.com/muriloFlores/StoreManager/internal/core/domain"
-	"github.com/muriloFlores/StoreManager/internal/core/ports"
+	"github.com/muriloFlores/StoreManager/internal/core/ports/repositories"
 	"github.com/muriloFlores/StoreManager/internal/core/value_objects"
 )
 
 type DeleteUserUseCase struct {
-	userRepository ports.UserRepository
+	userRepository repositories.UserRepository
 }
 
-func NewDeleteUserUseCase(userRepository ports.UserRepository) *DeleteUserUseCase {
+func NewDeleteUserUseCase(userRepository repositories.UserRepository) *DeleteUserUseCase {
 	return &DeleteUserUseCase{userRepository: userRepository}
 }
 

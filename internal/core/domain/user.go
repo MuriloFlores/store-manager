@@ -12,6 +12,7 @@ type User struct {
 	password   string
 	role       value_objects.Role
 	verifiedAt *time.Time
+	deletedAt  *time.Time
 }
 
 func NewUser(id string, name, email, password string, role value_objects.Role) (*User, error) {
@@ -38,7 +39,7 @@ func NewUser(id string, name, email, password string, role value_objects.Role) (
 	}, nil
 }
 
-func HydrateUser(id, name, email, passwordHash string, role value_objects.Role, verifiedAt *time.Time) *User {
+func HydrateUser(id, name, email, passwordHash string, role value_objects.Role, verifiedAt, deletedAt *time.Time) *User {
 	return &User{
 		id:         id,
 		name:       name,
@@ -46,6 +47,7 @@ func HydrateUser(id, name, email, passwordHash string, role value_objects.Role, 
 		password:   passwordHash,
 		role:       role,
 		verifiedAt: verifiedAt,
+		deletedAt:  deletedAt,
 	}
 }
 
@@ -73,6 +75,10 @@ func (u *User) IsVerified() bool {
 	return u.verifiedAt != nil
 }
 
+func (u *User) IsDeleted() bool {
+	return u.deletedAt != nil
+}
+
 func (u *User) VerifiedAt() *time.Time {
 	return u.verifiedAt
 }
@@ -93,14 +99,6 @@ func (u *User) ChangeEmail(email string) error {
 	return nil
 }
 
-func (u *User) SetPasswordHash(hashedPassword string) error {
-	if err := validatePassword(hashedPassword); err != nil {
-		return err
-	}
-	u.password = hashedPassword
-	return nil
-}
-
 func (u *User) ChangeRole(newRole value_objects.Role) error {
 	if !newRole.IsValid() {
 		return &ErrInvalidInput{FieldName: "role", Reason: "invalid role"}
@@ -109,10 +107,22 @@ func (u *User) ChangeRole(newRole value_objects.Role) error {
 	return nil
 }
 
+func (u *User) SetPasswordHash(hashedPassword string) error {
+	if err := validatePassword(hashedPassword); err != nil {
+		return err
+	}
+	u.password = hashedPassword
+	return nil
+}
+
 func (u *User) MarkAsVerified() {
 	now := time.Now().UTC()
 
 	u.verifiedAt = &now
+}
+
+func (u *User) Reactivate() {
+	u.deletedAt = nil
 }
 
 func validatePassword(password string) error {

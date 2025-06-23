@@ -1,6 +1,9 @@
 package auth
 
-import "github.com/muriloFlores/StoreManager/internal/core/ports"
+import (
+	"github.com/muriloFlores/StoreManager/internal/core/ports"
+	"github.com/muriloFlores/StoreManager/internal/core/ports/repositories"
+)
 
 type AuthUseCases struct {
 	Login                           *LoginUserUseCase
@@ -15,10 +18,10 @@ type AuthUseCases struct {
 }
 
 func NewAuthUseCases(
-	userRepo ports.UserRepository,
+	userRepo repositories.UserRepository,
 	hasher ports.PasswordHasher,
 	manager ports.TokenManager,
-	tokenRepo ports.ActionTokenRepository,
+	tokenRepo repositories.ActionTokenRepository,
 	tokenGen ports.SecureTokenGenerator,
 	taskEnqueuer ports.TaskEnqueuer,
 	logger ports.Logger,

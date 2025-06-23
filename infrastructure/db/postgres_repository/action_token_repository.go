@@ -8,6 +8,7 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/muriloFlores/StoreManager/internal/core/domain"
 	"github.com/muriloFlores/StoreManager/internal/core/ports"
+	"github.com/muriloFlores/StoreManager/internal/core/ports/repositories"
 	"time"
 )
 
@@ -16,7 +17,7 @@ type ActionTokenRepository struct {
 	logger ports.Logger
 }
 
-func NewActionTokenRepository(db *pgxpool.Pool, logger ports.Logger) ports.ActionTokenRepository {
+func NewActionTokenRepository(db *pgxpool.Pool, logger ports.Logger) repositories.ActionTokenRepository {
 	return &ActionTokenRepository{db: db, logger: logger}
 }
 
