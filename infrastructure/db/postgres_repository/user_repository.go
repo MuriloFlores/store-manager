@@ -125,7 +125,7 @@ func (p *PostgresUserRepository) Update(ctx context.Context, user *domain.User) 
 }
 
 func (p *PostgresUserRepository) Delete(ctx context.Context, userID string) error {
-	query := `UPDATE users SET deleted_at = NOW() WHERE id = $1 AND deleted_at IS NULL`
+	query := `UPDATE users SET deleted_at = NOW(), verified_at = null WHERE id = $1 AND deleted_at IS NULL`
 
 	commandTag, err := p.db.Exec(ctx, query, userID)
 	if err != nil {
