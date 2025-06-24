@@ -54,7 +54,7 @@ jobs:
             DATABASE_URL="postgres://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}?sslmode=require"
           
             echo "4/5 - Running database migrations..."
-            docker run --rm --network host -v $(pwd)/infrastructure/db/migrations:/migrations \
+            docker run --rm --network host -v $(pwd)/migrations:/migrations \
             migrate/migrate -path /migrations -database "${DATABASE_URL}" up
 
             echo "5/5 - Starting application services with Docker Compose..."
