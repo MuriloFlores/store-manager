@@ -12,6 +12,7 @@ type UserUseCases struct {
 	Update  *UpdateUserUseCase
 	Delete  *DeleteUserUseCase
 	Promote *PromoteUserUseCase
+	List    *ListUsersUseCase
 }
 
 func NewUserUseCases(
@@ -31,5 +32,6 @@ func NewUserUseCases(
 		Update:  NewUpdateUserUseCase(userRepo, hasher),
 		Delete:  NewDeleteUserUseCase(userRepo),
 		Promote: NewPromoteUseCase(userRepo, logger, taskEnqueuer),
+		List:    NewListUsersUseCase(userRepo, logger),
 	}
 }

@@ -174,3 +174,58 @@ func (p *PostgresUserRepository) FindByEmailIncludingDeleted(ctx context.Context
 
 	return user, nil
 }
+
+func (p *PostgresUserRepository) List(ctx context.Context, params *domain.PaginationParams) (*domain.PaginatedUsers, error) {
+	var totalItems int
+
+	countQuery := `SELECT COUNT(*) FROM users WHERE deleted_at IS NULL AND verified_at IS NOT NULL`
+
+	err := p.db.QueryRow(ctx, countQuery).Scan(&totalItems)
+	if err != nil {
+		return nil, fmt.Errorf("error counting users: %w", err)
+	}
+
+	paginationInfo := &domain.PaginationInfo{
+		CurrentPage: params.Page,
+		PageSize:    params.PageSize,
+		TotalItems:  totalItems,
+	}
+
+	paginationInfo.CalculateTotalPages()
+
+	offset := (params.Page - 1) * params.PageSize
+
+	query := `
+        SELECT id, name, email, password_hash, role, verified_at, deleted_at 
+        FROM users 
+        WHERE deleted_at IS NULL 
+        ORDER BY created_at DESC 
+        LIMIT $1 OFFSET $2
+    `
+
+	rows, err := p.db.Query(ctx, query, params.Page*params.PageSize, offset)
+	if err != nil {
+		return nil, fmt.Errorf("error listing users: %w", err)
+	}
+
+	defer rows.Close()
+
+	users := make([]*domain.User, 0)
+	for rows.Next() {
+		var id, name, email, passwordHash string
+		var role value_objects.Role
+		var verifiedAt, deletedAt *time.Time
+
+		if err := rows.Scan(&id, &name, &email, &passwordHash, &role, &verifiedAt, &deletedAt); err != nil {
+			return nil, fmt.Errorf("error scanning user row: %w", err)
+		}
+
+		user := domain.HydrateUser(id, name, email, passwordHash, role, verifiedAt, deletedAt)
+		users = append(users, user)
+	}
+
+	return &domain.PaginatedUsers{
+		Data:       users,
+		Pagination: *paginationInfo,
+	}, nil
+}
