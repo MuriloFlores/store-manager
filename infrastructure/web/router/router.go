@@ -29,6 +29,7 @@ func NewRouter(
 
 	// --- Rotas para Validação de Conta ---
 	r.HandleFunc("/verify-account", authHandler.ConfirmAccount).Methods(http.MethodGet)
+	r.HandleFunc("/auth/resend-verification", authHandler.ResendVerificationEmail).Methods(http.MethodPost)
 
 	// --- Rotas Protegidas ---
 	api := r.PathPrefix("/api").Subrouter()

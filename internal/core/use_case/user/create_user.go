@@ -91,7 +91,7 @@ func (uc *CreateClienteUseCase) Execute(ctx context.Context, name, email, passwo
 		user = domainUser
 	}
 
-	if err = uc.accountValidation.Execute(ctx, user.ID()); err != nil {
+	if err = uc.accountValidation.Execute(ctx, user.Email()); err != nil {
 		uc.logger.ErrorLevel("Error requesting account validation", err, map[string]interface{}{"user_id": user.ID()})
 		return nil, fmt.Errorf("failed to request account validation: %w", err)
 	}

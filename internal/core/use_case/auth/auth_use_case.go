@@ -25,6 +25,7 @@ func NewAuthUseCases(
 	tokenGen ports.SecureTokenGenerator,
 	taskEnqueuer ports.TaskEnqueuer,
 	logger ports.Logger,
+	limiter ports.RateLimiter,
 ) *AuthUseCases {
 	return &AuthUseCases{
 		Login:                           NewLoginUserUseCase(userRepo, hasher, manager, logger),
@@ -35,6 +36,6 @@ func NewAuthUseCases(
 		ConfirmEmailChangeUseCase:       NewConfirmEmailChangeUseCase(userRepo, tokenRepo),
 		ConfirmUserEmailUseCase:         NewConfirmUserEmailUseCase(userRepo, tokenRepo, logger),
 		ConfirmAccountUserUseCase:       NewConfirmAccountUserUseCase(userRepo, tokenRepo, logger),
-		RequestAccountValidationUseCase: NewRequestAccountValidationUseCase(userRepo, tokenRepo, tokenGen, taskEnqueuer, logger),
+		RequestAccountValidationUseCase: NewRequestAccountValidationUseCase(userRepo, tokenRepo, tokenGen, taskEnqueuer, logger, limiter),
 	}
 }
