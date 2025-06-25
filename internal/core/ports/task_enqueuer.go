@@ -9,4 +9,5 @@ type TaskEnqueuer interface {
 	EnqueueEmailChangeConfirmation(data *jobs.EmailChangeConfirmationJobData) error
 	EnqueueSecurityNotification(data *jobs.SecurityNotificationJobData) error
 	EnqueueAccountVerification(data *jobs.AccountVerificationJobData) error
+	EnqueuePromotionNotification(data *jobs.PromotionNotificationJobData) error
 }

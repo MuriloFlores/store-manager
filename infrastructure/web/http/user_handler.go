@@ -10,7 +10,6 @@ import (
 	"github.com/muriloFlores/StoreManager/infrastructure/web/web_errors"
 	"github.com/muriloFlores/StoreManager/internal/core/domain"
 	"github.com/muriloFlores/StoreManager/internal/core/use_case/user"
-	"github.com/muriloFlores/StoreManager/internal/core/value_objects"
 	"net/http"
 )
 
@@ -36,7 +35,7 @@ func (h *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	createdUser, err := h.useCases.Create.Execute(r.Context(), req.Name, req.Email, req.Password, value_objects.Role(req.Role))
+	createdUser, err := h.useCases.Create.Execute(r.Context(), req.Name, req.Email, req.Password)
 	if err != nil {
 		web.HandleError(w, err)
 		return
@@ -162,6 +161,48 @@ func (h *UserHandler) UpdateUser(w http.ResponseWriter, r *http.Request) {
 		Name:  responseUser.Name(),
 		Email: responseUser.Email(),
 		Role:  responseUser.Role(),
+	}
+
+	respondWithJSON(w, http.StatusOK, response)
+}
+
+func (h *UserHandler) PromoteUser(w http.ResponseWriter, r *http.Request) {
+	actorIdentity, ok := r.Context().Value(middleware.UserIdentityKey).(*domain.Identity)
+	if !ok {
+		web_errors.NewInternalServerError("user service not found in context").Send(w)
+		return
+	}
+
+	vars := mux.Vars(r)
+	targetID, ok := vars["id"]
+	if !ok {
+		web_errors.NewBadRequestError("user ID not provided").Send(w)
+		return
+	}
+
+	var req dto.PromoteUserRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		web_errors.NewBadRequestError("invalid json body").Send(w)
+		return
+	}
+
+	if err := validation.Validate.Struct(&req); err != nil {
+		restErr := validation.TranslateError(err)
+		restErr.Send(w)
+		return
+	}
+
+	targetUser, err := h.useCases.Promote.Execute(r.Context(), actorIdentity, targetID, req.Role)
+	if err != nil {
+		web.HandleError(w, err)
+		return
+	}
+
+	response := dto.UserResponse{
+		ID:    targetUser.ID(),
+		Name:  targetUser.Name(),
+		Email: targetUser.Email(),
+		Role:  targetUser.Role(),
 	}
 
 	respondWithJSON(w, http.StatusOK, response)

@@ -96,3 +96,29 @@ func (p *EmailProcessor) HandleAccountVerification(ctx context.Context, taskPayl
 
 	return p.sender.Send(ctx, emailData)
 }
+
+func (p *EmailProcessor) HandlePromotionNotification(ctx context.Context, taskPayload []byte) error {
+	var payload jobs.PromotionNotificationJobData
+
+	if err := json.Unmarshal(taskPayload, &payload); err != nil {
+		return fmt.Errorf("unmarshal promotion notification payload: %w", err)
+	}
+
+	templateData := map[string]interface{}{
+		"UserName": payload.UserName,
+		"NewRole":  payload.NewRole,
+	}
+
+	htmlBody, err := p.templateManager.Render("promotion_notification.html", templateData)
+	if err != nil {
+		return fmt.Errorf("error in rendering promotion notification template: %w", err)
+	}
+
+	emailData := domain.EmailData{
+		To:       payload.ToEmail,
+		Subject:  "Notificação de Promoção - Store Manager",
+		BodyHTML: htmlBody,
+	}
+
+	return p.sender.Send(ctx, emailData)
+}

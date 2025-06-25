@@ -43,6 +43,7 @@ func NewRouter(
 	api.HandleFunc("/user/{id}", userHandler.FindUserByID).Methods(http.MethodGet)
 	api.HandleFunc("/user", userHandler.FindUserByEmail).Methods(http.MethodGet).Queries("email", "{email}")
 	api.HandleFunc("/user/{id}", userHandler.UpdateUser).Methods(http.MethodPut)
+	api.HandleFunc("/user/{id}/role", userHandler.PromoteUser).Methods(http.MethodPatch)
 
 	allowedOrigins := handlers.AllowedOrigins([]string{"*"})
 	allowedMethods := handlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE", "OPTIONS"})
