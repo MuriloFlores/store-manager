@@ -83,6 +83,10 @@ func (u *User) VerifiedAt() *time.Time {
 	return u.verifiedAt
 }
 
+func (u *User) DeletedAt() *time.Time {
+	return u.deletedAt
+}
+
 func (u *User) ChangeName(name string) error {
 	if name == "" {
 		return &ErrInvalidInput{FieldName: "name", Reason: "name is required"}
