@@ -188,7 +188,7 @@ func (p *PostgresUserRepository) List(ctx context.Context, params *domain.Pagina
 	paginationInfo := &domain.PaginationInfo{
 		CurrentPage: params.Page,
 		PageSize:    params.PageSize,
-		TotalItems:  totalItems,
+		TotalItems:  int64(totalItems),
 	}
 
 	paginationInfo.CalculateTotalPages()
