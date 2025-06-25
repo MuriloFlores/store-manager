@@ -157,8 +157,6 @@ func (h *AuthHandler) ResendVerificationEmail(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	user, err := h.useCases..Execute(r.Context(), req.Email)
-
 	err := h.useCases.RequestAccountValidationUseCase.Execute(r.Context(), req.Email)
 	if err != nil {
 		h.logger.ErrorLevel("RequestAccountValidation use case error", err, map[string]interface{}{"email": req.Email})
