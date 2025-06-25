@@ -5,12 +5,14 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/muriloFlores/StoreManager/infrastructure/validation"
 	"github.com/muriloFlores/StoreManager/infrastructure/web"
+	"github.com/muriloFlores/StoreManager/infrastructure/web/DTO/pagination"
 	dto "github.com/muriloFlores/StoreManager/infrastructure/web/DTO/userDTO"
 	"github.com/muriloFlores/StoreManager/infrastructure/web/middleware"
 	"github.com/muriloFlores/StoreManager/infrastructure/web/web_errors"
 	"github.com/muriloFlores/StoreManager/internal/core/domain"
 	"github.com/muriloFlores/StoreManager/internal/core/use_case/user"
 	"net/http"
+	"strconv"
 )
 
 type UserHandler struct {
@@ -206,4 +208,56 @@ func (h *UserHandler) PromoteUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	respondWithJSON(w, http.StatusOK, response)
+}
+
+func (h *UserHandler) ListUsers(w http.ResponseWriter, r *http.Request) {
+	actorIdentity, ok := r.Context().Value(middleware.UserIdentityKey).(*domain.Identity)
+	if !ok {
+		web_errors.NewInternalServerError("user service not found in context").Send(w)
+		return
+	}
+
+	page, _ := strconv.Atoi(r.URL.Query().Get("page"))
+	pageSize, _ := strconv.Atoi(r.URL.Query().Get("pageSize"))
+
+	if page < 1 {
+		page = 1
+	}
+
+	if pageSize < 1 || pageSize > 100 {
+		pageSize = 10
+	}
+
+	params := &domain.PaginationParams{
+		Page:     page,
+		PageSize: pageSize,
+	}
+
+	paginatedResult, err := h.useCases.List.Execute(r.Context(), actorIdentity, params)
+	if err != nil {
+		web.HandleError(w, err)
+		return
+	}
+
+	userResponses := make([]dto.UserResponse, 0, len(paginatedResult.Data))
+	for _, userDomain := range paginatedResult.Data {
+		userResponses = append(userResponses, dto.UserResponse{
+			ID:    userDomain.ID(),
+			Name:  userDomain.Name(),
+			Email: userDomain.Email(),
+			Role:  userDomain.Role(),
+		})
+	}
+
+	finalResponse := pagination.PaginatedUsersResponse{
+		Data: userResponses,
+		Pagination: pagination.PaginationInfoResponse{
+			CurrentPage: paginatedResult.Pagination.CurrentPage,
+			PageSize:    paginatedResult.Pagination.PageSize,
+			TotalItems:  paginatedResult.Pagination.TotalItems,
+			TotalPages:  paginatedResult.Pagination.TotalPages,
+		},
+	}
+
+	respondWithJSON(w, http.StatusOK, finalResponse)
 }

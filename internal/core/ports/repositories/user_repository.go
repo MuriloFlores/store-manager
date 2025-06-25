@@ -13,4 +13,5 @@ type UserRepository interface {
 	Delete(ctx context.Context, userID string) error
 	CountAdmins(ctx context.Context) (int, error)
 	FindByEmailIncludingDeleted(ctx context.Context, email string) (*domain.User, error)
+	List(ctx context.Context, params *domain.PaginationParams) (*domain.PaginatedUsers, error)
 }

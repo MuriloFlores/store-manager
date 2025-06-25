@@ -1,4 +1,4 @@
-package user
+package userDTO
 
 type UpdateUserRequest struct {
 	Name *string `json:"name" validate:"omitempty,min=3,max=100"`
