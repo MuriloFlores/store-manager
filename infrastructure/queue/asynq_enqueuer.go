@@ -9,10 +9,11 @@ import (
 )
 
 const (
-	TaskTypeEmailPasswordReset       = "email:password_reset"
-	TaskTypeEmailChange              = "email:change_confirmation"
-	TaskTypeEmailSecurityAlert       = "email:security_alert"
-	TaskTypeEmailAccountVerification = "email:account_verification"
+	TaskTypeEmailPasswordReset         = "email:password_reset"
+	TaskTypeEmailChange                = "email:change_confirmation"
+	TaskTypeEmailSecurityAlert         = "email:security_alert"
+	TaskTypeEmailAccountVerification   = "email:account_verification"
+	TaskTypeEmailPromotionNotification = "email:promotion_notification"
 )
 
 type taskEnqueuer struct {
@@ -108,5 +109,26 @@ func (t *taskEnqueuer) EnqueueAccountVerification(data *jobs.AccountVerification
 	}
 
 	t.logger.InfoLevel("Account verification task enqueued successfully", map[string]interface{}{"user_name": data.UserName, "to_email": data.ToEmail})
+	return nil
+}
+
+func (t *taskEnqueuer) EnqueuePromotionNotification(data *jobs.PromotionNotificationJobData) error {
+	t.logger.InfoLevel("Enqueuing promotion notification task", map[string]interface{}{"user_name": data.UserName, "to_email": data.ToEmail, "new_role": data.NewRole})
+
+	payload, err := json.Marshal(data)
+	if err != nil {
+		t.logger.ErrorLevel("Failed to marshal promotion notification data", err, map[string]interface{}{"user_name": data.UserName, "to_email": data.ToEmail, "new_role": data.NewRole})
+		return fmt.Errorf("fail in marshal data: %w", err)
+	}
+
+	task := asynq.NewTask("email:promotion_notification", payload)
+
+	_, err = t.client.Enqueue(task)
+	if err != nil {
+		t.logger.ErrorLevel("Failed to enqueue promotion notification task", err, map[string]interface{}{"user_name": data.UserName, "to_email": data.ToEmail, "new_role": data.NewRole})
+		return fmt.Errorf("fail in enqueue promotion notification payload: %w", err)
+	}
+
+	t.logger.InfoLevel("Promotion notification task enqueued successfully", map[string]interface{}{"user_name": data.UserName, "to_email": data.ToEmail, "new_role": data.NewRole})
 	return nil
 }

@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Atualização de Cargo</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            color: #333;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #fff;
+            border: 1px solid #ddd;
+        }
+        .header {
+            background: #28a745; /* Um verde para indicar algo positivo */
+            color: white;
+            padding: 10px;
+            text-align: center;
+            border-radius: 5px 5px 0 0;
+        }
+        .content {
+            padding: 20px 0;
+        }
+        .role-box {
+            background-color: #e9ecef;
+            border: 1px solid #ced4da;
+            padding: 10px 15px;
+            border-radius: 5px;
+            text-align: center;
+            font-size: 1.2em;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+        .footer {
+            margin-top: 20px;
+            font-size: 0.9em;
+            color: #777;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h2>Atualização de Cargo na Conta</h2>
+    </div>
+    <div class="content">
+        <h3>Olá, {{.UserName}}!</h3>
+        <p>
+            Gostaríamos de informar que o cargo associado à sua conta no **Store Manager** foi atualizado.
+        </p>
+        <p>
+            Seu novo cargo é:
+        </p>
+        <div class="role-box">
+            {{.NewRole}}
+        </div>
+        <p>
+            Dependendo do seu novo cargo, você pode ter acesso a novas funcionalidades na plataforma.
+        </p>
+        <p>
+            Se você não estava esperando esta mudança ou acredita que isso é um erro, por favor, entre em contato com um administrador ou com o suporte imediatamente.
+        </p>
+    </div>
+    <div class="footer">
+        <p>Atenciosamente,<br>Equipe Store Manager</p>
+    </div>
+</div>
+</body>
+</html>

@@ -7,10 +7,11 @@ import (
 )
 
 type UserUseCases struct {
-	Create *CreateUserUseCase
-	Find   *FindUserUseCase
-	Update *UpdateUserUseCase
-	Delete *DeleteUserUseCase
+	Create  *CreateClienteUseCase
+	Find    *FindUserUseCase
+	Update  *UpdateUserUseCase
+	Delete  *DeleteUserUseCase
+	Promote *PromoteUserUseCase
 }
 
 func NewUserUseCases(
@@ -25,9 +26,10 @@ func NewUserUseCases(
 
 ) *UserUseCases {
 	return &UserUseCases{
-		Create: NewCreateUserUseCase(userRepo, hasher, generator, tokenGenerator, taskEnqueuer, tokenRepo, logger, accountValidation),
-		Find:   NewFindUserUseCase(userRepo),
-		Update: NewUpdateUserUseCase(userRepo, hasher),
-		Delete: NewDeleteUserUseCase(userRepo),
+		Create:  NewCreateClienteUseCase(userRepo, hasher, generator, tokenGenerator, taskEnqueuer, tokenRepo, logger, accountValidation),
+		Find:    NewFindUserUseCase(userRepo),
+		Update:  NewUpdateUserUseCase(userRepo, hasher),
+		Delete:  NewDeleteUserUseCase(userRepo),
+		Promote: NewPromoteUseCase(userRepo, logger, taskEnqueuer),
 	}
 }

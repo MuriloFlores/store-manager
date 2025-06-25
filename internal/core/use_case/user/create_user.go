@@ -11,7 +11,7 @@ import (
 	"github.com/muriloFlores/StoreManager/internal/core/value_objects"
 )
 
-type CreateUserUseCase struct {
+type CreateClienteUseCase struct {
 	userRepository    repositories.UserRepository
 	hasher            ports.PasswordHasher
 	generator         ports.IDGenerator
@@ -22,7 +22,7 @@ type CreateUserUseCase struct {
 	accountValidation auth.RequestAccountValidationUseCase //não tenho certeza se isso foi importado corretamente, no sentido de uma arquitetura limpa, talvez seja melhor criar uma nova port para isso
 }
 
-func NewCreateUserUseCase(
+func NewCreateClienteUseCase(
 	userRepository repositories.UserRepository,
 	hasher ports.PasswordHasher,
 	generator ports.IDGenerator,
@@ -31,8 +31,8 @@ func NewCreateUserUseCase(
 	tokenRepo repositories.ActionTokenRepository,
 	logger ports.Logger,
 	accountValidation auth.RequestAccountValidationUseCase,
-) *CreateUserUseCase {
-	return &CreateUserUseCase{
+) *CreateClienteUseCase {
+	return &CreateClienteUseCase{
 		userRepository:    userRepository,
 		hasher:            hasher,
 		generator:         generator,
@@ -44,8 +44,8 @@ func NewCreateUserUseCase(
 	}
 }
 
-func (uc *CreateUserUseCase) Execute(ctx context.Context, name, email, password string, role value_objects.Role) (*domain.User, error) {
-	uc.logger.InfoLevel("Creating user", map[string]interface{}{"name": name, "email": email, "role": role})
+func (uc *CreateClienteUseCase) Execute(ctx context.Context, name, email, password string) (*domain.User, error) {
+	uc.logger.InfoLevel("Creating client", map[string]interface{}{"name": name, "email": email})
 
 	user, err := uc.userRepository.FindByEmailIncludingDeleted(ctx, email)
 	if err == nil {
@@ -54,7 +54,7 @@ func (uc *CreateUserUseCase) Execute(ctx context.Context, name, email, password 
 			return nil, &domain.ErrConflict{Resource: "email", Details: "User already exists with this email"}
 		}
 
-		if err = uc.reactivateUser(ctx, user, name, password, role); err != nil {
+		if err = uc.reactivateUser(ctx, user, name, password, value_objects.Client); err != nil {
 			uc.logger.ErrorLevel("Error reactivating user", err, map[string]interface{}{"user_id": user.ID()})
 			return nil, err
 		}
@@ -75,7 +75,7 @@ func (uc *CreateUserUseCase) Execute(ctx context.Context, name, email, password 
 			return nil, &domain.ErrInvalidInput{FieldName: "password", Reason: "failed to hash password"}
 		}
 
-		domainUser, err := domain.NewUser(userID, name, email, hashedPassword, role)
+		domainUser, err := domain.NewUser(userID, name, email, hashedPassword, value_objects.Client)
 		if err != nil {
 			uc.logger.ErrorLevel("Error creating new user", err, map[string]interface{}{"email": email})
 			return nil, err
@@ -100,7 +100,7 @@ func (uc *CreateUserUseCase) Execute(ctx context.Context, name, email, password 
 	return user, nil
 }
 
-func (uc *CreateUserUseCase) reactivateUser(ctx context.Context, user *domain.User, name, password string, role value_objects.Role) error {
+func (uc *CreateClienteUseCase) reactivateUser(ctx context.Context, user *domain.User, name, password string, role value_objects.Role) error {
 	uc.logger.InfoLevel("Reactivating user", map[string]interface{}{"user_id": user.ID(), "user_name": name})
 
 	user.Reactivate()
