@@ -15,6 +15,8 @@ func HandleError(w http.ResponseWriter, err error) {
 	var conflict *domain.ErrConflict
 	var forbidden *domain.ErrForbidden
 	var invalidCredentials *domain.ErrInvalidCredentials
+	var emailNotVerified *domain.ErrEmailNotVerified
+	var rateLimitExceeded *domain.ErrRateLimitExceeded
 
 	switch {
 	case errors.As(err, &invalidInput):
@@ -35,6 +37,12 @@ func HandleError(w http.ResponseWriter, err error) {
 
 	case errors.As(err, &invalidCredentials):
 		restErr = web_errors.NewUnauthorizedRequestError(err.Error())
+
+	case errors.As(err, &emailNotVerified):
+		restErr = web_errors.NewEmailNotVerified(err.Error())
+
+	case errors.As(err, &rateLimitExceeded):
+		restErr = web_errors.NewRateLimitExceededError(err.Error())
 
 	default:
 		restErr = web_errors.NewInternalServerError("Ocorreu um erro interno no servidor")

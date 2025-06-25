@@ -2,11 +2,13 @@ package main
 
 import (
 	"context"
+	"github.com/muriloFlores/StoreManager/infrastructure/rate_limiter"
 	"github.com/muriloFlores/StoreManager/infrastructure/reset_token"
 	"github.com/muriloFlores/StoreManager/infrastructure/security"
 	"github.com/muriloFlores/StoreManager/infrastructure/security/uuid_generator"
 	"github.com/muriloFlores/StoreManager/infrastructure/workers/email"
 	"github.com/muriloFlores/StoreManager/pkg/logger"
+	"github.com/redis/go-redis/v9"
 	"log"
 	"net/http"
 	"os"
@@ -50,7 +52,10 @@ func main() {
 	}
 	defer dbpool.Close()
 
+	redisClient := redis.NewClient(&redis.Options{Addr: cfg.RedisAddress})
 	redisConnectionOpt := asynq.RedisClientOpt{Addr: cfg.RedisAddress}
+
+	rateLimiter := rate_limiter.NewRedisRateLimiter(redisClient)
 
 	userRepo := postgres_repository.NewPostgresUserRepository(dbpool)
 	actionTokenRepo := postgres_repository.NewActionTokenRepository(dbpool, appLogs)
@@ -78,6 +83,7 @@ func main() {
 		cryptToken,
 		taskEnqueuer,
 		appLogs,
+		rateLimiter,
 	)
 
 	userUseCases := user.NewUserUseCases(

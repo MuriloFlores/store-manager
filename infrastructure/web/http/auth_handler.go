@@ -139,3 +139,31 @@ func (h *AuthHandler) ConfirmAccount(w http.ResponseWriter, r *http.Request) {
 
 	respondWithJSON(w, http.StatusOK, map[string]string{"message": "Conta verificada com sucesso!"})
 }
+
+func (h *AuthHandler) ResendVerificationEmail(w http.ResponseWriter, r *http.Request) {
+	h.logger.InfoLevel("ResendVerificationEmail handler invoked", nil)
+
+	var req dto.ResendVerificationRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		h.logger.ErrorLevel("Failed to decode request body", err)
+		restErr := web_errors.NewBadRequestError("invalid body request")
+		restErr.Send(w)
+	}
+
+	if err := validation.Validate.Struct(req); err != nil {
+		h.logger.ErrorLevel("Validation error", err, map[string]interface{}{"email": req.Email})
+		restErr := validation.TranslateError(err)
+		restErr.Send(w)
+		return
+	}
+
+	err := h.useCases.RequestAccountValidationUseCase.Execute(r.Context(), req.Email)
+	if err != nil {
+		h.logger.ErrorLevel("RequestAccountValidation use case error", err, map[string]interface{}{"email": req.Email})
+		web.HandleError(w, err)
+		return
+	}
+
+	response := map[string]string{"message": "Se uma conta com este email existir e não estiver verificada, um novo link de verificação foi enviado."}
+	respondWithJSON(w, http.StatusAccepted, response)
+}

@@ -56,3 +56,14 @@ type ErrEmailNotVerified struct{}
 func (e *ErrEmailNotVerified) Error() string {
 	return fmt.Sprintf("email not verified")
 }
+
+type ErrRateLimitExceeded struct {
+	Message string
+}
+
+func (e *ErrRateLimitExceeded) Error() string {
+	if e.Message != "" {
+		return e.Message
+	}
+	return "request rate limit exceeded"
+}

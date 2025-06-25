@@ -83,3 +83,19 @@ func NewConflictError(message string) *RestErr {
 		Code:    http.StatusConflict,
 	}
 }
+
+func NewEmailNotVerified(message string) *RestErr {
+	return &RestErr{
+		Message: message,
+		Err:     "EmailNotVerified",
+		Code:    http.StatusUnauthorized,
+	}
+}
+
+func NewRateLimitExceededError(message string) *RestErr {
+	return &RestErr{
+		Message: message,
+		Err:     "rate_limit_exceeded",
+		Code:    http.StatusTooManyRequests,
+	}
+}
