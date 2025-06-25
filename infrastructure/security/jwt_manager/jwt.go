@@ -24,7 +24,8 @@ func (j *jwtGenerator) Generate(identity *domain.Identity) (string, error) {
 
 	claims := &AppClaims{
 		UserID: identity.UserID,
-		Role:   string(identity.Role),
+		Role:   identity.Role,
+		Name:   identity.Name,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(expirationTime),
 			Issuer:    "muriloflores.xyz",
@@ -62,6 +63,7 @@ func (j *jwtGenerator) Validate(tokenString string) (*domain.Identity, error) {
 	identity := &domain.Identity{
 		UserID: claims.UserID,
 		Role:   claims.Role,
+		Name:   claims.Name,
 	}
 
 	return identity, nil

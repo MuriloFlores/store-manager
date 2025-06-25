@@ -47,6 +47,7 @@ func (uc *LoginUserUseCase) Execute(ctx context.Context, email, password string)
 	userIdentity := domain.Identity{
 		UserID: user.ID(),
 		Role:   user.Role(),
+		Name:   user.Name(),
 	}
 
 	token, err := uc.tokenManager.Generate(&userIdentity)
