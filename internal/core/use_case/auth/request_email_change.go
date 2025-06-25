@@ -82,7 +82,7 @@ func (uc *RequestEmailChangeUseCase) Execute(ctx context.Context, actor *domain.
 
 	confirmationJob := jobs.EmailChangeConfirmationJobData{
 		UserName:         user.Name(),
-		ConfirmationLink: "https://muriloflores.xyz/confirm-email?token=" + changeToken.Token,
+		ConfirmationLink: "https://app.muriloflores.xyz/confirm-email?token=" + changeToken.Token,
 		ToEmail:          user.Email(),
 	}
 
