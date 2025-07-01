@@ -1,6 +1,8 @@
 package domain
 
-import "math"
+import (
+	"math"
+)
 
 type PaginationParams struct {
 	Page     int
@@ -14,8 +16,12 @@ type PaginationInfo struct {
 	TotalPages  int
 }
 
-type PaginatedUsers struct {
-	Data       []*User
+type PaginatedEntity interface {
+	*User | *Item
+}
+
+type PaginatedResult[T PaginatedEntity] struct {
+	Data       []T
 	Pagination PaginationInfo
 }
 
