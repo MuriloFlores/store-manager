@@ -10,6 +10,7 @@ import (
 	"github.com/muriloFlores/StoreManager/infrastructure/web/middleware"
 	"github.com/muriloFlores/StoreManager/infrastructure/web/web_errors"
 	"github.com/muriloFlores/StoreManager/internal/core/domain"
+	pagination2 "github.com/muriloFlores/StoreManager/internal/core/domain/pagination"
 	"github.com/muriloFlores/StoreManager/internal/core/use_case/user"
 	"net/http"
 	"strconv"
@@ -228,7 +229,7 @@ func (h *UserHandler) ListUsers(w http.ResponseWriter, r *http.Request) {
 		pageSize = 10
 	}
 
-	params := &domain.PaginationParams{
+	params := &pagination2.PaginationParams{
 		Page:     page,
 		PageSize: pageSize,
 	}

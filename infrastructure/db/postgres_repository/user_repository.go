@@ -8,6 +8,7 @@ import (
 	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/muriloFlores/StoreManager/internal/core/domain"
+	"github.com/muriloFlores/StoreManager/internal/core/domain/pagination"
 	"github.com/muriloFlores/StoreManager/internal/core/ports/repositories"
 	"github.com/muriloFlores/StoreManager/internal/core/value_objects"
 	"time"
@@ -184,8 +185,8 @@ func (p *PostgresUserRepository) FindByEmailIncludingDeleted(ctx context.Context
 	return user, nil
 }
 
-func (p *PostgresUserRepository) List(ctx context.Context, params *domain.PaginationParams) (*domain.PaginatedUsers, error) {
-	var totalItems int
+func (p *PostgresUserRepository) List(ctx context.Context, params *pagination.PaginationParams) (*pagination.PaginatedResult[*domain.User], error) {
+	var totalItems int64
 
 	countQuery := `SELECT COUNT(*) FROM users WHERE deleted_at IS NULL AND verified_at IS NOT NULL`
 
@@ -194,10 +195,10 @@ func (p *PostgresUserRepository) List(ctx context.Context, params *domain.Pagina
 		return nil, fmt.Errorf("error counting users: %w", err)
 	}
 
-	paginationInfo := &domain.PaginationInfo{
+	paginationInfo := &pagination.PaginationInfo{
 		CurrentPage: params.Page,
 		PageSize:    params.PageSize,
-		TotalItems:  int64(totalItems),
+		TotalItems:  totalItems,
 	}
 
 	paginationInfo.CalculateTotalPages()
@@ -212,7 +213,7 @@ func (p *PostgresUserRepository) List(ctx context.Context, params *domain.Pagina
         LIMIT $1 OFFSET $2
     `
 
-	rows, err := p.db.Query(ctx, query, params.Page*params.PageSize, offset)
+	rows, err := p.db.Query(ctx, query, params.PageSize, offset)
 	if err != nil {
 		return nil, fmt.Errorf("error listing users: %w", err)
 	}
@@ -233,7 +234,7 @@ func (p *PostgresUserRepository) List(ctx context.Context, params *domain.Pagina
 		users = append(users, user)
 	}
 
-	return &domain.PaginatedUsers{
+	return &pagination.PaginatedResult[*domain.User]{
 		Data:       users,
 		Pagination: *paginationInfo,
 	}, nil
