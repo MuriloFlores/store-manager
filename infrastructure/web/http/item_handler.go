@@ -18,11 +18,11 @@ import (
 )
 
 type ItemHandler struct {
-	useCase items.ItemsUseCases
+	useCase *items.ItemsUseCases
 	logger  ports.Logger
 }
 
-func NewItemHandler(useCase items.ItemsUseCases, logger ports.Logger) *ItemHandler {
+func NewItemHandler(useCase *items.ItemsUseCases, logger ports.Logger) *ItemHandler {
 	return &ItemHandler{
 		useCase: useCase,
 		logger:  logger,
