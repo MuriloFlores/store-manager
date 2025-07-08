@@ -29,7 +29,7 @@ func NewPostgresItemRepository(db *pgxpool.Pool, logger ports.Logger) repositori
 
 func (r *PostgresItemRepository) Save(ctx context.Context, item *item.Item) error {
 	query := `
-		INSERT INTO items (id, name, description, sku, type, can_be_sold, price_sale_in_cents, stock_quantity, minimum_stock_level, unit_of_measure, is_active)
+		INSERT INTO items (id, name, description, sku, type, can_be_sold, price_sale_in_cents, price_cost_in_cents, stock_quantity, minimum_stock_level, unit_of_measure, is_active)
 		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`
 
 	_, err := r.db.Exec(ctx, query,
@@ -40,6 +40,7 @@ func (r *PostgresItemRepository) Save(ctx context.Context, item *item.Item) erro
 		item.ItemType(),
 		item.CanBeSold(),
 		item.PriceInCents(),
+		item.PriceCostInCents(),
 		item.StockQuantity(),
 		item.MinimumStockLevel(),
 		item.UnitOfMeasure(),
@@ -59,7 +60,7 @@ func (r *PostgresItemRepository) Save(ctx context.Context, item *item.Item) erro
 
 func (r *PostgresItemRepository) FindByID(ctx context.Context, id string) (*item.Item, error) {
 	query := `
-	SELECT id, name, description, sku, type, is_active, can_be_sold, price_sale_in_cents, stock_quantity,
+	SELECT id, name, description, sku, type, is_active, can_be_sold, price_sale_in_cents, price_cost_in_cents, stock_quantity,
 		unit_of_measure, minimum_stock_level, deleted_at
 	FROM items WHERE id = $1 AND deleted_at IS NULL
 `
@@ -68,7 +69,7 @@ func (r *PostgresItemRepository) FindByID(ctx context.Context, id string) (*item
 
 	err := r.db.QueryRow(ctx, query, id).Scan(
 		&params.Id, &params.Name, &params.Description, &params.Sku, &params.ItemType, &params.Active, &params.CanBeSold,
-		&params.PriceInCents, &params.StockQuantity, &params.UnitOfMeasure,
+		&params.PriceInCents, &params.PriceCostInCents, &params.StockQuantity, &params.UnitOfMeasure,
 		&params.MinimumStockLevel, &deletedAt,
 	)
 
@@ -88,7 +89,7 @@ func (r *PostgresItemRepository) FindByID(ctx context.Context, id string) (*item
 
 func (r *PostgresItemRepository) FindBySKU(ctx context.Context, sku string) (*item.Item, error) {
 	query := `
-	SELECT id, name, description, sku, type, is_active, can_be_sold, price_sale_in_cents, stock_quantity,
+	SELECT id, name, description, sku, type, is_active, can_be_sold, price_sale_in_cents, price_cost_in_cents, stock_quantity,
 		unit_of_measure, minimum_stock_level, deleted_at
 	FROM items WHERE sku = $1 AND deleted_at IS NULL
 `
@@ -97,7 +98,7 @@ func (r *PostgresItemRepository) FindBySKU(ctx context.Context, sku string) (*it
 
 	err := r.db.QueryRow(ctx, query, sku).Scan(
 		&params.Id, &params.Name, &params.Description, &params.Sku, &params.ItemType, &params.Active, &params.CanBeSold,
-		&params.PriceInCents, &params.StockQuantity, &params.UnitOfMeasure,
+		&params.PriceInCents, &params.PriceCostInCents, &params.StockQuantity, &params.UnitOfMeasure,
 		&params.MinimumStockLevel, &deletedAt,
 	)
 
@@ -115,23 +116,57 @@ func (r *PostgresItemRepository) FindBySKU(ctx context.Context, sku string) (*it
 	return item, err
 }
 
-func (r *PostgresItemRepository) Update(ctx context.Context, item *item.Item) error {
+func (r *PostgresItemRepository) FindByName(ctx context.Context, name string) (*item.Item, error) {
 	query := `
-		UPDATE items SET
-			name = $1, description = $2, sku = $3, is_active = $4, can_be_sold = $5,
-			price_sale_in_cents = $6, stock_quantity = $7, unit_of_measure = $8,
-			minimum_stock_level = $9, deleted_at = $10
-		WHERE id = $11`
+	SELECT id, name, description, sku, type, is_active, can_be_sold, price_sale_in_cents, price_cost_in_cents, stock_quantity,
+		unit_of_measure, minimum_stock_level, deleted_at
+	FROM items WHERE id = $1 AND deleted_at IS NULL
+`
+	var deletedAt *time.Time
+	var params item.HydrateItemParams
+
+	err := r.db.QueryRow(ctx, query, name).Scan(
+		&params.Id, &params.Name, &params.Description, &params.Sku, &params.ItemType, &params.Active, &params.CanBeSold,
+		&params.PriceInCents, &params.PriceCostInCents, &params.StockQuantity, &params.UnitOfMeasure,
+		&params.MinimumStockLevel, &deletedAt,
+	)
+
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, &domain.ErrNotFound{ResourceName: "item"}
+		}
+
+		r.logger.ErrorLevel("Error finding item", err, map[string]interface{}{"item": name})
+		return nil, err
+	}
+
+	item := item.HydrateItem(params, deletedAt)
+
+	return item, err
+}
+
+func (r *PostgresItemRepository) Update(ctx context.Context, item *item.Item) error {
+	r.logger.InfoLevel("Updating item in repository", map[string]interface{}{"item": item.ID()})
+
+	query := `
+		UPDATE items SET 
+			name = $1,
+			description = $2,
+			is_active = $3,
+			can_be_sold = $4,
+			price_sale_in_cents = $5,
+			price_cost_in_cents = $6,
+			minimum_stock_level = $7, 
+			deleted_at = $8 
+		WHERE id = $9`
 
 	commandTag, err := r.db.Exec(ctx, query,
 		item.Name(),
 		item.Description(),
-		item.SKU(),
 		item.IsActive(),
 		item.CanBeSold(),
 		item.PriceInCents(),
-		item.StockQuantity(),
-		item.UnitOfMeasure(),
+		item.PriceCostInCents(),
 		item.MinimumStockLevel(),
 		item.DeletedAt(),
 		item.ID(),
@@ -145,12 +180,12 @@ func (r *PostgresItemRepository) Update(ctx context.Context, item *item.Item) er
 				Details:  fmt.Sprintf("constraint violation: %s", pgErr.ConstraintName),
 			}
 		}
-		return fmt.Errorf("error updating user: %w", err)
+		r.logger.ErrorLevel("Failed to update item", err, map[string]interface{}{"item_id": item.ID()})
+		return fmt.Errorf("erro ao atualizar item: %w", err)
 	}
 
 	if commandTag.RowsAffected() == 0 {
 		return &domain.ErrNotFound{ResourceName: "item", ResourceID: item.ID()}
-
 	}
 
 	return nil
@@ -169,7 +204,7 @@ func (r *PostgresItemRepository) List(ctx context.Context, PaginationParams *pag
 	offset := (PaginationParams.Page - 1) * PaginationParams.PageSize
 
 	query := `
-		SELECT id, name, description, sku, type, is_active, can_be_sold, price_sale_in_cents,
+		SELECT id, name, description, sku, type, is_active, can_be_sold, price_sale_in_cents, price_cost_in_cents,
 		       stock_quantity, unit_of_measure, minimum_stock_level, created_at, updated_at, deleted_at
 		FROM items
 		WHERE deleted_at IS NULL
@@ -189,19 +224,34 @@ func (r *PostgresItemRepository) List(ctx context.Context, PaginationParams *pag
 
 		if err := rows.Scan(
 			&params.Id, &params.Name, &params.Description, &params.Sku, &params.ItemType,
-			&params.Active, &params.CanBeSold, &params.PriceInCents, &params.StockQuantity,
+			&params.Active, &params.CanBeSold, &params.PriceInCents, &params.PriceCostInCents, &params.StockQuantity,
 			&params.UnitOfMeasure, &params.MinimumStockLevel,
 			&createdAt, &updatedAt, &deletedAt,
 		); err != nil {
 			return nil, fmt.Errorf("error scanning item row: %w", err)
 		}
 
-		item := item.HydrateItem(params, deletedAt)
-		items = append(items, item)
+		itemDomain := item.HydrateItem(params, deletedAt)
+		items = append(items, itemDomain)
 	}
 
 	return &pagination.PaginatedResult[*item.Item]{
 		Data:       items,
 		Pagination: paginationInfo,
 	}, nil
+}
+
+func (r *PostgresItemRepository) Delete(ctx context.Context, itemID string) error {
+	query := `UPDATE items SET deleted_at = NOW() WHERE id = $2`
+
+	commandTag, err := r.db.Exec(ctx, query, itemID)
+	if err != nil {
+		return fmt.Errorf("error deleting item: %w", err)
+	}
+
+	if commandTag.RowsAffected() == 0 {
+		return &domain.ErrNotFound{ResourceName: "item", ResourceID: itemID}
+	}
+
+	return nil
 }
