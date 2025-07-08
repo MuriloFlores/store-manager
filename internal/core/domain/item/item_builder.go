@@ -103,6 +103,16 @@ func (b *ItemBuilder) WithDeletion(date *time.Time) *ItemBuilder {
 	return b
 }
 
+func (b *ItemBuilder) WithPriceCostInCents(price int64) *ItemBuilder {
+	if price < 0 {
+		b.err = &domain.ErrInvalidInput{FieldName: "priceCostInCents", Reason: "price must be non-negative"}
+	}
+
+	b.item.priceCostInCents = price
+
+	return b
+}
+
 func (b *ItemBuilder) Build() (*Item, error) {
 	if b.err != nil {
 		return nil, b.err

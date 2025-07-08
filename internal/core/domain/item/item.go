@@ -21,6 +21,7 @@ type Item struct {
 	canBeSold         bool
 	active            bool
 	priceInCents      int64
+	priceCostInCents  int64
 	stockQuantity     float64
 	minimumStockLevel float64
 	unitOfMeasure     string
@@ -36,6 +37,7 @@ type HydrateItemParams struct {
 	CanBeSold         bool
 	Active            bool
 	PriceInCents      int64
+	PriceCostInCents  int64
 	StockQuantity     float64
 	MinimumStockLevel float64
 	UnitOfMeasure     string
@@ -43,16 +45,17 @@ type HydrateItemParams struct {
 
 func HydrateItem(params HydrateItemParams, deleteAt *time.Time) *Item {
 	return &Item{
-		id:            params.Id,
-		name:          params.Name,
-		sku:           params.Sku,
-		description:   params.Description,
-		itemType:      params.ItemType,
-		canBeSold:     params.CanBeSold,
-		priceInCents:  params.PriceInCents,
-		stockQuantity: params.StockQuantity,
-		unitOfMeasure: params.UnitOfMeasure,
-		deletedAt:     deleteAt,
+		id:               params.Id,
+		name:             params.Name,
+		sku:              params.Sku,
+		description:      params.Description,
+		itemType:         params.ItemType,
+		canBeSold:        params.CanBeSold,
+		priceInCents:     params.PriceInCents,
+		priceCostInCents: params.PriceCostInCents,
+		stockQuantity:    params.StockQuantity,
+		unitOfMeasure:    params.UnitOfMeasure,
+		deletedAt:        deleteAt,
 	}
 }
 
@@ -80,9 +83,15 @@ func (i *Item) CanBeSold() bool {
 	return i.canBeSold
 }
 
+func (i *Item) SetCanBeSold(canBeSold bool) {
+	i.canBeSold = canBeSold
+}
+
 func (i *Item) PriceInCents() int64 {
 	return i.priceInCents
 }
+
+func (i *Item) PriceCostInCents() int64 { return i.priceCostInCents }
 
 func (i *Item) StockQuantity() float64 {
 	return i.stockQuantity
@@ -190,4 +199,14 @@ func (i *Item) SetDeleted(deletedAt *time.Time) {
 
 func (i *Item) DeletedAt() *time.Time {
 	return i.deletedAt
+}
+
+func (i *Item) ChangePriceCostInCents(price int64) error {
+	if price < 0 {
+		return &domain.ErrInvalidInput{FieldName: "Price Cost in Cents", Reason: "price must be non-negative"}
+	}
+
+	i.priceCostInCents = price
+
+	return nil
 }
