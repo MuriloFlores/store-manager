@@ -83,3 +83,19 @@ func (r *Recipe) UpdateIngredientQuantity(materialID string, newQuantity float64
 
 	return &ErrNotFound{ResourceName: "ingredient", ResourceID: materialID}
 }
+
+func (r *Recipe) CalculateTotalCost(materialCosts map[string]int64) (int64, error) {
+	var totalCost int64
+
+	for _, ingredient := range r.ingredients {
+		cost, ok := materialCosts[ingredient.MaterialID()]
+		if !ok {
+			return 0, &ErrInvalidInput{FieldName: "cost", Reason: "no cost found for material"}
+		}
+
+		lineCost := int64(float64(cost) * ingredient.Quantity())
+		totalCost += lineCost
+	}
+
+	return totalCost, nil
+}
