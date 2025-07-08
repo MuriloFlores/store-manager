@@ -1,22 +1,14 @@
-package domain
+package pagination
 
-import "math"
-
-type PaginationParams struct {
-	Page     int
-	PageSize int
-}
+import (
+	"math"
+)
 
 type PaginationInfo struct {
 	CurrentPage int
 	PageSize    int
 	TotalItems  int64
 	TotalPages  int
-}
-
-type PaginatedUsers struct {
-	Data       []*User
-	Pagination PaginationInfo
 }
 
 func (p *PaginationInfo) CalculateTotalPages() {

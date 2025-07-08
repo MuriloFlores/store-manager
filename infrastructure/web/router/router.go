@@ -13,6 +13,7 @@ import (
 func NewRouter(
 	userHandler *httphandlers.UserHandler,
 	authHandler *httphandlers.AuthHandler,
+	itemHandler *httphandlers.ItemHandler,
 	tokenManager ports.TokenManager,
 ) http.Handler {
 	r := mux.NewRouter()
@@ -22,6 +23,10 @@ func NewRouter(
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte("Connected to Order Manager API!"))
 	})
+
+	// --- Rota De Itens para todos os Usuários ---
+	r.HandleFunc("/itens", itemHandler.ListPublicItems).Methods(http.MethodGet)
+	r.HandleFunc("/itens/{name}", itemHandler.FindByName).Methods(http.MethodGet)
 
 	// --- Rotas de Autenticação e Criação de Usuários ---
 	r.HandleFunc("/create-user", userHandler.CreateUser).Methods(http.MethodPost)
@@ -46,6 +51,14 @@ func NewRouter(
 	api.HandleFunc("/user/{id}", userHandler.UpdateUser).Methods(http.MethodPut)
 	api.HandleFunc("/user/{id}/role", userHandler.PromoteUser).Methods(http.MethodPatch)
 	api.HandleFunc("/users", userHandler.ListUsers).Methods(http.MethodGet)
+
+	// --- Rotas de Itens ---
+	api.HandleFunc("/items", itemHandler.ListInternalItems).Methods(http.MethodGet)
+	api.HandleFunc("/item", itemHandler.CreateItem).Methods(http.MethodPost)
+	api.HandleFunc("/item/{id}", itemHandler.DeleteItem).Methods(http.MethodDelete)
+	api.HandleFunc("/item/{id}", itemHandler.FindItemByID).Methods(http.MethodGet)
+	api.HandleFunc("/item/{sku}", itemHandler.FindItemBySKU).Methods(http.MethodGet)
+	api.HandleFunc("/item/{id}", itemHandler.UpdateItem).Methods(http.MethodPatch)
 
 	allowedOrigins := handlers.AllowedOrigins([]string{"*"})
 	allowedMethods := handlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE", "OPTIONS"})

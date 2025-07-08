@@ -3,6 +3,7 @@ package repositories
 import (
 	"context"
 	"github.com/muriloFlores/StoreManager/internal/core/domain"
+	"github.com/muriloFlores/StoreManager/internal/core/domain/pagination"
 )
 
 type UserRepository interface {
@@ -13,5 +14,5 @@ type UserRepository interface {
 	Delete(ctx context.Context, userID string) error
 	CountAdmins(ctx context.Context) (int, error)
 	FindByEmailIncludingDeleted(ctx context.Context, email string) (*domain.User, error)
-	List(ctx context.Context, params *domain.PaginationParams) (*domain.PaginatedUsers, error)
+	List(ctx context.Context, params *pagination.PaginationParams) (*pagination.PaginatedResult[*domain.User], error)
 }

@@ -7,6 +7,7 @@ import (
 	"github.com/muriloFlores/StoreManager/infrastructure/security"
 	"github.com/muriloFlores/StoreManager/infrastructure/security/uuid_generator"
 	"github.com/muriloFlores/StoreManager/infrastructure/workers/email"
+	"github.com/muriloFlores/StoreManager/internal/core/use_case/items"
 	"github.com/muriloFlores/StoreManager/pkg/logger"
 	"github.com/redis/go-redis/v9"
 	"log"
@@ -62,6 +63,7 @@ func main() {
 	passwordHasher := security.NewPasswordHasher()
 	idGenerator := uuid_generator.NewUUIDGenerator()
 	tokenManager := jwt_manager.NewJWTGenerator(cfg.JWTSecret)
+	itemRepo := postgres_repository.NewPostgresItemRepository(dbpool, appLogs)
 
 	templateManager, err := templates.NewHTMLTemplateManager()
 	if err != nil {
@@ -97,12 +99,19 @@ func main() {
 		*authUseCases.RequestAccountValidationUseCase, // realmente acho que isso esta pessimo, mas não sei como resolver
 	)
 
+	itemUseCase := items.NewItemUseCases(
+		itemRepo,
+		appLogs,
+		idGenerator,
+	)
+
 	emailProcessor := email.NewEmailProcessor(emailSender, templateManager)
 	go email.RunTaskServer(redisConnectionOpt, emailProcessor, appLogs)
 
 	userHandler := web_http.NewUserHandler(userUseCases)
 	authHandler := web_http.NewAuthHandler(authUseCases, appLogs)
-	mainRouter := router.NewRouter(userHandler, authHandler, tokenManager)
+	itemHandler := web_http.NewItemHandler(itemUseCase, appLogs)
+	mainRouter := router.NewRouter(userHandler, authHandler, itemHandler, tokenManager)
 
 	server := &http.Server{
 		Addr:    ":" + cfg.ServerPort,

@@ -1,0 +1,1 @@
+ALTER TABLE items DROP COLUMN price_cost_in_cents

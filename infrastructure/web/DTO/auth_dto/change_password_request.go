@@ -1,4 +1,4 @@
-package authDTO
+package auth_dto
 
 type ChangePasswordRequest struct {
 	OldPassword string `json:"old_password" validate:"required,min=8,max=100"`
