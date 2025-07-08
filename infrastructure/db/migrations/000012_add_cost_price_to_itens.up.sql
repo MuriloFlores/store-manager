@@ -1,0 +1,2 @@
+ALTER TABLE items
+ADD COLUMN price_cost_in_cents BIGINT NOT NULL DEFAULT 0;
