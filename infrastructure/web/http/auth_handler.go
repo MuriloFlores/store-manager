@@ -6,7 +6,7 @@ import (
 	"github.com/muriloFlores/StoreManager/infrastructure/web"
 	"github.com/muriloFlores/StoreManager/internal/core/ports"
 
-	dto "github.com/muriloFlores/StoreManager/infrastructure/web/DTO/authDTO"
+	dto "github.com/muriloFlores/StoreManager/infrastructure/web/DTO/auth_dto"
 	"github.com/muriloFlores/StoreManager/infrastructure/web/middleware"
 	"github.com/muriloFlores/StoreManager/infrastructure/web/web_errors"
 	"github.com/muriloFlores/StoreManager/internal/core/domain"

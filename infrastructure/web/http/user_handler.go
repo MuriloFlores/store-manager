@@ -5,15 +5,13 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/muriloFlores/StoreManager/infrastructure/validation"
 	"github.com/muriloFlores/StoreManager/infrastructure/web"
-	"github.com/muriloFlores/StoreManager/infrastructure/web/DTO/pagination"
-	dto "github.com/muriloFlores/StoreManager/infrastructure/web/DTO/userDTO"
+	"github.com/muriloFlores/StoreManager/infrastructure/web/DTO/pagination_dto"
+	dto "github.com/muriloFlores/StoreManager/infrastructure/web/DTO/user_dto"
 	"github.com/muriloFlores/StoreManager/infrastructure/web/middleware"
 	"github.com/muriloFlores/StoreManager/infrastructure/web/web_errors"
 	"github.com/muriloFlores/StoreManager/internal/core/domain"
-	pagination2 "github.com/muriloFlores/StoreManager/internal/core/domain/pagination"
 	"github.com/muriloFlores/StoreManager/internal/core/use_case/user"
 	"net/http"
-	"strconv"
 )
 
 type UserHandler struct {
@@ -218,21 +216,7 @@ func (h *UserHandler) ListUsers(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	page, _ := strconv.Atoi(r.URL.Query().Get("page"))
-	pageSize, _ := strconv.Atoi(r.URL.Query().Get("pageSize"))
-
-	if page < 1 {
-		page = 1
-	}
-
-	if pageSize < 1 || pageSize > 100 {
-		pageSize = 10
-	}
-
-	params := &pagination2.PaginationParams{
-		Page:     page,
-		PageSize: pageSize,
-	}
+	params := pagination_dto.ParsePagination(r)
 
 	paginatedResult, err := h.useCases.List.Execute(r.Context(), actorIdentity, params)
 	if err != nil {
@@ -250,14 +234,9 @@ func (h *UserHandler) ListUsers(w http.ResponseWriter, r *http.Request) {
 		})
 	}
 
-	finalResponse := pagination.PaginatedUsersResponse{
-		Data: userResponses,
-		Pagination: pagination.PaginationInfoResponse{
-			CurrentPage: paginatedResult.Pagination.CurrentPage,
-			PageSize:    paginatedResult.Pagination.PageSize,
-			TotalItems:  paginatedResult.Pagination.TotalItems,
-			TotalPages:  paginatedResult.Pagination.TotalPages,
-		},
+	finalResponse := pagination_dto.PaginatedResponse[dto.UserResponse]{
+		Data:       userResponses,
+		Pagination: pagination_dto.ToPaginationInfoResponse(paginatedResult.Pagination),
 	}
 
 	respondWithJSON(w, http.StatusOK, finalResponse)
