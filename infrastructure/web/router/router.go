@@ -25,8 +25,11 @@ func NewRouter(
 	})
 
 	// --- Rota De Itens para todos os Usuários ---
-	r.HandleFunc("/itens", itemHandler.ListPublicItems).Methods(http.MethodGet)
-	r.HandleFunc("/itens/{name}", itemHandler.FindByName).Methods(http.MethodGet)
+	r.HandleFunc("/items", itemHandler.ListPublicItems).Methods(http.MethodGet)
+
+	// --- Rota de Busca de Itens ---
+	searchItemsHandler := http.HandlerFunc(itemHandler.SearchItem)
+	r.Handle("/items/search/{param}", middleware.TryAuthMiddleware(tokenManager)(searchItemsHandler)).Methods(http.MethodGet)
 
 	// --- Rotas de Autenticação e Criação de Usuários ---
 	r.HandleFunc("/create-user", userHandler.CreateUser).Methods(http.MethodPost)

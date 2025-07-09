@@ -13,7 +13,6 @@ import (
 	"github.com/muriloFlores/StoreManager/internal/core/domain/item"
 	"github.com/muriloFlores/StoreManager/internal/core/ports"
 	"github.com/muriloFlores/StoreManager/internal/core/use_case/items"
-	"github.com/muriloFlores/StoreManager/internal/core/value_objects"
 	"net/http"
 )
 
@@ -68,9 +67,7 @@ func (h *ItemHandler) ListInternalItems(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	actorRole := actorIdentity.Role
-
-	if actorRole == value_objects.Admin || actorRole == value_objects.Manager || actorRole == value_objects.StockPerson {
+	if actorIdentity.Role.IsStockEmployee() {
 		internalResponse := make([]item_dto.InternalItemResponse, 0, len(paginatedResult.Data))
 
 		for _, itemData := range paginatedResult.Data {
@@ -84,10 +81,10 @@ func (h *ItemHandler) ListInternalItems(w http.ResponseWriter, r *http.Request) 
 		}
 
 		respondWithJSON(w, http.StatusOK, response)
-	} else {
-
-		web_errors.NewForbiddenError("You do not have permission to access this route").Send(w)
+		return
 	}
+
+	web_errors.NewForbiddenError("You do not have permission to access this route").Send(w)
 
 }
 
@@ -210,26 +207,6 @@ func (h *ItemHandler) FindItemBySKU(w http.ResponseWriter, r *http.Request) {
 	respondWithJSON(w, http.StatusOK, response)
 }
 
-func (h *ItemHandler) FindByName(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-
-	itemName, ok := vars["name"]
-	if !ok {
-		web_errors.NewBadRequestError("item name not provided").Send(w)
-		return
-	}
-
-	itemInfo, err := h.useCase.Find.FindByName(r.Context(), itemName)
-	if err != nil {
-		web.HandleError(w, err)
-		return
-	}
-
-	response := item_dto.ToClientItemResponse(itemInfo)
-
-	respondWithJSON(w, http.StatusOK, response)
-}
-
 func (h *ItemHandler) UpdateItem(w http.ResponseWriter, r *http.Request) {
 	actorIdentity, ok := r.Context().Value(middleware.UserIdentityKey).(*domain.Identity)
 	if !ok {
@@ -238,7 +215,12 @@ func (h *ItemHandler) UpdateItem(w http.ResponseWriter, r *http.Request) {
 	}
 
 	vars := mux.Vars(r)
+
 	targetID, ok := vars["id"]
+	if !ok {
+		web_errors.NewBadRequestError("item ID not provided").Send(w)
+		return
+	}
 
 	var req item_dto.UpdateItemRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
@@ -260,5 +242,56 @@ func (h *ItemHandler) UpdateItem(w http.ResponseWriter, r *http.Request) {
 	}
 
 	response := item_dto.ToInternalItemResponse(updatedItem)
+	respondWithJSON(w, http.StatusOK, response)
+}
+
+func (h *ItemHandler) SearchItem(w http.ResponseWriter, r *http.Request) {
+	actorIdentity, ok := r.Context().Value(middleware.UserIdentityKey).(*domain.Identity)
+	if !ok {
+		web_errors.NewInternalServerError("user service not found in context").Send(w)
+		return
+	}
+
+	vars := mux.Vars(r)
+
+	searchParam, ok := vars["param"]
+	if !ok {
+		web_errors.NewBadRequestError("search param not provided").Send(w)
+		return
+	}
+
+	params := pagination_dto.ParsePagination(r)
+
+	paginatedResult, err := h.useCase.Search.Execute(r.Context(), actorIdentity, searchParam, params)
+	if err != nil {
+		web.HandleError(w, err)
+		return
+	}
+
+	if actorIdentity != nil && actorIdentity.Role.IsStockEmployee() {
+		internalResponse := make([]item_dto.InternalItemResponse, 0, len(paginatedResult.Data))
+		for _, domainItem := range paginatedResult.Data {
+			internalResponse = append(internalResponse, item_dto.ToInternalItemResponse(domainItem))
+		}
+
+		response := pagination_dto.PaginatedResponse[item_dto.InternalItemResponse]{
+			Data:       internalResponse,
+			Pagination: pagination_dto.ToPaginationInfoResponse(paginatedResult.Pagination),
+		}
+
+		respondWithJSON(w, http.StatusOK, response)
+		return
+	}
+
+	publicResponse := make([]item_dto.ClientItemResponse, 0, len(paginatedResult.Data))
+	for _, domainItem := range paginatedResult.Data {
+		publicResponse = append(publicResponse, item_dto.ToClientItemResponse(domainItem))
+	}
+
+	response := pagination_dto.PaginatedResponse[item_dto.ClientItemResponse]{
+		Data:       publicResponse,
+		Pagination: pagination_dto.ToPaginationInfoResponse(paginatedResult.Pagination),
+	}
+
 	respondWithJSON(w, http.StatusOK, response)
 }
