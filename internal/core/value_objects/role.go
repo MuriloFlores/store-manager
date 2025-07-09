@@ -27,3 +27,12 @@ func (r Role) ToString() string {
 func (r Role) ExpectedValue() string {
 	return "admin, manager, salesperson, client, stock_person, cashier"
 }
+
+func (r Role) IsStockEmployee() bool {
+	switch r {
+	case Admin, Manager, StockPerson:
+		return true
+	default:
+		return false
+	}
+}
