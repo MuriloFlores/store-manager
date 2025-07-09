@@ -163,7 +163,7 @@ func (r *PostgresItemRepository) Update(ctx context.Context, item *item.Item) er
 	return nil
 }
 
-func (r *PostgresItemRepository) List(ctx context.Context, PaginationParams *pagination.PaginationParams) (*pagination.PaginatedResult[*item.Item], error) {
+func (r *PostgresItemRepository) List(ctx context.Context, paginationParams *pagination.PaginationParams) (*pagination.PaginatedResult[*item.Item], error) {
 	var totalItems int64
 	countQuery := `SELECT COUNT(*) FROM items WHERE deleted_at IS NULL`
 
@@ -171,9 +171,15 @@ func (r *PostgresItemRepository) List(ctx context.Context, PaginationParams *pag
 		return nil, fmt.Errorf("error counting items: %w", err)
 	}
 
-	paginationInfo := pagination.PaginationInfo{}
+	paginationInfo := pagination.PaginationInfo{
+		CurrentPage: paginationParams.Page,
+		PageSize:    paginationParams.PageSize,
+		TotalItems:  totalItems,
+	}
+
 	paginationInfo.CalculateTotalPages()
-	offset := (PaginationParams.Page - 1) * PaginationParams.PageSize
+
+	offset := (paginationParams.Page - 1) * paginationParams.PageSize
 
 	query := `
 		SELECT id, name, description, sku, type, is_active, can_be_sold, price_sale_in_cents, price_cost_in_cents,
@@ -183,18 +189,18 @@ func (r *PostgresItemRepository) List(ctx context.Context, PaginationParams *pag
 		ORDER BY name
 		LIMIT $1 OFFSET $2`
 
-	rows, err := r.db.Query(ctx, query, PaginationParams.PageSize, offset)
+	rows, err := r.db.Query(ctx, query, paginationParams.PageSize, offset)
 	if err != nil {
 		return nil, fmt.Errorf("error listing items: %w", err)
 	}
 	defer rows.Close()
 
-	items := make([]*item.Item, 0, PaginationParams.PageSize)
+	items := make([]*item.Item, 0, paginationParams.PageSize)
 	for rows.Next() {
 		var params item.HydrateItemParams
 		var createdAt, updatedAt, deletedAt *time.Time
 
-		if err := rows.Scan(
+		if err = rows.Scan(
 			&params.Id, &params.Name, &params.Description, &params.Sku, &params.ItemType,
 			&params.Active, &params.CanBeSold, &params.PriceInCents, &params.PriceCostInCents, &params.StockQuantity,
 			&params.UnitOfMeasure, &params.MinimumStockLevel,
