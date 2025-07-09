@@ -6,6 +6,7 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/muriloFlores/StoreManager/internal/core/domain"
 	"github.com/muriloFlores/StoreManager/internal/core/ports"
+	"github.com/muriloFlores/StoreManager/internal/core/value_objects"
 	"time"
 )
 
@@ -24,7 +25,7 @@ func (j *jwtGenerator) Generate(identity *domain.Identity) (string, error) {
 
 	claims := &AppClaims{
 		UserID: identity.UserID,
-		Role:   identity.Role,
+		Role:   string(identity.Role),
 		Name:   identity.Name,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(expirationTime),
@@ -62,7 +63,7 @@ func (j *jwtGenerator) Validate(tokenString string) (*domain.Identity, error) {
 
 	identity := &domain.Identity{
 		UserID: claims.UserID,
-		Role:   claims.Role,
+		Role:   value_objects.Role(claims.Role),
 		Name:   claims.Name,
 	}
 
