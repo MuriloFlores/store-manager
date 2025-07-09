@@ -5,7 +5,6 @@ import (
 	"github.com/muriloFlores/StoreManager/internal/core/domain"
 	"github.com/muriloFlores/StoreManager/internal/core/ports"
 	"github.com/muriloFlores/StoreManager/internal/core/ports/repositories"
-	"github.com/muriloFlores/StoreManager/internal/core/value_objects"
 )
 
 type DeleteItemUseCase struct {
@@ -24,7 +23,7 @@ func NewDeleteItemUseCase(itemRepo repositories.ItemRepository, logger ports.Log
 func (uc *DeleteItemUseCase) Execute(ctx context.Context, actor *domain.Identity, itemID string) error {
 	uc.logger.InfoLevel("Init delete item", map[string]interface{}{"item_ID": itemID})
 
-	if actor.Role != value_objects.Admin && actor.Role != value_objects.Manager && actor.Role != value_objects.StockPerson {
+	if actor.Role.IsStockEmployee() {
 		return &domain.ErrForbidden{Action: "user does not have permission to delete item"}
 	}
 

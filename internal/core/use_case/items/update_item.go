@@ -6,7 +6,6 @@ import (
 	"github.com/muriloFlores/StoreManager/internal/core/domain/item"
 	"github.com/muriloFlores/StoreManager/internal/core/ports"
 	"github.com/muriloFlores/StoreManager/internal/core/ports/repositories"
-	"github.com/muriloFlores/StoreManager/internal/core/value_objects"
 )
 
 type UpdateItemUseCase struct {
@@ -33,7 +32,7 @@ func NewUpdateItemUseCase(itemRepo repositories.ItemRepository, logger ports.Log
 func (uc *UpdateItemUseCase) Execute(ctx context.Context, actor *domain.Identity, itemID string, params UpdateItemParams) (*item.Item, error) {
 	uc.logger.InfoLevel("Initiate update item", map[string]interface{}{"item_ID": itemID})
 
-	if actor.Role != value_objects.Admin && actor.Role != value_objects.Manager && actor.Role != value_objects.StockPerson {
+	if actor.Role.IsStockEmployee() {
 		uc.logger.InfoLevel("user does not have permission to update item", map[string]interface{}{"id": itemID})
 		return nil, &domain.ErrForbidden{Action: "trying update item"}
 	}
