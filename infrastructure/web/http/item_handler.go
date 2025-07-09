@@ -82,9 +82,9 @@ func (h *ItemHandler) ListInternalItems(w http.ResponseWriter, r *http.Request) 
 
 		respondWithJSON(w, http.StatusOK, response)
 		return
+	} else {
+		web_errors.NewForbiddenError("You do not have permission to access this route").Send(w)
 	}
-
-	web_errors.NewForbiddenError("You do not have permission to access this route").Send(w)
 
 }
 
