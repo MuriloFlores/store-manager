@@ -11,6 +11,7 @@ type ItemsUseCases struct {
 	Update *UpdateItemUseCase
 	Delete *DeleteItemUseCase
 	List   *ListItemUseCase
+	Search *SearchItemUseCase
 }
 
 func NewItemUseCases(
@@ -24,5 +25,6 @@ func NewItemUseCases(
 		Update: NewUpdateItemUseCase(itemRepo, logger),
 		Delete: NewDeleteItemUseCase(itemRepo, logger),
 		List:   NewListItemUseCase(itemRepo, logger),
+		Search: NewSearchItemUseCase(itemRepo, logger),
 	}
 }

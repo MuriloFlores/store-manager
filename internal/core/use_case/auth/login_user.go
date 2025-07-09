@@ -6,6 +6,7 @@ import (
 	"github.com/muriloFlores/StoreManager/internal/core/domain"
 	"github.com/muriloFlores/StoreManager/internal/core/ports"
 	"github.com/muriloFlores/StoreManager/internal/core/ports/repositories"
+	"github.com/muriloFlores/StoreManager/internal/core/value_objects"
 )
 
 type LoginUserUseCase struct {
@@ -46,7 +47,7 @@ func (uc *LoginUserUseCase) Execute(ctx context.Context, email, password string)
 
 	userIdentity := domain.Identity{
 		UserID: user.ID(),
-		Role:   user.Role(),
+		Role:   value_objects.Role(user.Role()),
 		Name:   user.Name(),
 	}
 

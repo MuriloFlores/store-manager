@@ -8,7 +8,6 @@ import (
 	"github.com/muriloFlores/StoreManager/internal/core/domain/item"
 	"github.com/muriloFlores/StoreManager/internal/core/ports"
 	"github.com/muriloFlores/StoreManager/internal/core/ports/repositories"
-	"github.com/muriloFlores/StoreManager/internal/core/value_objects"
 )
 
 type CreateItemParams struct {
@@ -46,13 +45,7 @@ func NewCreateItemUseCase(
 func (uc *CreateItemUseCase) Execute(ctx context.Context, params CreateItemParams, actor *domain.Identity) (*item.Item, error) {
 	uc.logger.InfoLevel("Invoke Create Item Use Case", map[string]interface{}{"item": ""})
 
-	allowedRoles := map[string]bool{
-		value_objects.Admin:       true,
-		value_objects.Manager:     true,
-		value_objects.StockPerson: true,
-	}
-
-	if !allowedRoles[actor.Role] {
+	if actor.Role.IsStockEmployee() {
 		return nil, &domain.ErrForbidden{Action: "You don't have permission to create an item"}
 	}
 
