@@ -58,7 +58,6 @@ func (h *ItemHandler) ListInternalItems(w http.ResponseWriter, r *http.Request) 
 		web_errors.NewInternalServerError("user identity not found in context").Send(w)
 		return
 	}
-
 	params := pagination_dto.ParsePagination(r)
 
 	paginatedResult, err := h.useCase.List.ListInternal(r.Context(), actorIdentity, params)
@@ -67,25 +66,17 @@ func (h *ItemHandler) ListInternalItems(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	if actorIdentity.Role.IsStockEmployee() {
-		internalResponse := make([]item_dto.InternalItemResponse, 0, len(paginatedResult.Data))
-
-		for _, itemData := range paginatedResult.Data {
-
-			internalResponse = append(internalResponse, item_dto.ToInternalItemResponse(itemData))
-		}
-
-		response := pagination_dto.PaginatedResponse[item_dto.InternalItemResponse]{
-			Data:       internalResponse,
-			Pagination: pagination_dto.ToPaginationInfoResponse(paginatedResult.Pagination),
-		}
-
-		respondWithJSON(w, http.StatusOK, response)
-		return
-	} else {
-		web_errors.NewForbiddenError("You do not have permission to access this route").Send(w)
+	internalResponse := make([]item_dto.InternalItemResponse, 0, len(paginatedResult.Data))
+	for _, itemData := range paginatedResult.Data {
+		internalResponse = append(internalResponse, item_dto.ToInternalItemResponse(itemData))
 	}
 
+	response := pagination_dto.PaginatedResponse[item_dto.InternalItemResponse]{
+		Data:       internalResponse,
+		Pagination: pagination_dto.ToPaginationInfoResponse(paginatedResult.Pagination),
+	}
+
+	respondWithJSON(w, http.StatusOK, response)
 }
 
 func (h *ItemHandler) CreateItem(w http.ResponseWriter, r *http.Request) {

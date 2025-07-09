@@ -25,9 +25,12 @@ func (uc *ListItemUseCase) ListPublic(ctx context.Context, params *pagination.Pa
 }
 
 func (uc *ListItemUseCase) ListInternal(ctx context.Context, actor *domain.Identity, params *pagination.PaginationParams) (*pagination.PaginatedResult[*item.Item], error) {
-	if actor.Role.IsStockEmployee() {
-		return nil, &domain.ErrForbidden{Action: "list item"}
+	uc.logger.InfoLevel("executing list internal items use case", map[string]interface{}{"actor_id": actor.UserID})
+
+	if !actor.Role.IsStockEmployee() {
+		return nil, &domain.ErrForbidden{Action: "list internal items"}
 	}
 
+	uc.logger.InfoLevel("User has permission, fetching internal item list", map[string]interface{}{"actor_id": actor.UserID})
 	return uc.itemRepo.List(ctx, params)
 }
