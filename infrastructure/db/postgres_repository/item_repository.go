@@ -164,10 +164,13 @@ func (r *PostgresItemRepository) Update(ctx context.Context, item *item.Item) er
 }
 
 func (r *PostgresItemRepository) List(ctx context.Context, paginationParams *pagination.PaginationParams) (*pagination.PaginatedResult[*item.Item], error) {
+	r.logger.InfoLevel("Init list item repository")
+
 	var totalItems int64
 	countQuery := `SELECT COUNT(*) FROM items WHERE deleted_at IS NULL`
 
 	if err := r.db.QueryRow(ctx, countQuery).Scan(&totalItems); err != nil {
+		r.logger.ErrorLevel("error while scan total items", err, map[string]interface{}{})
 		return nil, fmt.Errorf("error counting items: %w", err)
 	}
 
@@ -178,6 +181,7 @@ func (r *PostgresItemRepository) List(ctx context.Context, paginationParams *pag
 	}
 
 	paginationInfo.CalculateTotalPages()
+	r.logger.InfoLevel("pagination info complete")
 
 	offset := (paginationParams.Page - 1) * paginationParams.PageSize
 
@@ -191,6 +195,7 @@ func (r *PostgresItemRepository) List(ctx context.Context, paginationParams *pag
 
 	rows, err := r.db.Query(ctx, query, paginationParams.PageSize, offset)
 	if err != nil {
+		r.logger.ErrorLevel("error while execute query", err, map[string]interface{}{})
 		return nil, fmt.Errorf("error listing items: %w", err)
 	}
 	defer rows.Close()
@@ -206,6 +211,7 @@ func (r *PostgresItemRepository) List(ctx context.Context, paginationParams *pag
 			&params.UnitOfMeasure, &params.MinimumStockLevel,
 			&createdAt, &updatedAt, &deletedAt,
 		); err != nil {
+			r.logger.ErrorLevel("error while scan item", err, map[string]interface{}{})
 			return nil, fmt.Errorf("error scanning item row: %w", err)
 		}
 
