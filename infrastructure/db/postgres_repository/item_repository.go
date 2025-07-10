@@ -31,7 +31,7 @@ func NewPostgresItemRepository(db *pgxpool.Pool, logger ports.Logger) repositori
 func (r *PostgresItemRepository) Save(ctx context.Context, item *item.Item) error {
 	query := `
 		INSERT INTO items (id, name, description, sku, type, can_be_sold, price_sale_in_cents, price_cost_in_cents, stock_quantity, minimum_stock_level, unit_of_measure, is_active)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`
 
 	_, err := r.db.Exec(ctx, query,
 		item.ID(),
