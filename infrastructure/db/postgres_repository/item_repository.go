@@ -226,7 +226,7 @@ func (r *PostgresItemRepository) List(ctx context.Context, paginationParams *pag
 }
 
 func (r *PostgresItemRepository) Delete(ctx context.Context, itemID string) error {
-	query := `UPDATE items SET deleted_at = NOW() WHERE id = $2`
+	query := `UPDATE items SET deleted_at = NOW() WHERE id = $1`
 
 	commandTag, err := r.db.Exec(ctx, query, itemID)
 	if err != nil {
