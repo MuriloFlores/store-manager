@@ -9,6 +9,7 @@ import (
 type ItemRepository interface {
 	Save(ctx context.Context, item *item.Item) error
 	FindByID(ctx context.Context, id string) (*item.Item, error)
+	FindByIDIncludingDeleted(ctx context.Context, id string) (*item.Item, error)
 	FindBySKU(ctx context.Context, sku string) (*item.Item, error)
 	Update(ctx context.Context, item *item.Item) error
 	Delete(ctx context.Context, itemID string) error

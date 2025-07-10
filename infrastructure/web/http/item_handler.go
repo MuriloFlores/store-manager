@@ -224,7 +224,14 @@ func (h *ItemHandler) UpdateItem(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	params := items.UpdateItemParams{}
+	params := items.UpdateItemParams{
+		Name:              req.Name,
+		Description:       req.Description,
+		IsActive:          req.IsActive,
+		CanBeSold:         req.CanBeSold,
+		PriceSaleInCents:  req.PriceSaleInCents,
+		MinimumStockLevel: req.MinimumStockLevel,
+	}
 
 	updatedItem, err := h.useCase.Update.Execute(r.Context(), actorIdentity, targetID, params)
 	if err != nil {
@@ -284,5 +291,30 @@ func (h *ItemHandler) SearchItem(w http.ResponseWriter, r *http.Request) {
 		Pagination: pagination_dto.ToPaginationInfoResponse(paginatedResult.Pagination),
 	}
 
+	respondWithJSON(w, http.StatusOK, response)
+}
+
+func (h *ItemHandler) ReactiveItem(w http.ResponseWriter, r *http.Request) {
+	actorIdentity, ok := r.Context().Value(middleware.UserIdentityKey).(*domain.Identity)
+	if !ok {
+		web_errors.NewInternalServerError("user service not found in context").Send(w)
+		return
+	}
+
+	vars := mux.Vars(r)
+
+	targetID, ok := vars["id"]
+	if !ok {
+		web_errors.NewBadRequestError("search param not provided").Send(w)
+		return
+	}
+
+	itemDomain, err := h.useCase.Reactive.Execute(r.Context(), actorIdentity, targetID)
+	if err != nil {
+		web.HandleError(w, err)
+		return
+	}
+
+	response := item_dto.ToInternalItemResponse(itemDomain)
 	respondWithJSON(w, http.StatusOK, response)
 }

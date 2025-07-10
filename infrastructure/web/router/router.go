@@ -62,6 +62,7 @@ func NewRouter(
 	api.HandleFunc("/item/{id}", itemHandler.FindItemByID).Methods(http.MethodGet)
 	api.HandleFunc("/item/{sku}", itemHandler.FindItemBySKU).Methods(http.MethodGet)
 	api.HandleFunc("/item/{id}", itemHandler.UpdateItem).Methods(http.MethodPatch)
+	api.HandleFunc("/items/{id}/reactivate", itemHandler.ReactiveItem).Methods(http.MethodPost)
 
 	allowedOrigins := handlers.AllowedOrigins([]string{"*"})
 	allowedMethods := handlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"})
