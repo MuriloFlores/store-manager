@@ -113,6 +113,12 @@ func (b *ItemBuilder) WithPriceCostInCents(price int64) *ItemBuilder {
 	return b
 }
 
+func (b *ItemBuilder) WithActive(active bool) *ItemBuilder {
+	b.item.active = active
+
+	return b
+}
+
 func (b *ItemBuilder) Build() (*Item, error) {
 	if b.err != nil {
 		return nil, b.err
