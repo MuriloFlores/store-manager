@@ -49,7 +49,7 @@ jobs:
             cd ${{ secrets.EC2_APP_DIR }}
           
             echo "--- Starting Deployment on EC2 ---"
-
+          
             echo "1/5 - Pulling the latest backend image from Docker Hub..."
             docker compose -f docker-compose.prod.yml pull backend
 

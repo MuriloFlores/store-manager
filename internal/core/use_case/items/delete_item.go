@@ -23,7 +23,7 @@ func NewDeleteItemUseCase(itemRepo repositories.ItemRepository, logger ports.Log
 func (uc *DeleteItemUseCase) Execute(ctx context.Context, actor *domain.Identity, itemID string) error {
 	uc.logger.InfoLevel("Init delete item", map[string]interface{}{"item_ID": itemID})
 
-	if actor.Role.IsStockEmployee() {
+	if !actor.Role.IsStockEmployee() {
 		return &domain.ErrForbidden{Action: "user does not have permission to delete item"}
 	}
 
