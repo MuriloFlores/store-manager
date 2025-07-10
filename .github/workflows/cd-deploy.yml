@@ -32,9 +32,15 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
 
-      - name: Copy migrations files to server
-        run : |
-          scp -r -o StrictHostKeyChecking=no ./infrastructure/db/migrations ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }}:${{ secrets.EC2_APP_DIR }}/migrations
+      - name: Sync migration files to server
+        uses: easingthemes/ssh-deploy@v5.0.0
+        with:
+          SSH_PRIVATE_KEY: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
+          REMOTE_HOST: ${{ secrets.EC2_HOST }}
+          REMOTE_USER:  ${{ secrets.EC2_USERNAME}}
+          SOURCE: 'infrastructure/db/migrations/'
+          TARGET: '${{ secrets.EC2_APP_DIR }}/migrations'
+          ARGS: '-rltgoDvz --delete'
 
       - name: Deploy to server
         run: |
