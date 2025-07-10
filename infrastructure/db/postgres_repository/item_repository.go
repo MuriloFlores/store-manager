@@ -88,6 +88,35 @@ func (r *PostgresItemRepository) FindByID(ctx context.Context, id string) (*item
 	return itemDomain, err
 }
 
+func (r *PostgresItemRepository) FindByIDIncludingDeleted(ctx context.Context, id string) (*item.Item, error) {
+	query := `
+	SELECT id, name, description, sku, type, is_active, can_be_sold, price_sale_in_cents, price_cost_in_cents, stock_quantity,
+		unit_of_measure, minimum_stock_level, deleted_at
+	FROM items WHERE id = $1`
+
+	var deletedAt *time.Time
+	var params item.HydrateItemParams
+
+	err := r.db.QueryRow(ctx, query, id).Scan(
+		&params.Id, &params.Name, &params.Description, &params.Sku, &params.ItemType, &params.Active, &params.CanBeSold,
+		&params.PriceInCents, &params.PriceCostInCents, &params.StockQuantity, &params.UnitOfMeasure,
+		&params.MinimumStockLevel, &deletedAt,
+	)
+
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, &domain.ErrNotFound{ResourceName: "item", ResourceID: id}
+		}
+
+		r.logger.ErrorLevel("Error finding item", err, map[string]interface{}{"item": id})
+		return nil, err
+	}
+
+	itemDomain := item.HydrateItem(params, deletedAt)
+
+	return itemDomain, err
+}
+
 func (r *PostgresItemRepository) FindBySKU(ctx context.Context, sku string) (*item.Item, error) {
 	query := `
 	SELECT id, name, description, sku, type, is_active, can_be_sold, price_sale_in_cents, price_cost_in_cents, stock_quantity,

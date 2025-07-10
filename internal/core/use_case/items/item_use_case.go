@@ -6,12 +6,13 @@ import (
 )
 
 type ItemsUseCases struct {
-	Create *CreateItemUseCase
-	Find   *FindItemUseCase
-	Update *UpdateItemUseCase
-	Delete *DeleteItemUseCase
-	List   *ListItemUseCase
-	Search *SearchItemUseCase
+	Create   *CreateItemUseCase
+	Find     *FindItemUseCase
+	Update   *UpdateItemUseCase
+	Delete   *DeleteItemUseCase
+	List     *ListItemUseCase
+	Search   *SearchItemUseCase
+	Reactive *ReactiveItemUseCase
 }
 
 func NewItemUseCases(
@@ -20,11 +21,12 @@ func NewItemUseCases(
 	generator ports.IDGenerator,
 ) *ItemsUseCases {
 	return &ItemsUseCases{
-		Create: NewCreateItemUseCase(itemRepo, logger, generator),
-		Find:   NewFindItemUseCase(itemRepo, logger),
-		Update: NewUpdateItemUseCase(itemRepo, logger),
-		Delete: NewDeleteItemUseCase(itemRepo, logger),
-		List:   NewListItemUseCase(itemRepo, logger),
-		Search: NewSearchItemUseCase(itemRepo, logger),
+		Create:   NewCreateItemUseCase(itemRepo, logger, generator),
+		Find:     NewFindItemUseCase(itemRepo, logger),
+		Update:   NewUpdateItemUseCase(itemRepo, logger),
+		Delete:   NewDeleteItemUseCase(itemRepo, logger),
+		List:     NewListItemUseCase(itemRepo, logger),
+		Search:   NewSearchItemUseCase(itemRepo, logger),
+		Reactive: NewReactiveItemUseCase(itemRepo, logger),
 	}
 }
