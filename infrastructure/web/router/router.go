@@ -64,7 +64,7 @@ func NewRouter(
 	api.HandleFunc("/item/{id}", itemHandler.UpdateItem).Methods(http.MethodPatch)
 
 	allowedOrigins := handlers.AllowedOrigins([]string{"*"})
-	allowedMethods := handlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE", "OPTIONS"})
+	allowedMethods := handlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"})
 	allowedHeaders := handlers.AllowedHeaders([]string{"X-Requested-With", "Content-Type", "Authorization"})
 
 	log.Println("Roteador configurado com sucesso.")

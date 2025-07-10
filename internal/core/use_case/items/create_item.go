@@ -77,6 +77,7 @@ func (uc *CreateItemUseCase) Execute(ctx context.Context, params CreateItemParam
 		WithQuantity(params.StockQuantity).
 		WithMinimumStock(params.MinimumStockLevel).
 		WithCanBeSold(params.CanBeSold).
+		WithActive(params.IsActive).
 		Build()
 
 	if err != nil {
