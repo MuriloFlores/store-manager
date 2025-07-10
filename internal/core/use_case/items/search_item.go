@@ -29,7 +29,7 @@ func (uc *SearchItemUseCase) Execute(ctx context.Context, actor *domain.Identity
 
 	isPublicSearch := true
 
-	if actor.Role.IsStockEmployee() {
+	if !actor.Role.IsStockEmployee() {
 		uc.logger.InfoLevel("user not allowed")
 		isPublicSearch = false
 	}

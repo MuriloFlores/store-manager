@@ -32,7 +32,7 @@ func NewUpdateItemUseCase(itemRepo repositories.ItemRepository, logger ports.Log
 func (uc *UpdateItemUseCase) Execute(ctx context.Context, actor *domain.Identity, itemID string, params UpdateItemParams) (*item.Item, error) {
 	uc.logger.InfoLevel("Initiate update item", map[string]interface{}{"item_ID": itemID})
 
-	if actor.Role.IsStockEmployee() {
+	if !actor.Role.IsStockEmployee() {
 		uc.logger.InfoLevel("user does not have permission to update item", map[string]interface{}{"id": itemID})
 		return nil, &domain.ErrForbidden{Action: "trying update item"}
 	}

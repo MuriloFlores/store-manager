@@ -26,7 +26,7 @@ func NewFindItemUseCase(
 func (uc *FindItemUseCase) FindByID(ctx context.Context, id string, actor *domain.Identity) (*item.Item, error) {
 	uc.logger.InfoLevel("Invoke Find By ID", map[string]interface{}{"id": id})
 
-	if actor.Role.IsStockEmployee() {
+	if !actor.Role.IsStockEmployee() {
 		uc.logger.InfoLevel("user not allowed")
 		return nil, &domain.ErrForbidden{Action: "You don't have permission to create an item"}
 	}

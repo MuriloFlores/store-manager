@@ -45,7 +45,7 @@ func NewCreateItemUseCase(
 func (uc *CreateItemUseCase) Execute(ctx context.Context, params CreateItemParams, actor *domain.Identity) (*item.Item, error) {
 	uc.logger.InfoLevel("Invoke Create Item Use Case", map[string]interface{}{"item": ""})
 
-	if actor.Role.IsStockEmployee() {
+	if !actor.Role.IsStockEmployee() {
 		return nil, &domain.ErrForbidden{Action: "You don't have permission to create an item"}
 	}
 
