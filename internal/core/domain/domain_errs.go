@@ -21,8 +21,10 @@ func (e *ErrNotFound) Error() string {
 }
 
 type ErrConflict struct {
-	Resource string
-	Details  string
+	Resource       string
+	Details        string
+	ExistingItemID string
+	ExistingName   string
 }
 
 func (e *ErrConflict) Error() string {

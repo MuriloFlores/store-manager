@@ -60,7 +60,12 @@ func (uc *CreateItemUseCase) Execute(ctx context.Context, params CreateItemParam
 		}
 
 		if existing != nil {
-			return nil, &domain.ErrConflict{Resource: "item", Details: fmt.Sprintf("SKU %s already exists", params.SKU)}
+			return nil, &domain.ErrConflict{
+				Resource:       "item",
+				Details:        fmt.Sprintf("SKU %s already exists", params.SKU),
+				ExistingItemID: existing.ID(),
+				ExistingName:   existing.Name(),
+			}
 		}
 	}
 

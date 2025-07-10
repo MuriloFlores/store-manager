@@ -83,9 +83,9 @@ func (r *PostgresItemRepository) FindByID(ctx context.Context, id string) (*item
 		return nil, err
 	}
 
-	item := item.HydrateItem(params, deletedAt)
+	itemDomain := item.HydrateItem(params, deletedAt)
 
-	return item, err
+	return itemDomain, err
 }
 
 func (r *PostgresItemRepository) FindBySKU(ctx context.Context, sku string) (*item.Item, error) {

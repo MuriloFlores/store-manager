@@ -124,11 +124,5 @@ func (b *ItemBuilder) Build() (*Item, error) {
 		return nil, b.err
 	}
 
-	if b.item.itemType == "" {
-		b.item.itemType = Material
-	}
-
-	b.item.active = true
-
 	return &b.item, nil
 }
