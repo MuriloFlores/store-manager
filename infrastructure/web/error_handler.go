@@ -30,8 +30,20 @@ func HandleError(w http.ResponseWriter, err error) {
 		restErr = web_errors.NewNotFoundError(err.Error())
 
 	case errors.As(err, &conflict):
-		restErr = web_errors.NewConflictError(err.Error())
+		if conflict.ExistingItemID != "" && conflict.ExistingName != "" {
+			causes := []web_errors.Causes{{
+				Field:   "SKU",
+				Message: "Este SKU já pertence a um item existente",
+				Context: map[string]interface{}{
+					"existing_item_id": conflict.ExistingItemID,
+					"existing_name":    conflict.ExistingName,
+				},
+			}}
 
+			restErr = web_errors.NewConflictErrorWithCause("SKU already existing", causes)
+		} else {
+			restErr = web_errors.NewConflictError(err.Error())
+		}
 	case errors.As(err, &forbidden):
 		restErr = web_errors.NewForbiddenError(err.Error())
 

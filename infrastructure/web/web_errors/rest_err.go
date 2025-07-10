@@ -6,15 +6,16 @@ import (
 )
 
 type RestErr struct {
-	Message string   `json:"message" example:"error trying to process request"`
-	Err     string   `json:"error" example:"internal_server_error"`
-	Code    int      `json:"code" example:"500"`
+	Message string   `json:"message"`
+	Err     string   `json:"error"`
+	Code    int      `json:"code"`
 	Causes  []Causes `json:"causes"`
 }
 
 type Causes struct {
-	Field   string `json:"field" example:"name"`
-	Message string `json:"message" example:"name is required"`
+	Field   string                 `json:"field"`
+	Message string                 `json:"message"`
+	Context map[string]interface{} `json:"context,omitempty"`
 }
 
 func (r *RestErr) Error() string {
@@ -81,6 +82,15 @@ func NewConflictError(message string) *RestErr {
 		Message: message,
 		Err:     "conflict",
 		Code:    http.StatusConflict,
+	}
+}
+
+func NewConflictErrorWithCause(message string, causes []Causes) *RestErr {
+	return &RestErr{
+		Message: message,
+		Err:     "conflict",
+		Code:    http.StatusConflict,
+		Causes:  causes,
 	}
 }
 
