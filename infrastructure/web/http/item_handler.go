@@ -234,8 +234,8 @@ func (h *ItemHandler) UpdateItem(w http.ResponseWriter, r *http.Request) {
 		MinimumStockLevel: req.MinimumStockLevel,
 	}
 
-	fmt.Sprintf("%s", req.Active)
-	fmt.Sprintf("%s", params.IsActive)
+	fmt.Sprintf("%v", req.Active)
+	fmt.Sprintf("%v", params.IsActive)
 
 	updatedItem, err := h.useCase.Update.Execute(r.Context(), actorIdentity, targetID, params)
 	if err != nil {
