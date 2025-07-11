@@ -227,7 +227,7 @@ func (h *ItemHandler) UpdateItem(w http.ResponseWriter, r *http.Request) {
 	params := items.UpdateItemParams{
 		Name:              req.Name,
 		Description:       req.Description,
-		IsActive:          req.IsActive,
+		IsActive:          req.Active,
 		CanBeSold:         req.CanBeSold,
 		PriceSaleInCents:  req.PriceSaleInCents,
 		MinimumStockLevel: req.MinimumStockLevel,
