@@ -8,7 +8,7 @@ type InternalItemResponse struct {
 	Description       string  `json:"description"`
 	SKU               string  `json:"sku"`
 	ItemType          string  `json:"item_type"`
-	IsActive          bool    `json:"is_active"`
+	Active            bool    `json:"active"`
 	CanBeSold         bool    `json:"can_be_sold"`
 	PriceSale         int64   `json:"price_sale"`
 	PriceCost         int64   `json:"price_cost"`
@@ -24,7 +24,7 @@ func ToInternalItemResponse(item *item.Item) InternalItemResponse {
 		Description:       item.Description(),
 		SKU:               item.SKU(),
 		ItemType:          string(item.ItemType()),
-		IsActive:          item.IsActive(),
+		Active:            item.IsActive(),
 		CanBeSold:         item.CanBeSold(),
 		PriceSale:         item.PriceInCents(),
 		PriceCost:         item.PriceCostInCents(),
