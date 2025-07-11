@@ -45,17 +45,19 @@ type HydrateItemParams struct {
 
 func HydrateItem(params HydrateItemParams, deleteAt *time.Time) *Item {
 	return &Item{
-		id:               params.Id,
-		name:             params.Name,
-		sku:              params.Sku,
-		description:      params.Description,
-		itemType:         params.ItemType,
-		canBeSold:        params.CanBeSold,
-		priceInCents:     params.PriceInCents,
-		priceCostInCents: params.PriceCostInCents,
-		stockQuantity:    params.StockQuantity,
-		unitOfMeasure:    params.UnitOfMeasure,
-		deletedAt:        deleteAt,
+		id:                params.Id,
+		name:              params.Name,
+		sku:               params.Sku,
+		description:       params.Description,
+		itemType:          params.ItemType,
+		active:            params.Active,
+		canBeSold:         params.CanBeSold,
+		priceInCents:      params.PriceInCents,
+		priceCostInCents:  params.PriceCostInCents,
+		stockQuantity:     params.StockQuantity,
+		unitOfMeasure:     params.UnitOfMeasure,
+		minimumStockLevel: params.MinimumStockLevel,
+		deletedAt:         deleteAt,
 	}
 }
 
