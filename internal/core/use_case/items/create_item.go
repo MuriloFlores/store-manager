@@ -59,6 +59,8 @@ func (uc *CreateItemUseCase) Execute(ctx context.Context, params CreateItemParam
 			}
 		}
 
+		uc.logger.InfoLevel("Verification 1")
+
 		if existing != nil {
 			uc.logger.InfoLevel("Product already exists")
 
@@ -69,6 +71,8 @@ func (uc *CreateItemUseCase) Execute(ctx context.Context, params CreateItemParam
 				ExistingName:   existing.Name(),
 			}
 		}
+
+		uc.logger.InfoLevel("Verification 2")
 	}
 
 	id := uc.generator.Generate()
