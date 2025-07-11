@@ -202,8 +202,6 @@ func (r *PostgresItemRepository) Update(ctx context.Context, item *item.Item) er
 		item.ID(),
 	)
 
-	fmt.Printf("-------------- %v -------------------", item.IsActive())
-
 	if err != nil {
 		var pgErr *pgconn.PgError
 		if errors.As(err, &pgErr) && pgErr.Code == "23505" {
