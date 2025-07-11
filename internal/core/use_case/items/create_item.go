@@ -50,7 +50,7 @@ func (uc *CreateItemUseCase) Execute(ctx context.Context, params CreateItemParam
 	}
 
 	if params.SKU != "" {
-		existing, err := uc.itemRepo.FindBySKU(ctx, params.SKU)
+		existing, err := uc.itemRepo.FindBySKUIncludingDeleted(ctx, params.SKU)
 		if err != nil {
 			var notFoundErr *domain.ErrNotFound
 			if !errors.As(err, &notFoundErr) {
