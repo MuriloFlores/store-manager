@@ -2,6 +2,7 @@ package http
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/gorilla/mux"
 	"github.com/muriloFlores/StoreManager/infrastructure/validation"
 	"github.com/muriloFlores/StoreManager/infrastructure/web"
@@ -232,6 +233,8 @@ func (h *ItemHandler) UpdateItem(w http.ResponseWriter, r *http.Request) {
 		PriceSaleInCents:  req.PriceSaleInCents,
 		MinimumStockLevel: req.MinimumStockLevel,
 	}
+
+	fmt.Println(params.IsActive)
 
 	updatedItem, err := h.useCase.Update.Execute(r.Context(), actorIdentity, targetID, params)
 	if err != nil {
