@@ -358,7 +358,7 @@ func (r *PostgresItemRepository) Search(ctx context.Context, searchTerm string, 
 
 	args := make([]interface{}, 0)
 
-	queryBuilder.WriteString("WHERE (name LIKE $1 OR sku LIKE $2) ")
+	queryBuilder.WriteString("WHERE (name LIKE $1 OR sku LIKE $1) ")
 	args = append(args, fmt.Sprintf("%%%s%%", searchTerm))
 
 	if isPublicSearch {
