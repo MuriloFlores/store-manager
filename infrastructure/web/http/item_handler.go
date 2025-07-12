@@ -244,11 +244,7 @@ func (h *ItemHandler) UpdateItem(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *ItemHandler) SearchItem(w http.ResponseWriter, r *http.Request) {
-	actorIdentity, ok := r.Context().Value(middleware.UserIdentityKey).(*domain.Identity)
-	if !ok {
-		web_errors.NewInternalServerError("user service not found in context").Send(w)
-		return
-	}
+	actorIdentity, _ := r.Context().Value(middleware.UserIdentityKey).(*domain.Identity)
 
 	vars := mux.Vars(r)
 
