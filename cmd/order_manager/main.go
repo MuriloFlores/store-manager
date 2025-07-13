@@ -3,9 +3,9 @@ package main
 import (
 	"context"
 	"github.com/muriloFlores/StoreManager/infrastructure/rate_limiter"
-	"github.com/muriloFlores/StoreManager/infrastructure/reset_token"
 	"github.com/muriloFlores/StoreManager/infrastructure/security"
 	"github.com/muriloFlores/StoreManager/infrastructure/security/uuid_generator"
+	"github.com/muriloFlores/StoreManager/infrastructure/token_generator"
 	"github.com/muriloFlores/StoreManager/infrastructure/workers/email"
 	"github.com/muriloFlores/StoreManager/internal/core/use_case/items"
 	"github.com/muriloFlores/StoreManager/pkg/logger"
@@ -70,7 +70,7 @@ func main() {
 		log.Fatalf("FATAL: Falha ao carregar templates HTML: %v", err)
 	}
 
-	cryptToken := reset_token.NewCryptoTokenGenerator()
+	cryptToken := token_generator.NewCryptoTokenGenerator()
 	if err != nil {
 		log.Fatalf("FATAL: Falha ao carregar templates de email: %v", err)
 	}

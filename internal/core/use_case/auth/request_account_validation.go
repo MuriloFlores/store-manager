@@ -40,24 +40,29 @@ func NewRequestAccountValidationUseCase(
 func (uc *RequestAccountValidationUseCase) Execute(ctx context.Context, userEmail string) error {
 	uc.logger.InfoLevel("Request account validation use case started", map[string]interface{}{"user_email": userEmail})
 
-	user, err := uc.userRepo.FindByEmail(ctx, userEmail)
-	if err != nil {
-		uc.logger.ErrorLevel("Error finding user by ID", err, map[string]interface{}{"userEmail": userEmail})
-		return err
-	}
-
-	rateLimitKey := fmt.Sprintf("rate-limit:resend-verification:%s", user.Email())
+	rateLimitKey := fmt.Sprintf("rate-limit:resend-verification:%s", userEmail)
 	limit := 5 * time.Minute
 
 	allowed, err := uc.limiter.Allow(ctx, rateLimitKey, limit)
 	if err != nil {
-		uc.logger.ErrorLevel("Failed to check rate limit", err, map[string]interface{}{"user_id": user.ID()})
+		uc.logger.ErrorLevel("Failed to check rate limit", err, map[string]interface{}{"user_email": userEmail})
 		return err
 	}
 
 	if !allowed {
-		uc.logger.InfoLevel("Rate limit exceeded for resend verification email", map[string]interface{}{"user_id": user.ID(), "email": user.Email()})
+		uc.logger.InfoLevel("Rate limit exceeded for resend verification email", map[string]interface{}{"email": userEmail})
 		return &domain.ErrRateLimitExceeded{}
+	}
+
+	user, err := uc.userRepo.FindByEmail(ctx, userEmail)
+	if err != nil {
+		uc.logger.ErrorLevel("Error finding user by ID", err, map[string]interface{}{"userEmail": userEmail})
+		return nil
+	}
+
+	if user.IsVerified() {
+		uc.logger.InfoLevel("User already verified", map[string]interface{}{"user_id": user.ID(), "user_email": user.Email()})
+		return &domain.ErrUserAlreadyVerified{Email: user.Email()}
 	}
 
 	verificationTokenString, err := uc.tokenGenerator.Generate()
@@ -81,7 +86,7 @@ func (uc *RequestAccountValidationUseCase) Execute(ctx context.Context, userEmai
 	jobData := &jobs.AccountVerificationJobData{
 		UserName:         user.Name(),
 		ToEmail:          user.Email(),
-		VerificationLink: "https://app.muriloflores.xyz/auth/verify-account?token=" + actionToken.Token,
+		VerificationCode: verificationTokenString,
 	}
 
 	if err = uc.taskEnqueuer.EnqueueAccountVerification(jobData); err != nil {
