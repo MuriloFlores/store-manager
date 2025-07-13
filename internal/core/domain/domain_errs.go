@@ -69,3 +69,11 @@ func (e *ErrRateLimitExceeded) Error() string {
 	}
 	return "request rate limit exceeded"
 }
+
+type ErrUserAlreadyVerified struct {
+	Email string
+}
+
+func (e *ErrUserAlreadyVerified) Error() string {
+	return fmt.Sprintf("user with email '%s' is already verified", e.Email)
+}

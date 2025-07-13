@@ -42,7 +42,7 @@ func (uc *ConfirmAccountUserUseCase) Execute(ctx context.Context, tokenString st
 
 	user.MarkAsVerified()
 
-	uc.logger.InfoLevel("User account confirmed successfully", map[string]interface{}{"user_id": user.ID, "email": user.Email})
+	uc.logger.InfoLevel("User account confirmed successfully", map[string]interface{}{"user_id": user.ID(), "email": user.Email()})
 
 	return uc.userRepo.Update(ctx, user)
 }

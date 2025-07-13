@@ -80,7 +80,7 @@ func (p *EmailProcessor) HandleAccountVerification(ctx context.Context, taskPayl
 
 	templateData := map[string]interface{}{
 		"UserName":         payload.UserName,
-		"VerificationLink": payload.VerificationLink,
+		"VerificationLink": payload.VerificationCode,
 	}
 
 	htmlBody, err := p.templateManager.Render("account_verification.html", templateData)

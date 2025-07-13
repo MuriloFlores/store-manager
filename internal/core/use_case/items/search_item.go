@@ -7,6 +7,7 @@ import (
 	"github.com/muriloFlores/StoreManager/internal/core/domain/pagination"
 	"github.com/muriloFlores/StoreManager/internal/core/ports"
 	"github.com/muriloFlores/StoreManager/internal/core/ports/repositories"
+	"strings"
 )
 
 type SearchItemUseCase struct {
@@ -34,5 +35,5 @@ func (uc *SearchItemUseCase) Execute(ctx context.Context, actor *domain.Identity
 		isPublicSearch = false
 	}
 
-	return uc.itemRepo.Search(ctx, searchTerm, isPublicSearch, params)
+	return uc.itemRepo.Search(ctx, strings.TrimSpace(searchTerm), isPublicSearch, params)
 }

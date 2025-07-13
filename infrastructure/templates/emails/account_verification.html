@@ -3,63 +3,83 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Confirme seu Novo Endereço de Email</title>
+    <title>Seu Código de Verificação</title>
     <style>
         body {
             font-family: Arial, sans-serif;
             background-color: #f4f4f4;
             color: #333;
             line-height: 1.6;
+            margin: 0;
+            padding: 0;
         }
+
         .container {
             max-width: 600px;
             margin: 20px auto;
             padding: 20px;
             background: #fff;
             border: 1px solid #ddd;
+            border-radius: 8px;
         }
+
         .header {
             background: #00466a;
             color: white;
-            padding: 10px;
+            padding: 15px;
+            text-align: center;
+            border-radius: 5px 5px 0 0;
+        }
+
+        .header h2 {
+            margin: 0;
+        }
+
+        .content {
+            padding: 30px 10px;
             text-align: center;
         }
-        .content {
-            padding: 20px 0;
-        }
-        .button {
-            display: inline-block;
-            background-color: #00466a;
-            color: #ffffff;
-            padding: 12px 25px;
-            text-decoration: none;
-            border-radius: 5px;
+
+        .otp-code {
+            background-color: #f0f3f5;
+            border-radius: 8px;
+            padding: 15px 20px;
+            font-size: 32px;
             font-weight: bold;
+            letter-spacing: 10px;
+            text-align: center;
+            margin: 20px auto;
+            width: fit-content;
+            border: 1px solid #dee2e6;
         }
+
         .footer {
             margin-top: 20px;
             font-size: 0.9em;
             color: #777;
+            text-align: center;
         }
     </style>
 </head>
 <body>
 <div class="container">
     <div class="header">
-        <h2>Confirmação de Email</h2>
+        <h2>Seu Código de Verificação</h2>
     </div>
     <div class="content">
         <h3>Olá, {{.UserName}}!</h3>
         <p>
-            Recebemos uma solicitação para associar o endereço de email à sua conta no **Store Manager**.
+            Use o código abaixo para finalizar a verificação da sua conta no <strong>Store Manager</strong>>.
         </p>
+
+        <div class="otp-code">
+            {{.VerificationCode}}
+        </div>
+
         <p>
-            Para confirmar que este é o seu email e finalizar a verificação, por favor, clique no botão abaixo. Este link de confirmação é válido por 30 minutos.
+            Este código é válido por 10 minutos.
         </p>
-        <p style="text-align: center;">
-            <a href="{{.VerificationLink}}" class="button">Confirmar Email</a>
-        </p>
-        <p>
+        <p style="font-size: 0.9em; color: #777;">
             Se você não solicitou esta ação, pode ignorar este email com segurança.
         </p>
     </div>
