@@ -51,7 +51,12 @@ func HandleError(w http.ResponseWriter, err error) {
 		restErr = web_errors.NewUnauthorizedRequestError(err.Error())
 
 	case errors.As(err, &emailNotVerified):
-		restErr = web_errors.NewEmailNotVerified(err.Error())
+		causes := []web_errors.Causes{{
+			Field:   "email",
+			Message: "EMAIL_NOT_VERIFIED",
+		}}
+
+		restErr = web_errors.NewEmailNotVerified(err.Error(), causes)
 
 	case errors.As(err, &rateLimitExceeded):
 		restErr = web_errors.NewRateLimitExceededError(err.Error())

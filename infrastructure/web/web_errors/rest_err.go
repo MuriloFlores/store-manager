@@ -94,11 +94,12 @@ func NewConflictErrorWithCause(message string, causes []Causes) *RestErr {
 	}
 }
 
-func NewEmailNotVerified(message string) *RestErr {
+func NewEmailNotVerified(message string, causes []Causes) *RestErr {
 	return &RestErr{
 		Message: message,
 		Err:     "EmailNotVerified",
-		Code:    http.StatusUnauthorized,
+		Code:    http.StatusForbidden,
+		Causes:  causes,
 	}
 }
 
