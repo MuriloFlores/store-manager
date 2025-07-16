@@ -108,7 +108,7 @@ func main() {
 	emailProcessor := email.NewEmailProcessor(emailSender, templateManager)
 	go email.RunTaskServer(redisConnectionOpt, emailProcessor, appLogs)
 
-	userHandler := web_http.NewUserHandler(userUseCases)
+	userHandler := web_http.NewUserHandler(userUseCases, appLogs)
 	authHandler := web_http.NewAuthHandler(authUseCases, appLogs)
 	itemHandler := web_http.NewItemHandler(itemUseCase, appLogs)
 	mainRouter := router.NewRouter(userHandler, authHandler, itemHandler, tokenManager)
