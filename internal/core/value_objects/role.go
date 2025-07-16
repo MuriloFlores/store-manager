@@ -36,3 +36,12 @@ func (r Role) IsStockEmployee() bool {
 		return false
 	}
 }
+
+func (r Role) IsAdminEmployee() bool {
+	switch r {
+	case Admin, Manager:
+		return true
+	default:
+		return false
+	}
+}

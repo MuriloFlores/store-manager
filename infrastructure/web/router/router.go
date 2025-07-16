@@ -54,6 +54,7 @@ func NewRouter(
 	api.HandleFunc("/user/{id}", userHandler.UpdateUser).Methods(http.MethodPut)
 	api.HandleFunc("/user/{id}/role", userHandler.PromoteUser).Methods(http.MethodPatch)
 	api.HandleFunc("/users", userHandler.ListUsers).Methods(http.MethodGet)
+	api.HandleFunc("/users/search/{param}", userHandler.SearchUser).Methods(http.MethodGet)
 
 	// --- Rotas de Itens ---
 	api.HandleFunc("/items", itemHandler.ListInternalItems).Methods(http.MethodGet)
