@@ -210,7 +210,7 @@ func (p *PostgresUserRepository) List(ctx context.Context, params *pagination.Pa
         SELECT id, name, email, password_hash, role, verified_at, deleted_at 
         FROM users 
         WHERE deleted_at IS NULL 
-        ORDER BY role DESC 
+        ORDER BY role 
         LIMIT $1 OFFSET $2
     `
 
@@ -273,7 +273,7 @@ func (p *PostgresUserRepository) Search(ctx context.Context, searchTerm string, 
 	SELECT id, name, email, password_hash, role, verified_at, deleted_at
 	FROM users
 	%s
-	ORDER BY role DESC
+	ORDER BY role
 	LIMIT $%d OFFSET $%d`,
 		queryClause, len(args)-1, len(args))
 
