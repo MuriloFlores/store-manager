@@ -11,6 +11,7 @@ import (
 	"github.com/muriloFlores/StoreManager/internal/core/domain/pagination"
 	"github.com/muriloFlores/StoreManager/internal/core/ports/repositories"
 	"github.com/muriloFlores/StoreManager/internal/core/value_objects"
+	"strings"
 	"time"
 )
 
@@ -209,13 +210,76 @@ func (p *PostgresUserRepository) List(ctx context.Context, params *pagination.Pa
         SELECT id, name, email, password_hash, role, verified_at, deleted_at 
         FROM users 
         WHERE deleted_at IS NULL 
-        ORDER BY created_at DESC 
+        ORDER BY role DESC 
         LIMIT $1 OFFSET $2
     `
 
 	rows, err := p.db.Query(ctx, query, params.PageSize, offset)
 	if err != nil {
 		return nil, fmt.Errorf("error listing users: %w", err)
+	}
+
+	defer rows.Close()
+
+	users := make([]*domain.User, 0)
+	for rows.Next() {
+		var id, name, email, passwordHash string
+		var role value_objects.Role
+		var verifiedAt, deletedAt *time.Time
+
+		if err := rows.Scan(&id, &name, &email, &passwordHash, &role, &verifiedAt, &deletedAt); err != nil {
+			return nil, fmt.Errorf("error scanning user row: %w", err)
+		}
+
+		user := domain.HydrateUser(id, name, email, passwordHash, role, verifiedAt, deletedAt)
+		users = append(users, user)
+	}
+
+	return &pagination.PaginatedResult[*domain.User]{
+		Data:       users,
+		Pagination: *paginationInfo,
+	}, nil
+}
+
+func (p *PostgresUserRepository) Search(ctx context.Context, searchTerm string, params *pagination.PaginationParams) (*pagination.PaginatedResult[*domain.User], error) {
+	var queryBuilder strings.Builder
+
+	args := make([]interface{}, 0)
+
+	queryBuilder.WriteString("WHERE (name ILIKE $1 OR email ILIKE $1) AND deleted_at IS NULL AND verified_at IS NOT NULL ")
+	args = append(args, fmt.Sprintf("%%%s%%", searchTerm))
+
+	queryClause := queryBuilder.String()
+
+	var totalItems int64
+	countQuery := `SELECT COUNT(*) FROM users ` + queryClause
+
+	if err := p.db.QueryRow(ctx, countQuery, args...).Scan(&totalItems); err != nil {
+		return nil, fmt.Errorf("error counting users: %w", err)
+	}
+
+	paginationInfo := &pagination.PaginationInfo{
+		CurrentPage: params.Page,
+		PageSize:    params.PageSize,
+		TotalItems:  totalItems,
+	}
+
+	paginationInfo.CalculateTotalPages()
+	offset := (params.Page - 1) * params.PageSize
+
+	args = append(args, params.PageSize, offset)
+
+	query := fmt.Sprintf(`
+	SELECT id, name, email, password_hash, role, verified_at, deleted_at
+	FROM users
+	%s
+	ORDER BY role DESC
+	LIMIT $%d OFFSET $%d`,
+		queryClause, len(args)-1, len(args))
+
+	rows, err := p.db.Query(ctx, query, args...)
+	if err != nil {
+		return nil, fmt.Errorf("error searching users: %w", err)
 	}
 
 	defer rows.Close()

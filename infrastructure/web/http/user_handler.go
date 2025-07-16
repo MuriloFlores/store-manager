@@ -10,16 +10,21 @@ import (
 	"github.com/muriloFlores/StoreManager/infrastructure/web/middleware"
 	"github.com/muriloFlores/StoreManager/infrastructure/web/web_errors"
 	"github.com/muriloFlores/StoreManager/internal/core/domain"
+	"github.com/muriloFlores/StoreManager/internal/core/ports"
 	"github.com/muriloFlores/StoreManager/internal/core/use_case/user"
 	"net/http"
 )
 
 type UserHandler struct {
 	useCases *user.UserUseCases
+	logger   ports.Logger
 }
 
-func NewUserHandler(useCases *user.UserUseCases) *UserHandler {
-	return &UserHandler{useCases: useCases}
+func NewUserHandler(useCases *user.UserUseCases, logger ports.Logger) *UserHandler {
+	return &UserHandler{
+		useCases: useCases,
+		logger:   logger,
+	}
 }
 
 func (h *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
@@ -240,4 +245,51 @@ func (h *UserHandler) ListUsers(w http.ResponseWriter, r *http.Request) {
 	}
 
 	respondWithJSON(w, http.StatusOK, finalResponse)
+}
+
+func (h *UserHandler) SearchUser(w http.ResponseWriter, r *http.Request) {
+	actorIdentity, ok := r.Context().Value(middleware.UserIdentityKey).(*domain.Identity)
+	if !ok {
+		h.logger.ErrorLevel("Failed to retrieve user identity from context", nil)
+		web_errors.NewInternalServerError("unable to retrieve user identity").Send(w)
+		return
+	}
+
+	vars := mux.Vars(r)
+
+	searchParam, ok := vars["param"]
+	if !ok {
+		h.logger.ErrorLevel("Search parameter not provided", nil)
+		web_errors.NewBadRequestError("search parameter not provided").Send(w)
+		return
+	}
+
+	params := pagination_dto.ParsePagination(r)
+
+	paginatedResult, err := h.useCases.Search.Execute(r.Context(), actorIdentity, searchParam, params)
+	if err != nil {
+		h.logger.ErrorLevel("Error executing search use case", err, map[string]interface{}{"error": err, "search_param": searchParam, "user_id": actorIdentity.UserID})
+		web.HandleError(w, err)
+		return
+	}
+
+	h.logger.InfoLevel("Search completed successfully", map[string]interface{}{"search_param": searchParam, "user_id": actorIdentity.UserID})
+
+	userResponses := make([]dto.UserResponse, 0, len(paginatedResult.Data))
+	for _, userDomain := range paginatedResult.Data {
+		userResponses = append(userResponses, dto.UserResponse{
+			ID:    userDomain.ID(),
+			Name:  userDomain.Name(),
+			Email: userDomain.Email(),
+			Role:  userDomain.Role(),
+		})
+	}
+
+	finalResponse := pagination_dto.PaginatedResponse[dto.UserResponse]{
+		Data:       userResponses,
+		Pagination: pagination_dto.ToPaginationInfoResponse(paginatedResult.Pagination),
+	}
+
+	respondWithJSON(w, http.StatusOK, finalResponse)
+	return
 }
