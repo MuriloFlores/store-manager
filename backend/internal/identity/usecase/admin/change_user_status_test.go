@@ -4,52 +4,12 @@ import (
 	"context"
 	"testing"
 
-	"github.com/MuriloFlores/order-manager/internal/_common"
 	"github.com/MuriloFlores/order-manager/internal/identity/domain/entity"
 	"github.com/MuriloFlores/order-manager/internal/identity/domain/vo"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
-
-// MockUserRepository implements ports.UserRepository for testing
-type MockUserRepository struct {
-	mock.Mock
-}
-
-func (m *MockUserRepository) Save(ctx context.Context, user *entity.User) error {
-	args := m.Called(ctx, user)
-	return args.Error(0)
-}
-
-func (m *MockUserRepository) FindByID(ctx context.Context, id uuid.UUID) (*entity.User, error) {
-	args := m.Called(ctx, id)
-	if args.Get(0) == nil {
-		return nil, args.Error(1)
-	}
-	return args.Get(0).(*entity.User), args.Error(1)
-}
-
-func (m *MockUserRepository) FindByEmail(ctx context.Context, email vo.Email) (*entity.User, error) {
-	args := m.Called(ctx, email)
-	if args.Get(0) == nil {
-		return nil, args.Error(1)
-	}
-	return args.Get(0).(*entity.User), args.Error(1)
-}
-
-func (m *MockUserRepository) GetUsersInfo(ctx context.Context, roles []vo.Role, pagination _common.Pagination) (*_common.PaginatedResult[*entity.User], error) {
-	args := m.Called(ctx, roles, pagination)
-	if args.Get(0) == nil {
-		return nil, args.Error(1)
-	}
-	return args.Get(0).(*_common.PaginatedResult[*entity.User]), args.Error(1)
-}
-
-func (m *MockUserRepository) Update(ctx context.Context, user *entity.User) error {
-	args := m.Called(ctx, user)
-	return args.Error(0)
-}
 
 func TestChangeUserStatusUseCase_Execute(t *testing.T) {
 	ctx := context.Background()
@@ -58,9 +18,7 @@ func TestChangeUserStatusUseCase_Execute(t *testing.T) {
 	password, _ := vo.NewPassword("Password123!", "pepper")
 	
 	setupUser := func() *entity.User {
-		user, _ := entity.NewUser(email, "testuser", password, []vo.Role{vo.EmployeeRole})
-		// Re-create to match the specific ID for easier testing
-		user, _ = entity.RestoreUser(userID, email.String(), "testuser", password.String(), []string{vo.EmployeeRole.String()}, true)
+		user, _ := entity.RestoreUser(userID, email.String(), "testuser", password.String(), []string{vo.EmployeeRole.String()}, true)
 		return user
 	}
 
@@ -127,12 +85,12 @@ func TestChangeUserStatusUseCase_Execute(t *testing.T) {
 			err := uc.Execute(ctx, tt.id, tt.active)
 
 			if tt.wantErr {
-				assert.Error(t)
+				assert.Error(t, err)
 				if tt.err != nil {
-					assert.Equal(t, tt.err, err)
+					assert.ErrorIs(t, err, tt.err)
 				}
 			} else {
-				assert.NoError(t)
+				assert.NoError(t, err)
 			}
 			m.AssertExpectations(t)
 		})

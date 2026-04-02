@@ -57,13 +57,13 @@ func TestGetUsersInfoUseCase_Execute(t *testing.T) {
 			result, err := uc.Execute(ctx, pagination, tt.roles)
 
 			if tt.wantErr {
-				assert.Error(t)
+				assert.Error(t, err)
 				assert.Nil(t, result)
 				if tt.err != nil {
-					assert.Equal(t, tt.err, err)
+					assert.ErrorIs(t, err, tt.err)
 				}
 			} else {
-				assert.NoError(t)
+				assert.NoError(t, err)
 				assert.NotNil(t, result)
 			}
 			m.AssertExpectations(t)

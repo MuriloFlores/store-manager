@@ -75,12 +75,12 @@ func TestChangeUserRoleUseCase_Execute(t *testing.T) {
 			err := uc.Execute(ctx, tt.id, tt.roles)
 
 			if tt.wantErr {
-				assert.Error(t)
+				assert.Error(t, err)
 				if tt.err != nil {
-					assert.Equal(t, tt.err, err)
+					assert.ErrorIs(t, err, tt.err)
 				}
 			} else {
-				assert.NoError(t)
+				assert.NoError(t, err)
 			}
 			m.AssertExpectations(t)
 		})
