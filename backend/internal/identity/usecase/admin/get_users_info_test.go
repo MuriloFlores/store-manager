@@ -46,6 +46,15 @@ func TestGetUsersInfoUseCase_Execute(t *testing.T) {
 			wantErr: true,
 			err:     vo.ErrInvalidRole,
 		},
+		{
+			name:  "Repository Error",
+			roles: []string{"ADMIN"},
+			setup: func(m *MockUserRepository) {
+				m.On("GetUsersInfo", ctx, []vo.Role{vo.AdminRole}, pagination).Return(nil, assert.AnError)
+			},
+			wantErr: true,
+			err:     assert.AnError,
+		},
 	}
 
 	for _, tt := range tests {

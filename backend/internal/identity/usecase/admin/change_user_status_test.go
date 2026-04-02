@@ -74,6 +74,28 @@ func TestChangeUserStatusUseCase_Execute(t *testing.T) {
 			setup:   func(m *MockUserRepository) {},
 			wantErr: true,
 		},
+		{
+			name:   "FindByID Error",
+			id:     userID.String(),
+			active: true,
+			setup: func(m *MockUserRepository) {
+				m.On("FindByID", ctx, userID).Return(nil, assert.AnError)
+			},
+			wantErr: true,
+			err:     assert.AnError,
+		},
+		{
+			name:   "Update Error",
+			id:     userID.String(),
+			active: true,
+			setup: func(m *MockUserRepository) {
+				user := setupUser()
+				m.On("FindByID", ctx, userID).Return(user, nil)
+				m.On("Update", ctx, mock.Anything).Return(assert.AnError)
+			},
+			wantErr: true,
+			err:     assert.AnError,
+		},
 	}
 
 	for _, tt := range tests {
