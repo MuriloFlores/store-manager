@@ -46,6 +46,15 @@ func TestMyInfoUseCase_Execute(t *testing.T) {
 			wantErr: true,
 			err:     entity.ErrUserNotFound,
 		},
+		{
+			name:   "Repository Error",
+			userID: userID,
+			setup: func(m *MockUserRepository) {
+				m.On("FindByID", ctx, userID).Return(nil, assert.AnError)
+			},
+			wantErr: true,
+			err:     assert.AnError,
+		},
 	}
 
 	for _, tt := range tests {

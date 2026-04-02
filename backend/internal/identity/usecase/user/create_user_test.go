@@ -60,6 +60,30 @@ func TestCreateUserUseCase_Execute(t *testing.T) {
 			},
 			wantErr: true,
 		},
+		{
+			name: "Repository Save Error",
+			input: dto.CreateUserInput{
+				Username: "murilo",
+				Email:    "murilo@test.com",
+				Password: "StrongPass123!",
+				Roles:    []string{"ADMIN"},
+			},
+			setup: func(mockRepo *MockUserRepository) {
+				mockRepo.On("Save", mock.Anything, mock.Anything).Return(assert.AnError)
+			},
+			wantErr: true,
+		},
+		{
+			name: "Invalid Username (empty)",
+			input: dto.CreateUserInput{
+				Username: "",
+				Email:    "murilo@test.com",
+				Password: "StrongPass123!",
+				Roles:    []string{"ADMIN"},
+			},
+			setup:   func(mockRepo *MockUserRepository) {},
+			wantErr: true,
+		},
 	}
 
 	for _, tt := range tests {
