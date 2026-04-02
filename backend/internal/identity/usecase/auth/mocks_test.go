@@ -88,3 +88,41 @@ func (m *MockRefreshTokenRepository) DeleteRefreshToken(ctx context.Context, ref
 	args := m.Called(ctx, refreshToken)
 	return args.Error(0)
 }
+
+// MockNotificationService
+type MockNotificationService struct {
+	mock.Mock
+}
+
+func (m *MockNotificationService) SendForgotPasswordEmail(ctx context.Context, email vo.Email, otp vo.OTP) error {
+	args := m.Called(ctx, email, otp)
+	return args.Error(0)
+}
+
+func (m *MockNotificationService) SendChangePasswordEmail(ctx context.Context, email vo.Email, otp vo.OTP) error {
+	args := m.Called(ctx, email, otp)
+	return args.Error(0)
+}
+
+// MockOTPRepository
+type MockOTPRepository struct {
+	mock.Mock
+}
+
+func (m *MockOTPRepository) SaveOTP(ctx context.Context, email vo.Email, otp vo.OTP, expiresIn time.Duration) error {
+	args := m.Called(ctx, email, otp, expiresIn)
+	return args.Error(0)
+}
+
+func (m *MockOTPRepository) GetOTP(ctx context.Context, email vo.Email) (vo.OTP, error) {
+	args := m.Called(ctx, email)
+	if args.Get(0) == nil {
+		return "", args.Error(1)
+	}
+	return args.Get(0).(vo.OTP), args.Error(1)
+}
+
+func (m *MockOTPRepository) DeleteOTP(ctx context.Context, email vo.Email) error {
+	args := m.Called(ctx, email)
+	return args.Error(0)
+}

@@ -11,58 +11,88 @@ import (
 )
 
 func TestChangePasswordUseCase_Execute(t *testing.T) {
-	pepper := "test-pepper"
-	emailStr := "test@example.com"
-	emailVO, _ := vo.NewEmail(emailStr)
-	passwordStr := "OldPassword123!"
-	passwordVO, _ := vo.NewPassword(passwordStr, pepper)
-	user, _ := entity.NewUser(emailVO, "testuser", passwordVO, []vo.Role{vo.EmployeeRole})
+	pepper := "pepper"
+	oldPass := "OldPass123!"
+	newPass := "NewPass123!"
 
 	tests := []struct {
 		name        string
 		oldPassword string
 		newPassword string
-		setup       func(*MockUserRepository)
+		setup       func(*MockUserRepository, *entity.User)
 		wantErr     error
 	}{
 		{
 			name:        "Success",
-			oldPassword: passwordStr,
-			newPassword: "NewPassword123!",
-			setup: func(mr *MockUserRepository) {
+			oldPassword: oldPass,
+			newPassword: newPass,
+			setup: func(mr *MockUserRepository, user *entity.User) {
 				mr.On("FindByID", mock.Anything, user.ID()).Return(user, nil)
 				mr.On("Update", mock.Anything, mock.MatchedBy(func(u *entity.User) bool {
-					return u.Password().Matches("NewPassword123!", pepper)
+					return u.Password().Matches(newPass, pepper)
 				})).Return(nil)
 			},
 			wantErr: nil,
 		},
 		{
 			name:        "Invalid Old Password",
-			oldPassword: "wrong-password",
-			newPassword: "NewPassword123!",
-			setup: func(mr *MockUserRepository) {
+			oldPassword: "WrongOld1!",
+			newPassword: newPass,
+			setup: func(mr *MockUserRepository, user *entity.User) {
 				mr.On("FindByID", mock.Anything, user.ID()).Return(user, nil)
 			},
 			wantErr: entity.ErrInvalidOldPassword,
 		},
 		{
+			name:        "New Password Too Short",
+			oldPassword: oldPass,
+			newPassword: "short",
+			setup: func(mr *MockUserRepository, user *entity.User) {
+				mr.On("FindByID", mock.Anything, user.ID()).Return(user, nil)
+			},
+			wantErr: vo.ErrPasswordTooShort,
+		},
+		{
+			name:        "FindByID Error",
+			oldPassword: oldPass,
+			newPassword: newPass,
+			setup: func(mr *MockUserRepository, user *entity.User) {
+				mr.On("FindByID", mock.Anything, user.ID()).Return(nil, assert.AnError)
+			},
+			wantErr: assert.AnError,
+		},
+		{
 			name:        "User Not Found",
-			oldPassword: passwordStr,
-			newPassword: "NewPassword123!",
-			setup: func(mr *MockUserRepository) {
+			oldPassword: oldPass,
+			newPassword: newPass,
+			setup: func(mr *MockUserRepository, user *entity.User) {
 				mr.On("FindByID", mock.Anything, user.ID()).Return(nil, nil)
 			},
 			wantErr: entity.ErrUserNotFound,
+		},
+		{
+			name:        "Update Error",
+			oldPassword: oldPass,
+			newPassword: newPass,
+			setup: func(mr *MockUserRepository, user *entity.User) {
+				mr.On("FindByID", mock.Anything, user.ID()).Return(user, nil)
+				mr.On("Update", mock.Anything, mock.Anything).Return(assert.AnError)
+			},
+			wantErr: assert.AnError,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			mr := new(MockUserRepository)
-			tt.setup(mr)
+			mockRepo := new(MockUserRepository)
 
-			uc := NewChangePassword(mr, pepper)
+			email, _ := vo.NewEmail("t@t.com")
+			hashedOld, _ := vo.NewPassword(oldPass, pepper)
+			user, _ := entity.NewUser(email, "user", hashedOld, nil)
+
+			tt.setup(mockRepo, user)
+
+			uc := NewChangePassword(mockRepo, pepper)
 			err := uc.Execute(context.Background(), user.ID(), tt.oldPassword, tt.newPassword)
 
 			if tt.wantErr != nil {
@@ -70,8 +100,8 @@ func TestChangePasswordUseCase_Execute(t *testing.T) {
 				assert.ErrorIs(t, err, tt.wantErr)
 			} else {
 				assert.NoError(t, err)
+				mockRepo.AssertExpectations(t)
 			}
-			mr.AssertExpectations(t)
 		})
 	}
 }

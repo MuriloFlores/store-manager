@@ -67,6 +67,48 @@ func TestRotateRefreshTokenUseCase_Execute(t *testing.T) {
 			wantErr:   entity.ErrUserIsDeactivated,
 			expectErr: true,
 		},
+		{
+			name:  "FindByID Error",
+			token: token,
+			setup: func(ur *MockUserRepository, rr *MockRefreshTokenRepository, tm *MockTokenManager) {
+				rr.On("GetUserIDByRefreshToken", mock.Anything, token).Return(userID, nil)
+				ur.On("FindByID", mock.Anything, userID).Return(nil, assert.AnError)
+			},
+			expectErr: true,
+		},
+		{
+			name:  "DeleteRefreshToken Error",
+			token: token,
+			setup: func(ur *MockUserRepository, rr *MockRefreshTokenRepository, tm *MockTokenManager) {
+				rr.On("GetUserIDByRefreshToken", mock.Anything, token).Return(userID, nil)
+				ur.On("FindByID", mock.Anything, userID).Return(user, nil)
+				rr.On("DeleteRefreshToken", mock.Anything, token).Return(assert.AnError)
+			},
+			expectErr: true,
+		},
+		{
+			name:  "GenerateTokens Error",
+			token: token,
+			setup: func(ur *MockUserRepository, rr *MockRefreshTokenRepository, tm *MockTokenManager) {
+				rr.On("GetUserIDByRefreshToken", mock.Anything, token).Return(userID, nil)
+				ur.On("FindByID", mock.Anything, userID).Return(user, nil)
+				rr.On("DeleteRefreshToken", mock.Anything, token).Return(nil)
+				tm.On("GenerateTokens", mock.Anything, user).Return("", "", assert.AnError)
+			},
+			expectErr: true,
+		},
+		{
+			name:  "SaveRefreshToken Error",
+			token: token,
+			setup: func(ur *MockUserRepository, rr *MockRefreshTokenRepository, tm *MockTokenManager) {
+				rr.On("GetUserIDByRefreshToken", mock.Anything, token).Return(userID, nil)
+				ur.On("FindByID", mock.Anything, userID).Return(user, nil)
+				rr.On("DeleteRefreshToken", mock.Anything, token).Return(nil)
+				tm.On("GenerateTokens", mock.Anything, user).Return("new-access", "new-refresh", nil)
+				rr.On("SaveRefreshToken", mock.Anything, mock.Anything, "new-refresh", mock.Anything).Return(assert.AnError)
+			},
+			expectErr: true,
+		},
 	}
 
 	for _, tt := range tests {

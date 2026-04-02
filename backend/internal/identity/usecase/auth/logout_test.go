@@ -43,6 +43,7 @@ func TestLogoutUseCase_Execute(t *testing.T) {
 			err := uc.Execute(context.Background(), tt.refreshToken)
 
 			if tt.wantErr != nil {
+				assert.Error(t, err)
 				assert.ErrorContains(t, err, tt.wantErr.Error())
 			} else {
 				assert.NoError(t, err)

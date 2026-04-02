@@ -65,6 +65,30 @@ func TestLoginUseCase_Execute(t *testing.T) {
 			},
 			wantErr: true,
 		},
+		{
+			name:    "Invalid Email Format",
+			input:   &dto.LoginRequest{Email: "invalid", Password: passwordStr},
+			setup:   func(mr *MockUserRepository, tm *MockTokenManager, rr *MockRefreshTokenRepository) {},
+			wantErr: true,
+		},
+		{
+			name:  "Repository FindByEmail Error",
+			input: &dto.LoginRequest{Email: emailStr, Password: passwordStr},
+			setup: func(mr *MockUserRepository, tm *MockTokenManager, rr *MockRefreshTokenRepository) {
+				mr.On("FindByEmail", mock.Anything, emailVO).Return(nil, errors.New("db error"))
+			},
+			wantErr: true,
+		},
+		{
+			name:  "Save Refresh Token Error",
+			input: &dto.LoginRequest{Email: emailStr, Password: passwordStr},
+			setup: func(mr *MockUserRepository, tm *MockTokenManager, rr *MockRefreshTokenRepository) {
+				mr.On("FindByEmail", mock.Anything, emailVO).Return(user, nil)
+				tm.On("GenerateTokens", mock.Anything, user).Return("access", "refresh", nil)
+				rr.On("SaveRefreshToken", mock.Anything, user.ID(), "refresh", mock.Anything).Return(errors.New("db error"))
+			},
+			wantErr: true,
+		},
 	}
 
 	for _, tt := range tests {

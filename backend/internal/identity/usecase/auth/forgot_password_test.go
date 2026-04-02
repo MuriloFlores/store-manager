@@ -11,39 +11,6 @@ import (
 	"github.com/stretchr/testify/mock"
 )
 
-type MockNotificationService struct {
-	mock.Mock
-}
-
-func (m *MockNotificationService) SendForgotPasswordEmail(ctx context.Context, email vo.Email, otp vo.OTP) error {
-	args := m.Called(ctx, email, otp)
-	return args.Error(0)
-}
-
-func (m *MockNotificationService) SendChangePasswordEmail(ctx context.Context, email vo.Email, otp vo.OTP) error {
-	args := m.Called(ctx, email, otp)
-	return args.Error(0)
-}
-
-type MockOTPRepository struct {
-	mock.Mock
-}
-
-func (m *MockOTPRepository) SaveOTP(ctx context.Context, email vo.Email, otp vo.OTP, expiresIn time.Duration) error {
-	args := m.Called(ctx, email, otp, expiresIn)
-	return args.Error(0)
-}
-
-func (m *MockOTPRepository) GetOTP(ctx context.Context, email vo.Email) (vo.OTP, error) {
-	args := m.Called(ctx, email)
-	return args.Get(0).(vo.OTP), args.Error(1)
-}
-
-func (m *MockOTPRepository) DeleteOTP(ctx context.Context, email vo.Email) error {
-	args := m.Called(ctx, email)
-	return args.Error(0)
-}
-
 func TestForgotPasswordUseCase_Execute(t *testing.T) {
 	emailStr := "test@example.com"
 	emailVO, _ := vo.NewEmail(emailStr)
@@ -74,6 +41,31 @@ func TestForgotPasswordUseCase_Execute(t *testing.T) {
 			},
 			wantErr:   nil, // O use case atual retorna nil mesmo se nao encontrar (para evitar enumeraçao)
 			expectErr: false,
+		},
+		{
+			name:    "Invalid Email",
+			email:   "invalid",
+			setup:   func(ur *MockUserRepository, or *MockOTPRepository, ns *MockNotificationService) {},
+			expectErr: true,
+		},
+		{
+			name:  "Save OTP Error",
+			email: emailStr,
+			setup: func(ur *MockUserRepository, or *MockOTPRepository, ns *MockNotificationService) {
+				ur.On("FindByEmail", mock.Anything, emailVO).Return(user, nil)
+				or.On("SaveOTP", mock.Anything, emailVO, mock.Anything, mock.Anything).Return(assert.AnError)
+			},
+			expectErr: true,
+		},
+		{
+			name:  "Send Email Error",
+			email: emailStr,
+			setup: func(ur *MockUserRepository, or *MockOTPRepository, ns *MockNotificationService) {
+				ur.On("FindByEmail", mock.Anything, emailVO).Return(user, nil)
+				or.On("SaveOTP", mock.Anything, emailVO, mock.Anything, mock.Anything).Return(nil)
+				ns.On("SendForgotPasswordEmail", mock.Anything, emailVO, mock.Anything).Return(assert.AnError)
+			},
+			expectErr: true,
 		},
 	}
 
