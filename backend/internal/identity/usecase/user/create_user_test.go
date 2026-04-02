@@ -4,53 +4,11 @@ import (
 	"context"
 	"testing"
 
-	"github.com/MuriloFlores/order-manager/internal/_common"
 	"github.com/MuriloFlores/order-manager/internal/identity/domain/dto"
 	"github.com/MuriloFlores/order-manager/internal/identity/domain/entity"
-	"github.com/MuriloFlores/order-manager/internal/identity/domain/vo"
-	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
-
-// MockUserRepository implements ports.UserRepository
-type MockUserRepository struct {
-	mock.Mock
-}
-
-func (m *MockUserRepository) Save(ctx context.Context, user *entity.User) error {
-	args := m.Called(ctx, user)
-	return args.Error(0)
-}
-
-func (m *MockUserRepository) FindByID(ctx context.Context, id uuid.UUID) (*entity.User, error) {
-	args := m.Called(ctx, id)
-	if args.Get(0) != nil {
-		return args.Get(0).(*entity.User), args.Error(1)
-	}
-	return nil, args.Error(1)
-}
-
-func (m *MockUserRepository) FindByEmail(ctx context.Context, email vo.Email) (*entity.User, error) {
-	args := m.Called(ctx, email)
-	if args.Get(0) != nil {
-		return args.Get(0).(*entity.User), args.Error(1)
-	}
-	return nil, args.Error(1)
-}
-
-func (m *MockUserRepository) FindByRole(ctx context.Context, roles []vo.Role, pagination _common.Pagination) (*_common.PaginatedResult[*entity.User], error) {
-	args := m.Called(ctx, roles, pagination)
-	if args.Get(0) != nil {
-		return args.Get(0).(*_common.PaginatedResult[*entity.User]), args.Error(1)
-	}
-	return nil, args.Error(1)
-}
-
-func (m *MockUserRepository) Update(ctx context.Context, user *entity.User) error {
-	args := m.Called(ctx, user)
-	return args.Error(0)
-}
 
 func TestCreateUserUseCase_Execute(t *testing.T) {
 	pepper := "test-pepper"
