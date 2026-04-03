@@ -116,10 +116,11 @@ func TestRotateRefreshTokenUseCase_Execute(t *testing.T) {
 			ur := new(MockUserRepository)
 			rr := new(MockRefreshTokenRepository)
 			tm := new(MockTokenManager)
+			ml := new(MockLogger)
 
 			tt.setup(ur, rr, tm)
 
-			uc := NewRotateRefreshTokenUseCase(ur, rr, tm, 0)
+			uc := NewRotateRefreshTokenUseCase(ur, rr, tm, ml, 0)
 			res, err := uc.Execute(context.Background(), tt.token)
 
 			if tt.expectErr {
