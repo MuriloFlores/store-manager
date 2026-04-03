@@ -69,8 +69,9 @@ func TestChangeUserRoleUseCase_Execute(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			m := new(MockUserRepository)
+			l := new(MockLogger)
 			tt.setup(m)
-			uc := NewChangeUserRoleUseCase(m)
+			uc := NewChangeUserRoleUseCase(m, l)
 
 			err := uc.Execute(ctx, tt.id, tt.roles)
 
