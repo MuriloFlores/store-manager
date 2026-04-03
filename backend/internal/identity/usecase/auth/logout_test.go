@@ -37,9 +37,10 @@ func TestLogoutUseCase_Execute(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			rr := new(MockRefreshTokenRepository)
+			ml := new(MockLogger)
 			tt.setup(rr)
 
-			uc := NewLogoutUseCase(rr)
+			uc := NewLogoutUseCase(rr, ml)
 			err := uc.Execute(context.Background(), tt.refreshToken)
 
 			if tt.wantErr != nil {
