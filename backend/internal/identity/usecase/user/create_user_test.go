@@ -89,9 +89,10 @@ func TestCreateUserUseCase_Execute(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			mockRepo := new(MockUserRepository)
+			mockLogger := new(MockLogger)
 			tt.setup(mockRepo)
 
-			uc := NewCreateUserService(mockRepo, pepper)
+			uc := NewCreateUserService(mockRepo, mockLogger, pepper)
 			err := uc.Execute(context.Background(), tt.input)
 
 			if tt.wantErr {
