@@ -85,6 +85,7 @@ func TestChangePasswordUseCase_Execute(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			mockRepo := new(MockUserRepository)
+			mockLogger := new(MockLogger)
 
 			email, _ := vo.NewEmail("t@t.com")
 			hashedOld, _ := vo.NewPassword(oldPass, pepper)
@@ -92,7 +93,7 @@ func TestChangePasswordUseCase_Execute(t *testing.T) {
 
 			tt.setup(mockRepo, user)
 
-			uc := NewChangePassword(mockRepo, pepper)
+			uc := NewChangePassword(mockRepo, mockLogger, pepper)
 			err := uc.Execute(context.Background(), user.ID(), tt.oldPassword, tt.newPassword)
 
 			if tt.wantErr != nil {
