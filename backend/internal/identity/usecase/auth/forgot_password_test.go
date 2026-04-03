@@ -74,10 +74,11 @@ func TestForgotPasswordUseCase_Execute(t *testing.T) {
 			ur := new(MockUserRepository)
 			or := new(MockOTPRepository)
 			ns := new(MockNotificationService)
+			ml := new(MockLogger)
 
 			tt.setup(ur, or, ns)
 
-			uc := NewForgotPassword(or, ur, ns, time.Hour)
+			uc := NewForgotPassword(or, ur, ns, ml, time.Hour)
 			err := uc.Execute(context.Background(), tt.email)
 
 			if tt.expectErr {
