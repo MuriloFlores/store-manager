@@ -5,9 +5,9 @@ import (
 
 	"github.com/MuriloFlores/order-manager/internal/identity/domain/dto"
 	"github.com/MuriloFlores/order-manager/internal/identity/infrastructure/web/helper"
-	"github.com/MuriloFlores/order-manager/internal/identity/ports/user"
-	"github.com/MuriloFlores/order-manager/internal/identity/ports/auth"
 	"github.com/MuriloFlores/order-manager/internal/identity/infrastructure/web/middleware"
+	"github.com/MuriloFlores/order-manager/internal/identity/ports/auth"
+	"github.com/MuriloFlores/order-manager/internal/identity/ports/user"
 	"github.com/gin-gonic/gin"
 )
 

@@ -3,7 +3,7 @@ package repository
 import (
 	"context"
 
-	"github.com/MuriloFlores/order-manager/internal/_common"
+	"github.com/MuriloFlores/order-manager/internal/common"
 	"github.com/MuriloFlores/order-manager/internal/identity/domain/entity"
 	"github.com/MuriloFlores/order-manager/internal/identity/domain/vo"
 	"github.com/MuriloFlores/order-manager/internal/identity/infrastructure/database/model"
@@ -58,7 +58,7 @@ func (r *userRepositoryImpl) FindByID(ctx context.Context, id uuid.UUID) (*entit
 	return model.ToEntity(userModel)
 }
 
-func (r *userRepositoryImpl) GetUsersInfo(ctx context.Context, roles []vo.Role, pagination _common.Pagination) (*_common.PaginatedResult[*entity.User], error) {
+func (r *userRepositoryImpl) GetUsersInfo(ctx context.Context, roles []vo.Role, pagination common.Pagination) (*common.PaginatedResult[*entity.User], error) {
 	var userModels []model.UserModel
 
 	roleStr := make([]string, 0, len(roles))
@@ -114,7 +114,7 @@ func (r *userRepositoryImpl) GetUsersInfo(ctx context.Context, roles []vo.Role, 
 		entities = append(entities, enty)
 	}
 
-	result := _common.NewPaginatedResult(entities, int64(total), pagination)
+	result := common.NewPaginatedResult(entities, int64(total), pagination)
 	return result, nil
 }
 

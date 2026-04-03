@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/MuriloFlores/order-manager/internal/_common"
+	"github.com/MuriloFlores/order-manager/internal/common"
 	"github.com/MuriloFlores/order-manager/internal/identity/domain/vo"
 	"github.com/MuriloFlores/order-manager/internal/identity/infrastructure/web/helper"
 	"github.com/MuriloFlores/order-manager/internal/identity/infrastructure/web/middleware"
@@ -69,7 +69,7 @@ func (h *AdminController) GetUsersInfo(c *gin.Context) {
 	page, _ := strconv.Atoi(pageStr)
 	pageSize, _ := strconv.Atoi(pageSizeStr)
 
-	pagination := _common.NewPagination(page, pageSize, search, sort, direction)
+	pagination := common.NewPagination(page, pageSize, search, sort, direction)
 
 	info, err := h.getUserInfo.Execute(c.Request.Context(), pagination, roles)
 	if err != nil {
