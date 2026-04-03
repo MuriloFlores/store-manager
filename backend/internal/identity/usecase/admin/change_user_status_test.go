@@ -101,8 +101,9 @@ func TestChangeUserStatusUseCase_Execute(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			m := new(MockUserRepository)
+			l := new(MockLogger)
 			tt.setup(m)
-			uc := NewChangeUserStatusUseCase(m)
+			uc := NewChangeUserStatusUseCase(m, l)
 
 			err := uc.Execute(ctx, tt.id, tt.active)
 
