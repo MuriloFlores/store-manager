@@ -96,10 +96,11 @@ func TestLoginUseCase_Execute(t *testing.T) {
 			mockRepo := new(MockUserRepository)
 			mockTM := new(MockTokenManager)
 			mockRR := new(MockRefreshTokenRepository)
+			mockLogger := new(MockLogger)
 
 			tt.setup(mockRepo, mockTM, mockRR)
 
-			uc := NewLogin(mockRepo, mockTM, mockRR, pepper, time.Hour)
+			uc := NewLogin(mockRepo, mockTM, mockRR, mockLogger, pepper, time.Hour)
 			result, err := uc.Execute(context.Background(), tt.input)
 
 			if tt.wantErr {
