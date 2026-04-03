@@ -60,8 +60,9 @@ func TestMyInfoUseCase_Execute(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			m := new(MockUserRepository)
+			l := new(MockLogger)
 			tt.setup(m)
-			uc := NewMyInfoUseCase(m)
+			uc := NewMyInfoUseCase(m, l)
 
 			result, err := uc.Execute(ctx, tt.userID)
 
