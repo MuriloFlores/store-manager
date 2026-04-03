@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/MuriloFlores/order-manager/internal/_common"
+	"github.com/MuriloFlores/order-manager/internal/common"
 	"github.com/MuriloFlores/order-manager/internal/identity/domain/entity"
 	"github.com/MuriloFlores/order-manager/internal/identity/domain/vo"
 	"github.com/stretchr/testify/assert"
@@ -12,7 +12,7 @@ import (
 
 func TestGetUsersInfoUseCase_Execute(t *testing.T) {
 	ctx := context.Background()
-	pagination := _common.Pagination{Page: 1, PageSize: 10}
+	pagination := common.Pagination{Page: 1, PageSize: 10}
 
 	tests := []struct {
 		name    string
@@ -25,7 +25,7 @@ func TestGetUsersInfoUseCase_Execute(t *testing.T) {
 			name:  "Success With Roles",
 			roles: []string{"ADMIN"},
 			setup: func(m *MockUserRepository) {
-				m.On("GetUsersInfo", ctx, []vo.Role{vo.AdminRole}, pagination).Return(&_common.PaginatedResult[*entity.User]{}, nil)
+				m.On("GetUsersInfo", ctx, []vo.Role{vo.AdminRole}, pagination).Return(&common.PaginatedResult[*entity.User]{}, nil)
 			},
 			wantErr: false,
 		},
@@ -33,7 +33,7 @@ func TestGetUsersInfoUseCase_Execute(t *testing.T) {
 			name:  "Success Without Roles (All Roles)",
 			roles: []string{},
 			setup: func(m *MockUserRepository) {
-				m.On("GetUsersInfo", ctx, vo.AllRoles(), pagination).Return(&_common.PaginatedResult[*entity.User]{}, nil)
+				m.On("GetUsersInfo", ctx, vo.AllRoles(), pagination).Return(&common.PaginatedResult[*entity.User]{}, nil)
 			},
 			wantErr: false,
 		},
@@ -60,8 +60,9 @@ func TestGetUsersInfoUseCase_Execute(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			m := new(MockUserRepository)
+			l := new(MockLogger)
 			tt.setup(m)
-			uc := NewGetUsersInfoUseCase(m)
+			uc := NewGetUsersInfoUseCase(m, l)
 
 			result, err := uc.Execute(ctx, pagination, tt.roles)
 
