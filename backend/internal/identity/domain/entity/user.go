@@ -3,6 +3,7 @@ package entity
 import (
 	"errors"
 	"slices"
+	"time"
 
 	"github.com/MuriloFlores/order-manager/internal/identity/domain/vo"
 	"github.com/google/uuid"
@@ -13,12 +14,15 @@ var (
 )
 
 type User struct {
-	id       uuid.UUID
-	email    vo.Email
-	username string
-	password vo.Password
-	roles    []vo.Role
-	active   bool
+	id             uuid.UUID
+	email          vo.Email
+	username       string
+	password       vo.Password
+	roles          []vo.Role
+	active         bool
+	failedAttempts int
+	lockedUntil    *time.Time
+	emailVerified  bool
 }
 
 func NewUser(email vo.Email, username string, password vo.Password, roles []vo.Role) (*User, error) {
@@ -27,16 +31,29 @@ func NewUser(email vo.Email, username string, password vo.Password, roles []vo.R
 	}
 
 	return &User{
-		id:       uuid.New(),
-		email:    email,
-		username: username,
-		password: password,
-		roles:    roles,
-		active:   true,
+		id:             uuid.New(),
+		email:          email,
+		username:       username,
+		password:       password,
+		roles:          roles,
+		active:         true,
+		failedAttempts: 0,
+		lockedUntil:    nil,
+		emailVerified:  false,
 	}, nil
 }
 
-func RestoreUser(id uuid.UUID, email string, username string, password string, roles []string, active bool) (*User, error) {
+func RestoreUser(
+	id uuid.UUID,
+	email string,
+	username string,
+	password string,
+	roles []string,
+	active bool,
+	failedAttempts int,
+	lockedUntil *time.Time,
+	emailVerified bool,
+) (*User, error) {
 	restoredPassword, err := vo.RestorePassword(password)
 	if err != nil {
 		return nil, err
@@ -58,12 +75,15 @@ func RestoreUser(id uuid.UUID, email string, username string, password string, r
 	}
 
 	return &User{
-		id:       id,
-		email:    restEmail,
-		username: username,
-		password: restoredPassword,
-		roles:    restoredRoles,
-		active:   active,
+		id:             id,
+		email:          restEmail,
+		username:       username,
+		password:       restoredPassword,
+		roles:          restoredRoles,
+		active:         active,
+		failedAttempts: failedAttempts,
+		lockedUntil:    lockedUntil,
+		emailVerified:  emailVerified,
 	}, nil
 }
 
@@ -89,6 +109,18 @@ func (u *User) Roles() []vo.Role {
 
 func (u *User) Activate() {
 	u.active = true
+}
+
+func (u *User) FailedAttempts() int {
+	return u.failedAttempts
+}
+
+func (u *User) LockedUntil() *time.Time {
+	return u.lockedUntil
+}
+
+func (u *User) EmailVerified() bool {
+	return u.emailVerified
 }
 
 func (u *User) Deactivate() {
@@ -130,4 +162,33 @@ func (u *User) ReplaceRoles(newRoles []vo.Role) {
 	}
 
 	u.roles = newRoles
+}
+
+func (u *User) IsLocked(now time.Time) bool {
+	if u.lockedUntil == nil {
+		return false
+	}
+
+	return u.lockedUntil.After(now)
+}
+
+func (u *User) RecordFailedLogin(threshold int, baseDuration time.Duration, now time.Time) {
+	u.failedAttempts++
+
+	if u.failedAttempts >= threshold {
+		fator := u.failedAttempts / threshold
+		extraDuration := baseDuration * time.Duration(fator)
+
+		expiration := now.Add(extraDuration)
+		u.lockedUntil = &expiration
+	}
+}
+
+func (u *User) ResetFailedAttempts() {
+	u.failedAttempts = 0
+	u.lockedUntil = nil
+}
+
+func (u *User) VerifyEmail() {
+	u.emailVerified = true
 }
