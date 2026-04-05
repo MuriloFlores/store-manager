@@ -6,8 +6,8 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
+	"regexp"
 	"strings"
-	"unicode"
 
 	"golang.org/x/crypto/argon2"
 )
@@ -97,18 +97,10 @@ func (p Password) String() string {
 }
 
 func validateComplexity(p string) bool {
-	var hasUpper, hasNumber, hasSpecial bool
+	hasUpper := regexp.MustCompile("[A-Z]").MatchString(p)
+	hasLower := regexp.MustCompile("[a-z]").MatchString(p)
+	hasNumber := regexp.MustCompile(`[0-9]`).MatchString(p)
+	hasSpecial := regexp.MustCompile(`[!@#$%^&*(),.?":{}|<>]`).MatchString(p)
 
-	for _, char := range p {
-		switch {
-		case unicode.IsUpper(char):
-			hasUpper = true
-		case unicode.IsDigit(char):
-			hasNumber = true
-		case unicode.IsPunct(char) || unicode.IsSymbol(char):
-			hasSpecial = true
-		}
-	}
-
-	return hasUpper && hasNumber && hasSpecial
+	return hasUpper && hasNumber && hasSpecial && hasLower
 }
