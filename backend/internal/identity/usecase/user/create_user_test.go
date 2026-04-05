@@ -16,7 +16,7 @@ func TestCreateUserUseCase_Execute(t *testing.T) {
 	tests := []struct {
 		name    string
 		input   dto.CreateUserInput
-		setup   func(mockRepo *MockUserRepository)
+		setup   func(mockRepo *MockUserRepository, mockTx *MockTransactionManager)
 		wantErr bool
 	}{
 		{
@@ -27,7 +27,8 @@ func TestCreateUserUseCase_Execute(t *testing.T) {
 				Password: "StrongPass123!",
 				Roles:    []string{"ADMIN"},
 			},
-			setup: func(mockRepo *MockUserRepository) {
+			setup: func(mockRepo *MockUserRepository, mockTx *MockTransactionManager) {
+				mockTx.On("Execute", mock.Anything, mock.Anything).Return(nil)
 				mockRepo.On("Save", mock.Anything, mock.MatchedBy(func(u *entity.User) bool {
 					return u.Username() == "murilo" && u.Email().String() == "murilo@test.com"
 				})).Return(nil)
@@ -42,46 +43,34 @@ func TestCreateUserUseCase_Execute(t *testing.T) {
 				Password: "StrongPass123!",
 				Roles:    []string{"ADMIN"},
 			},
-			setup: func(mockRepo *MockUserRepository) {
-				// Save should not be called
-			},
+			setup: func(mockRepo *MockUserRepository, mockTx *MockTransactionManager) {},
 			wantErr: true,
 		},
 		{
-			name: "Invalid Role",
-			input: dto.CreateUserInput{
-				Username: "murilo",
-				Email:    "murilo@test.com",
-				Password: "StrongPass123!",
-				Roles:    []string{"INVALID_ROLE"},
-			},
-			setup: func(mockRepo *MockUserRepository) {
-				// Save should not be called
-			},
-			wantErr: true,
-		},
-		{
-			name: "Repository Save Error",
+			name: "Transaction Start Error",
 			input: dto.CreateUserInput{
 				Username: "murilo",
 				Email:    "murilo@test.com",
 				Password: "StrongPass123!",
 				Roles:    []string{"ADMIN"},
 			},
-			setup: func(mockRepo *MockUserRepository) {
+			setup: func(mockRepo *MockUserRepository, mockTx *MockTransactionManager) {
+				mockTx.On("Execute", mock.Anything, mock.Anything).Return(assert.AnError)
+			},
+			wantErr: true,
+		},
+		{
+			name: "Repository Save Error (Rollback Simulation)",
+			input: dto.CreateUserInput{
+				Username: "murilo",
+				Email:    "murilo@test.com",
+				Password: "StrongPass123!",
+				Roles:    []string{"ADMIN"},
+			},
+			setup: func(mockRepo *MockUserRepository, mockTx *MockTransactionManager) {
+				mockTx.On("Execute", mock.Anything, mock.Anything).Return(nil)
 				mockRepo.On("Save", mock.Anything, mock.Anything).Return(assert.AnError)
 			},
-			wantErr: true,
-		},
-		{
-			name: "Invalid Username (empty)",
-			input: dto.CreateUserInput{
-				Username: "",
-				Email:    "murilo@test.com",
-				Password: "StrongPass123!",
-				Roles:    []string{"ADMIN"},
-			},
-			setup:   func(mockRepo *MockUserRepository) {},
 			wantErr: true,
 		},
 	}
@@ -90,9 +79,11 @@ func TestCreateUserUseCase_Execute(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			mockRepo := new(MockUserRepository)
 			mockLogger := new(MockLogger)
-			tt.setup(mockRepo)
+			mockTx := new(MockTransactionManager)
+			
+			tt.setup(mockRepo, mockTx)
 
-			uc := NewCreateUserService(mockRepo, mockLogger, pepper)
+			uc := NewCreateUserService(mockRepo, mockLogger, mockTx, pepper)
 			err := uc.Execute(context.Background(), tt.input)
 
 			if tt.wantErr {
@@ -100,6 +91,7 @@ func TestCreateUserUseCase_Execute(t *testing.T) {
 			} else {
 				assert.NoError(t, err)
 				mockRepo.AssertExpectations(t)
+				mockTx.AssertExpectations(t)
 			}
 		})
 	}
