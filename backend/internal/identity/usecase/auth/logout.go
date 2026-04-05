@@ -12,7 +12,7 @@ type logoutUseCase struct {
 	logger      ports.Logger
 }
 
-func NewLogoutUseCase(refreshRepo ports.RefreshTokenRepository, logger ports.Logger) auth.LogoutUseCase {
+func NewLogoutUseCase(refreshRepo ports.RefreshTokenRepository, logger ports.Logger) security.LogoutUseCase {
 	return &logoutUseCase{
 		refreshRepo: refreshRepo,
 		logger:      logger,

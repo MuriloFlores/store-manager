@@ -14,7 +14,7 @@ import (
 type rotateRefreshTokenUseCase struct {
 	userRepo     ports.UserRepository
 	refreshRepo  ports.RefreshTokenRepository
-	tokenManager auth.TokenManager
+	tokenManager security.TokenManager
 	logger       ports.Logger
 	expiresIn    time.Duration
 }
@@ -22,10 +22,10 @@ type rotateRefreshTokenUseCase struct {
 func NewRotateRefreshTokenUseCase(
 	userRepo ports.UserRepository,
 	refreshRepo ports.RefreshTokenRepository,
-	tokenManger auth.TokenManager,
+	tokenManger security.TokenManager,
 	logger ports.Logger,
 	expiresIn time.Duration,
-) auth.RotateRefreshTokenUseCase {
+) security.RotateRefreshTokenUseCase {
 	return &rotateRefreshTokenUseCase{
 		userRepo:     userRepo,
 		refreshRepo:  refreshRepo,

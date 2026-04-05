@@ -31,7 +31,7 @@ type jwtTokenManager struct {
 	accessTokenTTL time.Duration
 }
 
-func NewJWTTokenManager(secretKey string, accessTokenTTL time.Duration) auth.TokenManager {
+func NewJWTTokenManager(secretKey string, accessTokenTTL time.Duration) security.TokenManager {
 	return &jwtTokenManager{
 		secretKey:      []byte(secretKey),
 		accessTokenTTL: accessTokenTTL,

@@ -12,7 +12,7 @@ type contextKey string
 
 const UserClaimsKey contextKey = "user_claims"
 
-func RequireAuth(manager auth.TokenManager) gin.HandlerFunc {
+func RequireAuth(manager security.TokenManager) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		tokenString, err := c.Cookie("access_token")
 		if err != nil {

@@ -21,7 +21,7 @@ func NewChangePassword(
 	userRepo ports.UserRepository,
 	logger ports.Logger,
 	pepper string,
-) auth.ChangePasswordUseCase {
+) security.ChangePasswordUseCase {
 	return &changePasswordUseCase{
 		userRepo: userRepo,
 		logger:   logger,

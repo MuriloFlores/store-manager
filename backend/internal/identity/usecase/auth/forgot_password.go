@@ -23,7 +23,7 @@ func NewForgotPassword(
 	notificationService ports.NotificationService,
 	logger ports.Logger,
 	expiresIn time.Duration,
-) auth.ForgotPasswordUseCase {
+) security.ForgotPasswordUseCase {
 	return &forgotPasswordUseCase{
 		otpRepo:             otpRepo,
 		userRepo:            userRepo,

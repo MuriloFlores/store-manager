@@ -8,8 +8,9 @@ import (
 	"github.com/MuriloFlores/order-manager/internal/identity/domain/vo"
 	"github.com/MuriloFlores/order-manager/internal/identity/infrastructure/web/helper"
 	"github.com/MuriloFlores/order-manager/internal/identity/infrastructure/web/middleware"
+	"github.com/MuriloFlores/order-manager/internal/identity/ports"
 	"github.com/MuriloFlores/order-manager/internal/identity/ports/admin"
-	"github.com/MuriloFlores/order-manager/internal/identity/ports/auth"
+	"github.com/MuriloFlores/order-manager/internal/identity/ports/security"
 	"github.com/gin-gonic/gin"
 )
 
@@ -17,12 +18,23 @@ type AdminController struct {
 	getUserInfo  admin.GetUsersInfo
 	changeStatus admin.ChangeUserStatusUseCase
 	changeRole   admin.ChangeUserRoleUseCase
-	tokenManager auth.TokenManager
+	rateLimit    ports.RateLimiterRepository
+	tokenManager security.TokenManager
 }
 
-func NewAdminController(getUserInfo admin.GetUsersInfo) *AdminController {
+func NewAdminController(
+	getUserInfo admin.GetUsersInfo,
+	changeStatus admin.ChangeUserStatusUseCase,
+	changeRole admin.ChangeUserRoleUseCase,
+	rateLimit ports.RateLimiterRepository,
+	tokenManger security.TokenManager,
+) *AdminController {
 	return &AdminController{
-		getUserInfo: getUserInfo,
+		getUserInfo:  getUserInfo,
+		changeStatus: changeStatus,
+		changeRole:   changeRole,
+		rateLimit:    rateLimit,
+		tokenManager: tokenManger,
 	}
 }
 
@@ -34,6 +46,7 @@ func (h *AdminController) RegisterRoutes(engine *gin.Engine) {
 
 	adminRoutes := engine.Group("/admin")
 	adminRoutes.Use(middleware.RequireAuth(h.tokenManager))
+	adminRoutes.Use(middleware.RateLimit(h.rateLimit))
 	adminRoutes.Use(middleware.VerifyRole(allowedRoles...))
 	{
 		adminRoutes.GET("/users", h.GetUsersInfo)
