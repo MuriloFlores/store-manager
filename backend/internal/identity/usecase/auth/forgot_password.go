@@ -6,7 +6,7 @@ import (
 
 	"github.com/MuriloFlores/order-manager/internal/identity/domain/vo"
 	"github.com/MuriloFlores/order-manager/internal/identity/ports"
-	"github.com/MuriloFlores/order-manager/internal/identity/ports/auth"
+	"github.com/MuriloFlores/order-manager/internal/identity/ports/security"
 )
 
 type forgotPasswordUseCase struct {

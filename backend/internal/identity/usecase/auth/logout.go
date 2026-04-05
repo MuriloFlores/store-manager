@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/MuriloFlores/order-manager/internal/identity/ports"
-	"github.com/MuriloFlores/order-manager/internal/identity/ports/auth"
+	"github.com/MuriloFlores/order-manager/internal/identity/ports/security"
 )
 
 type logoutUseCase struct {
