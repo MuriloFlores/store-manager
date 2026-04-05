@@ -11,16 +11,18 @@ import (
 )
 
 type CreateUserUseCase struct {
-	userRepo ports.UserRepository
-	logger   ports.Logger
-	pepper   string
+	userRepo  ports.UserRepository
+	logger    ports.Logger
+	txManager ports.TransactionManager
+	pepper    string
 }
 
-func NewCreateUserService(userRepo ports.UserRepository, logger ports.Logger, pepper string) user.CreateUserUseCase {
+func NewCreateUserService(userRepo ports.UserRepository, logger ports.Logger, txManager ports.TransactionManager, pepper string) user.CreateUserUseCase {
 	return &CreateUserUseCase{
-		userRepo: userRepo,
-		logger:   logger,
-		pepper:   pepper,
+		userRepo:  userRepo,
+		logger:    logger,
+		txManager: txManager,
+		pepper:    pepper,
 	}
 }
 
@@ -50,7 +52,7 @@ func (uc *CreateUserUseCase) Execute(ctx context.Context, input dto.CreateUserIn
 		roles = append(roles, voRole)
 	}
 
-	user, err := entity.NewUser(
+	createdUser, err := entity.NewUser(
 		email,
 		input.Username,
 		password,
@@ -61,11 +63,15 @@ func (uc *CreateUserUseCase) Execute(ctx context.Context, input dto.CreateUserIn
 		return err
 	}
 
-	if err := uc.userRepo.Save(ctx, user); err != nil {
-		uc.logger.Error("failed to save user in repository", err, "email", input.Email)
-		return err
-	}
+	err = uc.txManager.Execute(ctx, func(txCtx context.Context) error {
+		if err := uc.userRepo.Save(txCtx, createdUser); err != nil {
+			uc.logger.Error("failed to save user in repository", err, "email", input.Email)
+			return err
+		}
 
-	uc.logger.Info("user created successfully", "userID", user.ID(), "email", input.Email)
+		return nil
+	})
+
+	uc.logger.Info("user created successfully", "userID", createdUser.ID(), "email", input.Email)
 	return nil
 }
