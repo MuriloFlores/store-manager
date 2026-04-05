@@ -6,6 +6,7 @@ import (
 	"github.com/MuriloFlores/order-manager/internal/common"
 	"github.com/MuriloFlores/order-manager/internal/identity/domain/entity"
 	"github.com/MuriloFlores/order-manager/internal/identity/domain/vo"
+	"github.com/MuriloFlores/order-manager/internal/identity/infrastructure/database"
 	"github.com/MuriloFlores/order-manager/internal/identity/infrastructure/database/model"
 	"github.com/MuriloFlores/order-manager/internal/identity/ports"
 	"github.com/google/uuid"
@@ -23,14 +24,18 @@ func NewUserRepository(db *bun.DB) ports.UserRepository {
 func (r *userRepositoryImpl) Save(ctx context.Context, user *entity.User) error {
 	userModel := model.ToModel(user)
 
-	_, err := r.db.NewInsert().Model(userModel).Exec(ctx)
+	db := database.GetDB(ctx, r.db)
+
+	_, err := db.NewInsert().Model(userModel).Exec(ctx)
 	return err
 }
 
 func (r *userRepositoryImpl) FindByEmail(ctx context.Context, email vo.Email) (*entity.User, error) {
 	userModel := new(model.UserModel)
 
-	err := r.db.NewSelect().
+	db := database.GetDB(ctx, r.db)
+
+	err := db.NewSelect().
 		Model(userModel).
 		Where("email = ?", email).
 		Scan(ctx)
@@ -46,7 +51,9 @@ func (r *userRepositoryImpl) FindByEmail(ctx context.Context, email vo.Email) (*
 func (r *userRepositoryImpl) FindByID(ctx context.Context, id uuid.UUID) (*entity.User, error) {
 	userModel := new(model.UserModel)
 
-	err := r.db.NewSelect().
+	db := database.GetDB(ctx, r.db)
+
+	err := db.NewSelect().
 		Model(userModel).
 		Where("id = ?", id).
 		Scan(ctx)
@@ -60,6 +67,8 @@ func (r *userRepositoryImpl) FindByID(ctx context.Context, id uuid.UUID) (*entit
 
 func (r *userRepositoryImpl) GetUsersInfo(ctx context.Context, roles []vo.Role, pagination common.Pagination) (*common.PaginatedResult[*entity.User], error) {
 	var userModels []model.UserModel
+
+	db := database.GetDB(ctx, r.db)
 
 	roleStr := make([]string, 0, len(roles))
 	for _, role := range roles {
@@ -80,7 +89,7 @@ func (r *userRepositoryImpl) GetUsersInfo(ctx context.Context, roles []vo.Role, 
 		sortCol = "name"
 	}
 
-	query := r.db.NewSelect().Model(&userModels)
+	query := db.NewSelect().Model(&userModels)
 
 	if pagination.Search != "" {
 		searchTerm := "%" + pagination.Search + "%"
@@ -121,6 +130,8 @@ func (r *userRepositoryImpl) GetUsersInfo(ctx context.Context, roles []vo.Role, 
 func (r *userRepositoryImpl) Update(ctx context.Context, user *entity.User) error {
 	userModel := model.ToModel(user)
 
-	_, err := r.db.NewUpdate().Model(userModel).Exec(ctx)
+	db := database.GetDB(ctx, r.db)
+
+	_, err := db.NewUpdate().Model(userModel).Exec(ctx)
 	return err
 }
