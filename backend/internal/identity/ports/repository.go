@@ -29,3 +29,7 @@ type OTPRepository interface {
 	GetOTP(ctx context.Context, email vo.Email) (vo.OTP, error)
 	DeleteOTP(ctx context.Context, email vo.Email) error
 }
+
+type RateLimiterRepository interface {
+	Allow(ctx context.Context, key string) (bool, time.Duration, error)
+}
