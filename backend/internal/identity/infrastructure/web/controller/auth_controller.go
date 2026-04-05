@@ -6,7 +6,8 @@ import (
 	"github.com/MuriloFlores/order-manager/internal/identity/domain/dto"
 	"github.com/MuriloFlores/order-manager/internal/identity/infrastructure/web/helper"
 	"github.com/MuriloFlores/order-manager/internal/identity/infrastructure/web/middleware"
-	"github.com/MuriloFlores/order-manager/internal/identity/ports/auth"
+	"github.com/MuriloFlores/order-manager/internal/identity/ports"
+	"github.com/MuriloFlores/order-manager/internal/identity/ports/security"
 	"github.com/gin-gonic/gin"
 )
 
@@ -18,21 +19,23 @@ const (
 )
 
 type AuthController struct {
-	tokenManager     auth.TokenManager
-	loginUC          auth.LoginUseCase
-	refreshTokenUC   auth.RotateRefreshTokenUseCase
-	forgotPassword   auth.ForgotPasswordUseCase
-	changePasswordUC auth.ChangePasswordUseCase
-	logoutUC         auth.LogoutUseCase
+	tokenManager     security.TokenManager
+	loginUC          security.LoginUseCase
+	refreshTokenUC   security.RotateRefreshTokenUseCase
+	forgotPassword   security.ForgotPasswordUseCase
+	changePasswordUC security.ChangePasswordUseCase
+	logoutUC         security.LogoutUseCase
+	rateLimit        ports.RateLimiterRepository
 }
 
 func NewLoginController(
-	tokenManager auth.TokenManager,
-	loginUC auth.LoginUseCase,
-	refreshToken auth.RotateRefreshTokenUseCase,
-	forgotPassword auth.ForgotPasswordUseCase,
-	changePasswordUseCase auth.ChangePasswordUseCase,
-	logout auth.LogoutUseCase,
+	tokenManager security.TokenManager,
+	loginUC security.LoginUseCase,
+	refreshToken security.RotateRefreshTokenUseCase,
+	forgotPassword security.ForgotPasswordUseCase,
+	changePasswordUseCase security.ChangePasswordUseCase,
+	logout security.LogoutUseCase,
+	rateLimit ports.RateLimiterRepository,
 ) *AuthController {
 	return &AuthController{
 		tokenManager:     tokenManager,
@@ -41,11 +44,13 @@ func NewLoginController(
 		forgotPassword:   forgotPassword,
 		changePasswordUC: changePasswordUseCase,
 		logoutUC:         logout,
+		rateLimit:        rateLimit,
 	}
 }
 
 func (h *AuthController) RegisterRoutes(router *gin.RouterGroup) {
 	authRoutes := router.Group("/auth")
+	authRoutes.Use(middleware.RateLimit(h.rateLimit))
 	{
 		authRoutes.POST("/login", h.Login)
 		authRoutes.GET("/refresh", h.RefreshToken)

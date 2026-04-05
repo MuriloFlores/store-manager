@@ -6,7 +6,8 @@ import (
 	"github.com/MuriloFlores/order-manager/internal/identity/domain/dto"
 	"github.com/MuriloFlores/order-manager/internal/identity/infrastructure/web/helper"
 	"github.com/MuriloFlores/order-manager/internal/identity/infrastructure/web/middleware"
-	"github.com/MuriloFlores/order-manager/internal/identity/ports/auth"
+	"github.com/MuriloFlores/order-manager/internal/identity/ports"
+	"github.com/MuriloFlores/order-manager/internal/identity/ports/security"
 	"github.com/MuriloFlores/order-manager/internal/identity/ports/user"
 	"github.com/gin-gonic/gin"
 )
@@ -14,24 +15,33 @@ import (
 type UserController struct {
 	createUserUC user.CreateUserUseCase
 	getMyInfoUC  user.MyInfoUseCase
-	tokenManager auth.TokenManager
+	tokenManager security.TokenManager
+	rateLimit    ports.RateLimiterRepository
 }
 
-func NewUserHandle(createUser user.CreateUserUseCase, getMyInfoUC user.MyInfoUseCase, tokenManager auth.TokenManager) *UserController {
+func NewUserHandle(
+	createUser user.CreateUserUseCase,
+	getMyInfoUC user.MyInfoUseCase,
+	tokenManager security.TokenManager,
+	rateLimit ports.RateLimiterRepository,
+) *UserController {
 	return &UserController{
 		createUserUC: createUser,
 		getMyInfoUC:  getMyInfoUC,
 		tokenManager: tokenManager,
+		rateLimit:    rateLimit,
 	}
 }
 
 func (h *UserController) RegisterRoutes(router *gin.Engine) {
 	userRoutes := router.Group("/user")
+	userRoutes.Use(middleware.RateLimit(h.rateLimit))
 	{
 		userRoutes.POST("/", h.CreateUser)
 	}
 
 	privateRoutes := router.Group("/private/user")
+	userRoutes.Use(middleware.RateLimit(h.rateLimit))
 	privateRoutes.Use(middleware.RequireAuth(h.tokenManager))
 	{
 		privateRoutes.GET("/me", h.MyInfo)
