@@ -14,27 +14,33 @@ import (
 
 type LoginUseCase struct {
 	userRepo     ports.UserRepository
-	tokenManager auth.TokenManager
+	tokenManager security.TokenManager
 	refreshRepo  ports.RefreshTokenRepository
 	logger       ports.Logger
 	pepper       string
+	baseDuration time.Duration
+	threshold    int
 	expiresIn    time.Duration
 }
 
 func NewLogin(
 	userRepo ports.UserRepository,
-	tokenManager auth.TokenManager,
+	tokenManager security.TokenManager,
 	refreshRepo ports.RefreshTokenRepository,
 	logger ports.Logger,
 	pepper string,
+	baseDuration time.Duration,
+	threshold int,
 	expiresIn time.Duration,
-) auth.LoginUseCase {
+) security.LoginUseCase {
 	return &LoginUseCase{
 		userRepo:     userRepo,
 		tokenManager: tokenManager,
 		refreshRepo:  refreshRepo,
 		logger:       logger,
 		pepper:       pepper,
+		baseDuration: baseDuration,
+		threshold:    threshold,
 		expiresIn:    expiresIn,
 	}
 }
@@ -59,10 +65,24 @@ func (uc *LoginUseCase) Execute(ctx context.Context, input *dto.LoginRequest) (*
 		return nil, entity.ErrInvalidCredentials
 	}
 
+	if user.IsLocked(time.Now()) {
+		uc.logger.Info("user is locked", "email", input.Email)
+		return nil, entity.ErrUserBlocked
+	}
+
 	if ok := user.Password().Matches(input.Password, uc.pepper); !ok {
 		uc.logger.Info("login failed: invalid password", "userID", user.ID())
+
+		user.RecordFailedLogin(uc.threshold, uc.baseDuration, time.Now())
+		err := uc.userRepo.Update(ctx, user)
+		if err != nil {
+			return nil, fmt.Errorf("error updating failed attempts: %w", err)
+		}
+
 		return nil, entity.ErrInvalidCredentials
 	}
+
+	user.ResetFailedAttempts()
 
 	accessToken, refreshToken, err := uc.tokenManager.GenerateTokens(ctx, user)
 	if err != nil {
@@ -73,6 +93,10 @@ func (uc *LoginUseCase) Execute(ctx context.Context, input *dto.LoginRequest) (*
 	if err := uc.refreshRepo.SaveRefreshToken(ctx, user.ID(), refreshToken, uc.expiresIn); err != nil {
 		uc.logger.Error("failed to save refresh token", err, "userID", user.ID())
 		return nil, fmt.Errorf("saving refresh token: %w", err)
+	}
+
+	if err := uc.userRepo.Update(ctx, user); err != nil {
+		return nil, fmt.Errorf("error reset failed attempts: %w", err)
 	}
 
 	uc.logger.Info("user logged in successfully", "userID", user.ID())
