@@ -1,4 +1,6 @@
-# 🛒 Store Manager API
+# 🛒 Store Manager API (Atualmente pausado)
+
+Este projeto encontra-se pausado para estudos técnicos e aprofundamento nas tecnologias necessárias. Enquanto isso, o desenvolvimento seguirá em projetos mais simples para consolidar o conhecimento.
 
 ![Go](https://img.shields.io/badge/go-%2300ADD8.svg?style=for-the-badge&logo=go&logoColor=white)
 ![PostgreSQL](https://img.shields.io/badge/postgresql-4169e1?style=for-the-badge&logo=postgresql&logoColor=white)
